@@ -231,6 +231,61 @@ function CustomizePage() {
         </div>
       </main>
 
+      {/* Extras popup */}
+      {showExtras && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-start justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl mt-16 p-8 relative">
+            <button
+              onClick={() => setShowExtras(false)}
+              aria-label="Close"
+              className="absolute top-5 right-5 text-primary hover:opacity-70"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <h3 className="text-lg font-semibold">Add a Little Extra for a Special Touch!</h3>
+            <p className="text-sm text-muted-foreground mt-1">Worem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            <div className="mt-6 border-t border-border" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+              {popupExtras.map((p, i) => {
+                const isSel = selected.includes(i);
+                return (
+                  <div key={i} className={`bg-secondary/40 rounded-xl p-3 ${isSel ? "ring-2 ring-primary" : ""}`}>
+                    <div className="aspect-square rounded-lg overflow-hidden bg-white">
+                      <img src={p.img} alt={p.name} width={600} height={600} loading="lazy" className="w-full h-full object-cover" />
+                    </div>
+                    <p className="text-center text-sm font-medium mt-3">{p.name}</p>
+                    <p className="text-center text-sm mt-1">{p.price}</p>
+                    <button
+                      onClick={() => toggle(i)}
+                      className={`mt-3 w-full border rounded-md py-2 text-sm transition ${
+                        isSel
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                      }`}
+                    >
+                      {isSel ? "Added" : "Shop now"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-8 flex items-center justify-between border-t border-border pt-6">
+              <div className="flex items-center gap-3 text-sm">
+                <span className="text-muted-foreground">Total Price</span>
+                <span className="font-semibold text-base">${total.toFixed(2)}</span>
+                <span className="text-muted-foreground text-xs">All prices include tax</span>
+              </div>
+              <button
+                onClick={() => setShowExtras(false)}
+                className="bg-primary text-primary-foreground rounded-md px-8 py-3 text-sm hover:opacity-90 transition"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Zigzag divider */}
       <div className="h-10" style={{ background: "oklch(0.9 0.05 20)", clipPath: "polygon(0 100%, 5% 0, 10% 100%, 15% 0, 20% 100%, 25% 0, 30% 100%, 35% 0, 40% 100%, 45% 0, 50% 100%, 55% 0, 60% 100%, 65% 0, 70% 100%, 75% 0, 80% 100%, 85% 0, 90% 100%, 95% 0, 100% 100%)" }} />
 
