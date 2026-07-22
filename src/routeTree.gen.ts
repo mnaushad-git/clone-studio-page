@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ProductRouteImport } from './routes/product'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CustomizeRouteImport } from './routes/customize'
 import { Route as ChocolatesRouteImport } from './routes/chocolates'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
@@ -29,6 +30,11 @@ const ProductRoute = ProductRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomizeRoute = CustomizeRouteImport.update({
+  id: '/customize',
+  path: '/customize',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChocolatesRoute = ChocolatesRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/chocolates': typeof ChocolatesRoute
+  '/customize': typeof CustomizeRoute
   '/login': typeof LoginRoute
   '/product': typeof ProductRoute
   '/signup': typeof SignupRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/chocolates': typeof ChocolatesRoute
+  '/customize': typeof CustomizeRoute
   '/login': typeof LoginRoute
   '/product': typeof ProductRoute
   '/signup': typeof SignupRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/chocolates': typeof ChocolatesRoute
+  '/customize': typeof CustomizeRoute
   '/login': typeof LoginRoute
   '/product': typeof ProductRoute
   '/signup': typeof SignupRoute
@@ -78,16 +87,25 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/chocolates'
+    | '/customize'
     | '/login'
     | '/product'
     | '/signup'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/account' | '/chocolates' | '/login' | '/product' | '/signup'
+  to:
+    | '/'
+    | '/account'
+    | '/chocolates'
+    | '/customize'
+    | '/login'
+    | '/product'
+    | '/signup'
   id:
     | '__root__'
     | '/'
     | '/account'
     | '/chocolates'
+    | '/customize'
     | '/login'
     | '/product'
     | '/signup'
@@ -97,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
   ChocolatesRoute: typeof ChocolatesRoute
+  CustomizeRoute: typeof CustomizeRoute
   LoginRoute: typeof LoginRoute
   ProductRoute: typeof ProductRoute
   SignupRoute: typeof SignupRoute
@@ -123,6 +142,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customize': {
+      id: '/customize'
+      path: '/customize'
+      fullPath: '/customize'
+      preLoaderRoute: typeof CustomizeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chocolates': {
@@ -153,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   ChocolatesRoute: ChocolatesRoute,
+  CustomizeRoute: CustomizeRoute,
   LoginRoute: LoginRoute,
   ProductRoute: ProductRoute,
   SignupRoute: SignupRoute,
