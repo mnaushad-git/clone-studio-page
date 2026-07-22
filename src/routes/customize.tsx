@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   User, ShoppingBag, Check, MessageSquare, Minus, Plus, Ticket,
-  Bike, MapPin, Truck, Facebook, Instagram, Twitter, Youtube, ChevronDown,
+  Bike, MapPin, Truck, Facebook, Instagram, Twitter, Youtube, ChevronDown, X,
 } from "lucide-react";
 
 import giftCard from "@/assets/gift-card.jpg";
@@ -10,6 +10,17 @@ import sprinkleCake from "@/assets/divine-1.jpg";
 import extra1 from "@/assets/prod-swiss.jpg";
 import extra2 from "@/assets/divine-3.jpg";
 import extra3 from "@/assets/prod-butter.jpg";
+import popDonut from "@/assets/extra-donut.jpg";
+import popIcecream from "@/assets/extra-icecream.jpg";
+import popCheesecake from "@/assets/extra-cheesecake.jpg";
+import popDonutsPair from "@/assets/extra-donuts-pair.jpg";
+
+const popupExtras = [
+  { name: "Fanky Sweets", price: "$ 44.89", img: popDonut },
+  { name: "Fanky Sweets", price: "$ 44.89", img: popIcecream },
+  { name: "Fanky Sweets", price: "$ 44.89", img: popCheesecake },
+  { name: "Fanky Sweets", price: "$ 44.89", img: popDonutsPair },
+];
 
 export const Route = createFileRoute("/customize")({
   component: CustomizePage,
