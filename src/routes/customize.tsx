@@ -45,6 +45,11 @@ const extras = [
 function CustomizePage() {
   const [qty, setQty] = useState(1);
   const [promo, setPromo] = useState("");
+  const [showExtras, setShowExtras] = useState(false);
+  const [selected, setSelected] = useState<number[]>([]);
+  const toggle = (i: number) =>
+    setSelected((s) => (s.includes(i) ? s.filter((x) => x !== i) : [...s, i]));
+  const total = selected.length * 44.89 + 1187.55;
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
