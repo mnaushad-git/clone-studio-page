@@ -121,7 +121,7 @@ function CustomizePage() {
             <section className="bg-white rounded-2xl shadow-sm p-6">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="font-semibold">Add a Little Extra for a Special Touch!</h2>
-                <a href="#" className="text-sm text-primary hover:underline">View All</a>
+                <button onClick={() => setShowExtras(true)} className="text-sm text-primary hover:underline">View All</button>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 {extras.map((e, i) => (
