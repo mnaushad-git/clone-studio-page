@@ -110,8 +110,8 @@ function PaymentPage() {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <SiteHeader />
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8">
-        <div className="bg-white rounded-2xl shadow-sm px-8 py-5 flex items-center gap-4 mb-6">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="bg-white rounded-2xl shadow-sm px-3 sm:px-8 py-4 sm:py-5 flex items-center gap-2 sm:gap-4 mb-6">
           <Step n={1} label="Customize" done />
           <div className="flex-1 h-px bg-border" />
           <Step n={2} label="Delivery Details" done />
@@ -119,7 +119,7 @@ function PaymentPage() {
           <Step n={3} label="Payment" active />
         </div>
 
-        <div className="grid lg:grid-cols-[1fr_400px] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
           <div className="space-y-6">
             <section className="bg-white rounded-2xl shadow-sm p-6 space-y-3">
               {methods.map((m) => {
@@ -231,13 +231,14 @@ function PaymentPage() {
 
 function Step({ n, label, active, done }: { n: number; label: string; active?: boolean; done?: boolean }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-semibold ${
+    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+      <div className={`h-8 w-8 sm:h-9 sm:w-9 shrink-0 rounded-full flex items-center justify-center text-sm font-semibold ${
         done ? "bg-[oklch(0.85_0.08_120)] text-primary" : active ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"
       }`}>
         {done ? <Check className="h-4 w-4" /> : n}
       </div>
-      <span className={`text-sm ${active || done ? "font-semibold" : "text-muted-foreground"}`}>{label}</span>
+      <span className={`hidden sm:inline text-sm truncate ${active || done ? "font-semibold" : "text-muted-foreground"}`}>{label}</span>
+      {active && <span className="sm:hidden text-xs font-semibold truncate">{label}</span>}
     </div>
   );
 }

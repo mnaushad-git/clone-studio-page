@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, ShoppingBag, User, Facebook, Instagram, Twitter, Youtube, Play, Truck, Headphones, RotateCcw } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, Truck, Headphones, RotateCcw } from "lucide-react";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 
 import donutsHero from "@/assets/donuts-hero.jpg";
 import personDonut from "@/assets/person-donut.jpg";
@@ -24,27 +26,8 @@ export const Route = createFileRoute("/about")({
 function About() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Announcement */}
-      <div className="bg-white text-center text-[11px] tracking-[0.2em] py-2 text-muted-foreground uppercase">
-        Order Desserts for Local Pickup
-      </div>
+      <SiteHeader />
 
-      <div className="h-8 zigzag-top" style={{ ["--c" as string]: "white" }} />
-
-      {/* Nav */}
-      <header className="bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-lg">🇺🇸</span>
-            <span>English</span>
-          </div>
-          <Link to="/" className="font-script text-3xl text-primary leading-none">Terrific<br /><span className="ml-6">Bites</span></Link>
-          <div className="flex items-center gap-6 text-sm">
-            <Link to="/account" className="flex items-center gap-2"><User className="h-4 w-4" /> My Account</Link>
-            <button className="flex items-center gap-2"><ShoppingBag className="h-4 w-4" /> Cart</button>
-          </div>
-        </div>
-      </header>
 
       {/* Page banner */}
       <section className="relative bg-primary text-primary-foreground overflow-hidden">
@@ -145,45 +128,7 @@ function About() {
         ))}
       </section>
 
-      {/* Zigzag before footer */}
-      <div className="h-8 zigzag-top" style={{ ["--c" as string]: "var(--brand)" }} />
-
-      {/* Footer */}
-      <footer className="bg-primary text-primary-foreground">
-        <div className="max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-4 gap-10">
-          <div>
-            <div className="w-16 h-16 bg-background rounded-sm flex items-center justify-center font-script text-primary text-lg">TB</div>
-            <p className="mt-4 text-xs opacity-80 max-w-xs">Worem ipsum dolor sit amet consectetur adipiscing elit magna pulvinar, pulvinar euismod dolor nascetur sea blandit etiam sed.</p>
-            <div className="flex gap-3 mt-5">
-              {[Facebook, Instagram, Twitter, Youtube].map((I, i) => (
-                <a key={i} href="#" className="h-7 w-7 rounded-full bg-background/10 flex items-center justify-center hover:bg-background/20"><I className="h-3.5 w-3.5" /></a>
-              ))}
-            </div>
-          </div>
-          {[
-            { title: "Column One", items: ["Twenty One", "Thirty Two", "Fourty Three", "Fifty Four"] },
-            { title: "Column Two", items: ["Sixty Five", "Seventy Six", "Eighty Seven", "Ninety Eight"] },
-            { title: "Column Three", items: ["One Two", "Three Four", "Five Six", "Seven Eight"] },
-          ].map(col => (
-            <div key={col.title}>
-              <h4 className="font-display uppercase text-sm tracking-wider mb-4">{col.title}</h4>
-              <ul className="space-y-2 text-xs opacity-80">
-                {col.items.map(i => <li key={i}><a href="#" className="hover:opacity-100">{i}</a></li>)}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div className="border-t border-primary-foreground/10">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex flex-wrap justify-between items-center gap-4 text-[11px] opacity-70">
-            <span>Copyright © 2024 Example company. All Rights Reserved</span>
-            <div className="flex gap-2">
-              {["VISA","AMEX","PayPal","GPay"].map(p => (
-                <span key={p} className="bg-background text-primary rounded px-2 py-1 text-[10px] font-semibold">{p}</span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

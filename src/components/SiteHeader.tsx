@@ -25,8 +25,9 @@ export function SiteHeader({ variant = "cream" }: { variant?: "cream" | "white" 
       <div className="h-8 zigzag-top" style={{ ["--c" as string]: "white" }} />
 
       <header className={bg}>
-        <div className="max-w-7xl mx-auto px-6 py-4 grid grid-cols-3 items-center">
-          <div className="flex items-center gap-4 text-sm justify-self-start">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-3 items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 text-sm justify-self-start min-w-0">
+
             <button
               onClick={() => setMenuOpen(true)}
               aria-label={t("menu")}
@@ -38,11 +39,12 @@ export function SiteHeader({ variant = "cream" }: { variant?: "cream" | "white" 
               <button
                 onClick={() => setLangOpen((v) => !v)}
                 onBlur={() => setTimeout(() => setLangOpen(false), 150)}
-                className="flex items-center gap-2 hover:text-primary transition"
+                className="flex items-center gap-1 sm:gap-2 hover:text-primary transition"
               >
-                <span className="text-lg">{lang === "ar" ? "🇸🇦" : "🇺🇸"}</span>
-                <span>{lang === "ar" ? t("arabic") : t("english")}</span>
+                <span className="text-base sm:text-lg">{lang === "ar" ? "🇸🇦" : "🇺🇸"}</span>
+                <span className="hidden sm:inline">{lang === "ar" ? t("arabic") : t("english")}</span>
                 <ChevronDown className="h-3 w-3" />
+
               </button>
               {langOpen && (
                 <div className="absolute top-full mt-2 start-0 bg-white border border-border rounded-md shadow-md py-1 min-w-32 z-30">
@@ -62,10 +64,11 @@ export function SiteHeader({ variant = "cream" }: { variant?: "cream" | "white" 
               )}
             </div>
           </div>
-          <Link to="/" className="font-script text-3xl text-primary leading-none justify-self-center text-center">
+          <Link to="/" className="font-script text-2xl sm:text-3xl text-primary leading-none justify-self-center text-center whitespace-nowrap">
             Terrific<br /><span className="ms-6">Bites</span>
           </Link>
-          <div className="flex items-center gap-5 text-sm justify-self-end">
+          <div className="flex items-center gap-3 sm:gap-5 text-sm justify-self-end">
+
             <Link to="/shop" aria-label="Search" className="hover:text-primary transition">
               <Search className="h-4 w-4" />
             </Link>

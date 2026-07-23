@@ -79,8 +79,8 @@ function DeliveryPage() {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <SiteHeader />
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8">
-        <div className="bg-white rounded-2xl shadow-sm px-8 py-5 flex items-center gap-4 mb-6">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="bg-white rounded-2xl shadow-sm px-3 sm:px-8 py-4 sm:py-5 flex items-center gap-2 sm:gap-4 mb-6">
           <Step n={1} label="Customize" done />
           <div className="flex-1 h-px bg-border" />
           <Step n={2} label="Delivery Details" active />
@@ -88,19 +88,19 @@ function DeliveryPage() {
           <Step n={3} label="Payment" />
         </div>
 
-        <div className="grid lg:grid-cols-[1fr_400px] gap-6">
-          <section className="bg-white rounded-2xl shadow-sm p-6">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
+          <section className="bg-white rounded-2xl shadow-sm p-4 sm:p-6">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div className="flex gap-3 min-w-0">
                 <MapPin className="h-5 w-5 text-primary shrink-0 mt-1" />
-                <div>
+                <div className="min-w-0">
                   <h2 className="font-semibold">Recipient & Delivery</h2>
-                  <p className="text-xs text-muted-foreground mt-1 max-w-md">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Tell us where to deliver. Sending a gift? Toggle the switch and we'll pick a time slot.
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <span className="text-sm">Gift?</span>
                 <button onClick={() => setGift(!gift)} className={`w-11 h-6 rounded-full transition relative ${gift ? "bg-primary" : "bg-secondary"}`} aria-label="Toggle gift">
                   <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${gift ? "left-5" : "left-0.5"}`} />
@@ -115,11 +115,11 @@ function DeliveryPage() {
 
               <div>
                 <label className="block text-sm mb-2">Recipient phone <span className="text-primary">*</span></label>
-                <div className="grid grid-cols-[180px_1fr] gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-[180px_minmax(0,1fr)] gap-3">
                   <button type="button" className="border border-border rounded-md px-3 py-3 text-sm flex items-center justify-between">
-                    Saudi Arabia (+966) <ChevronDown className="h-4 w-4" />
+                    <span className="truncate">Saudi Arabia (+966)</span> <ChevronDown className="h-4 w-4 shrink-0" />
                   </button>
-                  <input value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 15))} className="border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary" />
+                  <input value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 15))} className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary" />
                 </div>
               </div>
 
@@ -396,13 +396,14 @@ function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { in
 
 function Step({ n, label, active, done }: { n: number; label: string; active?: boolean; done?: boolean }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-semibold ${
+    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+      <div className={`h-8 w-8 sm:h-9 sm:w-9 shrink-0 rounded-full flex items-center justify-center text-sm font-semibold ${
         done ? "bg-[oklch(0.85_0.08_120)] text-primary" : active ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"
       }`}>
         {done ? <Check className="h-4 w-4" /> : n}
       </div>
-      <span className={`text-sm ${active || done ? "font-semibold" : "text-muted-foreground"}`}>{label}</span>
+      <span className={`hidden sm:inline text-sm truncate ${active || done ? "font-semibold" : "text-muted-foreground"}`}>{label}</span>
+      {active && <span className="sm:hidden text-xs font-semibold truncate">{label}</span>}
     </div>
   );
 }
