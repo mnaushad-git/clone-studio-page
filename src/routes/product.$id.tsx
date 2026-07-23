@@ -114,7 +114,7 @@ function ProductPage() {
 
           {product.sizes && (
             <div className="mt-6 grid grid-cols-2 gap-3">
-              {product.sizes.map((s, i) => (
+              {product.sizes.map((s: { label: string; sub?: string; delta?: number }, i: number) => (
                 <button key={i} onClick={() => setSizeIdx(i)} className={`flex items-center gap-3 border rounded-md p-3 text-left ${sizeIdx === i ? "border-primary" : "border-border"}`}>
                   <span className={`h-4 w-4 rounded-full border ${sizeIdx === i ? "border-primary" : "border-muted-foreground/50"} flex items-center justify-center`}>
                     {sizeIdx === i && <span className="h-2 w-2 rounded-full bg-primary" />}
@@ -130,7 +130,7 @@ function ProductPage() {
 
           {product.flavors && (
             <div className="mt-3 grid grid-cols-2 gap-3">
-              {product.flavors.map((f, i) => (
+              {product.flavors.map((f: string, i: number) => (
                 <button key={f} onClick={() => setFlavorIdx(i)} className={`flex items-center gap-3 border rounded-md p-3 uppercase text-sm ${flavorIdx === i ? "border-primary" : "border-border"}`}>
                   <span className={`h-4 w-4 rounded-full border ${flavorIdx === i ? "border-primary" : "border-muted-foreground/50"} flex items-center justify-center`}>
                     {flavorIdx === i && <span className="h-2 w-2 rounded-full bg-primary" />}
