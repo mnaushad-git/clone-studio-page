@@ -25,6 +25,14 @@ function SuccessPage() {
   const lastOrderId = useStore((s) => s.lastOrderId);
   const order = useStore((s) => s.orders.find((o) => o.id === s.lastOrderId) ?? null);
 
+  useEffect(() => {
+    if (order && order.status === "Processing") {
+      const t = setTimeout(() => orderStore.setStatus(order.id, "Paid"), 600);
+      return () => clearTimeout(t);
+    }
+  }, [order?.id, order?.status]);
+
+
   const downloadInvoice = () => {
     if (!order) return;
     const doc = new jsPDF({ unit: "pt", format: "a4" });
