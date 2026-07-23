@@ -1,190 +1,214 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronDown, ChevronRight, ShoppingBag, User, Facebook, Instagram, Twitter, Youtube } from "lucide-react";
-
-import c1 from "@/assets/choc-1.jpg";
-import c2 from "@/assets/choc-2.jpg";
-import c3 from "@/assets/choc-3.jpg";
-import c4 from "@/assets/choc-4.jpg";
-import c5 from "@/assets/choc-5.jpg";
-import c6 from "@/assets/choc-6.jpg";
-import c7 from "@/assets/choc-7.jpg";
-import c8 from "@/assets/choc-8.jpg";
-import c9 from "@/assets/choc-9.jpg";
-import prodSwiss from "@/assets/prod-swiss.jpg";
-import prodMoose from "@/assets/prod-moose.jpg";
-import prodButter from "@/assets/prod-butter.jpg";
+import { useMemo, useState } from "react";
+import { ChevronDown, ChevronRight, Plus } from "lucide-react";
+import { toast } from "sonner";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
+import { products, type Product } from "@/lib/products";
+import { cart } from "@/lib/store";
 
 export const Route = createFileRoute("/chocolates")({
   component: ChocolatesPage,
   head: () => ({
     meta: [
-      { title: "Chocolates — Terrific Bites" },
-      { name: "description", content: "Browse our full collection of artisan chocolates, truffles and gift boxes." },
-      { property: "og:title", content: "Chocolates — Terrific Bites" },
-      { property: "og:description", content: "Browse our full collection of artisan chocolates and gift boxes." },
+      { title: "Shop All Desserts — Terrific Bites" },
+      { name: "description", content: "Browse our full collection of artisan chocolates, cupcakes, cakes and gift boxes." },
+      { property: "og:title", content: "Shop — Terrific Bites" },
+      { property: "og:description", content: "All our handmade desserts, chocolates and gift boxes in one place." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
 });
 
-const categories = [
-  { name: "Sweets", img: prodSwiss },
-  { name: "Chocolates", img: c1 },
-  { name: "Happy Birthday", img: prodButter },
-  { name: "Sweets", img: prodMoose },
-  { name: "Worem ipsum", img: c4 },
-  { name: "Worem ipsum", img: c6 },
-  { name: "Moose Cream", img: c2 },
+const CATEGORIES: { key: Product["category"] | "all"; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "cupcakes", label: "Cupcakes" },
+  { key: "cakes", label: "Cakes" },
+  { key: "chocolates", label: "Chocolates" },
+  { key: "donuts", label: "Donuts" },
+  { key: "gifts", label: "Gifts" },
+  { key: "extras", label: "Extras" },
 ];
 
-const products = [c1, c3, c9, c2, c7, c8, c4, c5, c6, c1, c8, c9];
-
-const filterGroups = [
-  { title: "Occasions", items: ["Worem ipsum", "Worem ipsum", "Worem ipsum", "Worem ipsum"], more: true },
-  { title: "By recipient", items: ["Friends", "Father", "Aunt", "Mom"], more: true },
-  { title: "Bundle", items: ["Worem ipsum", "Worem ipsum"] },
-  { title: "Color", items: ["White", "Read", "Pink", "Yellow"], more: true },
-  { title: "Price", items: ["$300 to $500", "$300 to $500", "$300 to $500", "$300 to $500"] },
+const PRICE_BUCKETS = [
+  { label: "Under $10", min: 0, max: 10 },
+  { label: "$10 – $25", min: 10, max: 25 },
+  { label: "$25 – $100", min: 25, max: 100 },
+  { label: "$100+", min: 100, max: Infinity },
 ];
 
 function ChocolatesPage() {
+  const [category, setCategory] = useState<Product["category"] | "all">("all");
+  const [prices, setPrices] = useState<number[]>([]);
+  const [sort, setSort] = useState<"featured" | "low" | "high" | "name">("featured");
+
+  const filtered = useMemo(() => {
+    let list = category === "all" ? products : products.filter((p) => p.category === category);
+    if (prices.length > 0) {
+      list = list.filter((p) =>
+        prices.some((i) => p.price >= PRICE_BUCKETS[i].min && p.price < PRICE_BUCKETS[i].max),
+      );
+    }
+    if (sort === "low") list = [...list].sort((a, b) => a.price - b.price);
+    else if (sort === "high") list = [...list].sort((a, b) => b.price - a.price);
+    else if (sort === "name") list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+    return list;
+  }, [category, prices, sort]);
+
+  const toggle = <T,>(arr: T[], set: (v: T[]) => void, val: T) =>
+    set(arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val]);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Announcement */}
-      <div className="bg-white text-center text-[11px] tracking-[0.2em] py-2 text-muted-foreground uppercase">
-        Order Desserts for Local Pickup
-      </div>
+      <SiteHeader />
 
-      <div className="h-8 zigzag-top" style={{ ["--c" as string]: "white" }} />
-
-      {/* Nav */}
-      <header className="bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-lg">🇺🇸</span>
-            <span>English</span>
-            <ChevronDown className="h-3 w-3" />
-          </div>
-          <Link to="/" className="font-script text-3xl text-primary leading-none text-center">
-            Terrific<br /><span className="ml-6">Bites</span>
-          </Link>
-          <div className="flex items-center gap-6 text-sm">
-            <button className="flex items-center gap-2"><User className="h-4 w-4" /> My Account</button>
-            <button className="flex items-center gap-2"><ShoppingBag className="h-4 w-4" /> Cart</button>
-          </div>
-        </div>
-      </header>
-
-      {/* Page title + breadcrumbs */}
       <div className="max-w-7xl mx-auto px-6 pt-10 pb-6 text-center">
-        <h1 className="font-display text-4xl md:text-5xl text-primary">Chocolates</h1>
+        <h1 className="font-display text-4xl md:text-5xl text-primary">
+          {CATEGORIES.find((c) => c.key === category)?.label ?? "Shop"}
+        </h1>
         <nav className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
           <Link to="/" className="hover:text-primary">Home</Link>
           <ChevronRight className="h-3 w-3" />
-          <span className="text-primary">Chocolates</span>
+          <span className="text-primary">{CATEGORIES.find((c) => c.key === category)?.label}</span>
         </nav>
       </div>
 
       {/* Category chips */}
       <div className="max-w-7xl mx-auto px-6 pb-8">
         <div className="flex flex-wrap gap-3 justify-center">
-          {categories.map((c, i) => (
-            <button key={i} className="flex items-center gap-2 rounded-md bg-white border border-border px-3 py-2 text-xs hover:border-primary transition">
-              <img src={c.img} alt={c.name} className="h-7 w-7 rounded object-cover" />
-              <span>{c.name}</span>
-            </button>
-          ))}
+          {CATEGORIES.map((c) => {
+            const sample = c.key === "all" ? products[0] : products.find((p) => p.category === c.key);
+            const active = category === c.key;
+            return (
+              <button
+                key={c.key}
+                onClick={() => setCategory(c.key)}
+                className={`flex items-center gap-2 rounded-md border px-3 py-2 text-xs transition ${
+                  active ? "bg-primary text-primary-foreground border-primary" : "bg-white border-border hover:border-primary"
+                }`}
+              >
+                {sample && <img src={sample.image} alt={c.label} className="h-7 w-7 rounded object-cover" />}
+                <span>{c.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Main grid: sidebar + products */}
       <div className="max-w-7xl mx-auto px-6 pb-16 grid grid-cols-1 md:grid-cols-[240px_1fr] gap-8">
         {/* Sidebar */}
         <aside className="border border-border rounded-md p-5 h-fit bg-white">
           <div className="flex items-center justify-between pb-4 border-b border-border">
-            <h3 className="font-display text-base text-primary">Category</h3>
+            <h3 className="font-display text-base text-primary">Filters</h3>
             <ChevronDown className="h-4 w-4 text-muted-foreground" />
           </div>
-          <div className="space-y-6 pt-5">
-            {filterGroups.map((g, gi) => (
-              <div key={gi}>
-                <h4 className="text-sm font-semibold text-foreground mb-3">{g.title}</h4>
-                <ul className="space-y-2">
-                  {g.items.map((it, i) => (
-                    <li key={i} className="flex items-center justify-between text-xs">
+
+          <div className="pt-5 space-y-6">
+            <div>
+              <h4 className="text-sm font-semibold mb-3">Category</h4>
+              <ul className="space-y-2">
+                {CATEGORIES.filter((c) => c.key !== "all").map((c) => {
+                  const count = products.filter((p) => p.category === c.key).length;
+                  return (
+                    <li key={c.key} className="flex items-center justify-between text-xs">
                       <label className="flex items-center gap-2 cursor-pointer">
-                        <span className="h-3.5 w-3.5 rounded-full border border-muted-foreground/50 inline-block" />
-                        <span className="text-foreground">{it}</span>
+                        <input
+                          type="radio"
+                          name="cat"
+                          checked={category === c.key}
+                          onChange={() => setCategory(c.key)}
+                          className="accent-primary"
+                        />
+                        <span>{c.label}</span>
                       </label>
-                      <span className="text-muted-foreground">(31)</span>
+                      <span className="text-muted-foreground">({count})</span>
                     </li>
-                  ))}
-                </ul>
-                {g.more && <button className="mt-2 text-xs underline text-foreground">Show More</button>}
-              </div>
-            ))}
+                  );
+                })}
+              </ul>
+              <button onClick={() => setCategory("all")} className="mt-2 text-xs underline text-foreground">
+                Clear category
+              </button>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-semibold mb-3">Price</h4>
+              <ul className="space-y-2">
+                {PRICE_BUCKETS.map((b, i) => (
+                  <li key={b.label} className="flex items-center gap-2 text-xs">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={prices.includes(i)}
+                        onChange={() => toggle(prices, setPrices, i)}
+                        className="accent-primary"
+                      />
+                      <span>{b.label}</span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-semibold mb-3">Sort by</h4>
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as typeof sort)}
+                className="w-full border border-border rounded-md px-2 py-2 text-xs bg-white"
+              >
+                <option value="featured">Featured</option>
+                <option value="low">Price: Low to High</option>
+                <option value="high">Price: High to Low</option>
+                <option value="name">Name</option>
+              </select>
+            </div>
           </div>
         </aside>
 
         {/* Product grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((img, i) => (
-            <div key={i} className="bg-white rounded-md overflow-hidden border border-border">
-              <div className="aspect-square overflow-hidden">
-                <img src={img} alt="Moose Cream" loading="lazy" width={700} height={700} className="w-full h-full object-cover hover:scale-105 transition duration-500" />
-              </div>
-              <div className="p-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-display text-sm text-primary uppercase tracking-wider">Moose Cream</h3>
-                  <span className="text-sm text-primary font-semibold">$6.99</span>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">Worem ipsum dolor sit amet consectetur.</p>
-              </div>
+        <div>
+          <p className="text-xs text-muted-foreground mb-4">{filtered.length} product{filtered.length !== 1 && "s"}</p>
+          {filtered.length === 0 ? (
+            <div className="text-center py-24 border border-dashed border-border rounded-lg">
+              <p className="text-sm text-muted-foreground">No products match your filters.</p>
             </div>
-          ))}
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map((p) => (
+                <div key={p.id} className="bg-white rounded-md overflow-hidden border border-border flex flex-col">
+                  <Link to="/product/$id" params={{ id: p.id }} className="aspect-square overflow-hidden block">
+                    <img src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+                  </Link>
+                  <div className="p-4 flex-1 flex flex-col">
+                    <div className="flex items-center justify-between">
+                      <Link to="/product/$id" params={{ id: p.id }} className="font-display text-sm text-primary uppercase tracking-wider hover:underline">
+                        {p.name}
+                      </Link>
+                      <span className="text-sm text-primary font-semibold">${p.price.toFixed(2)}</span>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2 flex-1">
+                      {p.description ?? "Handmade with love and the finest ingredients."}
+                    </p>
+                    <button
+                      onClick={() => {
+                        cart.add({ productId: p.id });
+                        toast.success(`${p.name} added to cart`);
+                      }}
+                      className="mt-3 w-full border border-border rounded-md py-2 text-xs font-medium hover:bg-primary hover:text-primary-foreground hover:border-primary transition inline-flex items-center justify-center gap-1"
+                    >
+                      <Plus className="h-3 w-3" /> Add to Cart
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Zigzag before footer */}
-      <div className="h-8 zigzag-top" style={{ ["--c" as string]: "var(--brand)" }} />
-
-      {/* Footer */}
-      <footer className="bg-primary text-primary-foreground">
-        <div className="max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-4 gap-10">
-          <div>
-            <div className="w-16 h-16 bg-background rounded-sm flex items-center justify-center font-script text-primary text-lg">TB</div>
-            <p className="mt-4 text-xs opacity-80 max-w-xs">Worem ipsum dolor sit amet consectetur adipiscing elit magna pulvinar, pulvinar euismod dolor nascetur sea blandit etiam sed.</p>
-            <div className="flex gap-3 mt-5">
-              {[Facebook, Instagram, Twitter, Youtube].map((I, i) => (
-                <a key={i} href="#" className="h-7 w-7 rounded-full bg-background/10 flex items-center justify-center hover:bg-background/20"><I className="h-3.5 w-3.5" /></a>
-              ))}
-            </div>
-          </div>
-          {[
-            { title: "Column One", items: ["Twenty One", "Thirty Two", "Fourty Three", "Fifty Four"] },
-            { title: "Column Two", items: ["Sixty Five", "Seventy Six", "Eighty Seven", "Ninety Eight"] },
-            { title: "Column Three", items: ["One Two", "Three Four", "Five Six", "Seven Eight"] },
-          ].map(col => (
-            <div key={col.title}>
-              <h4 className="font-display uppercase text-sm tracking-wider mb-4">{col.title}</h4>
-              <ul className="space-y-2 text-xs opacity-80">
-                {col.items.map(i => <li key={i}><a href="#" className="hover:opacity-100">{i}</a></li>)}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div className="border-t border-primary-foreground/10">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex flex-wrap justify-between items-center gap-4 text-[11px] opacity-70">
-            <span>Copyright © 2024 Example company. All Rights Reserved</span>
-            <div className="flex gap-2">
-              {["VISA","AMEX","PayPal","GPay"].map(p => (
-                <span key={p} className="bg-background text-primary rounded px-2 py-1 text-[10px] font-semibold">{p}</span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

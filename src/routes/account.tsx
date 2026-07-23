@@ -1,21 +1,25 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
-  User, ShoppingBag, UserRound, MapPin, ShoppingCart, DollarSign,
-  FileText, Calendar, Heart, Wallet, Plus,
-  Facebook, Instagram, Twitter, Youtube,
+  UserRound, MapPin, ShoppingCart, DollarSign, FileText, Calendar, Heart, Wallet, Plus,
+  LogOut, Trash2, X,
 } from "lucide-react";
+import { toast } from "sonner";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
+import { useStore, auth, addresses as addressStore } from "@/lib/store";
 
 export const Route = createFileRoute("/account")({
   component: AccountPage,
   head: () => ({
     meta: [
       { title: "My Account — Terrific Bites" },
-      { name: "description", content: "Manage your Terrific Bites profile, addresses, orders, subscriptions, invoices, favorites and wallet from your account dashboard." },
+      { name: "description", content: "Manage your Terrific Bites profile, addresses, orders and rewards." },
       { property: "og:title", content: "My Account — Terrific Bites" },
-      { property: "og:description", content: "Manage your profile, addresses, orders and rewards at Terrific Bites." },
+      { property: "og:description", content: "Manage your profile, addresses and orders." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "noindex" },
     ],
   }),
 });
@@ -27,7 +31,6 @@ const menu = [
   { key: "subs", label: "My Subscriptions", icon: DollarSign },
   { key: "invoices", label: "Invoices", icon: FileText },
   { key: "occasions", label: "My Occasions", icon: Calendar },
-  { key: "addresses", label: "My Addresses", icon: MapPin },
   { key: "favorite", label: "Favorite", icon: Heart },
   { key: "wallet", label: "Terrific Wallet", icon: Wallet },
 ] as const;
@@ -35,38 +38,47 @@ const menu = [
 type MenuKey = typeof menu[number]["key"];
 
 function AccountPage() {
-  const [active, setActive] = useState<MenuKey>("address");
+  const navigate = useNavigate();
+  const user = useStore((s) => s.user);
+  const addresses = useStore((s) => s.addresses);
+  const orders = useStore((s) => s.orders);
+  const [active, setActive] = useState<MenuKey>("personal");
+  const [profile, setProfile] = useState({ name: "", email: "", phone: "", birthDate: "" });
+  const [showAddr, setShowAddr] = useState(false);
+  const [newAddr, setNewAddr] = useState({ name: "", phone: "", area: "", address: "", extra: "" });
+
+  useEffect(() => {
+    if (user) setProfile({ name: user.name ?? "", email: user.email ?? "", phone: user.phone ?? "", birthDate: user.birthDate ?? "" });
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) navigate({ to: "/login" });
+  }, [user, navigate]);
+
+  if (!user) return null;
+
+  const saveProfile = () => {
+    auth.updateProfile(profile);
+    toast.success("Profile saved");
+  };
+
+  const addAddress = () => {
+    if (!newAddr.name || !newAddr.phone || !newAddr.address) return toast.error("Please complete address");
+    addressStore.add(newAddr);
+    setNewAddr({ name: "", phone: "", area: "", address: "", extra: "" });
+    setShowAddr(false);
+    toast.success("Address added");
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* Announcement */}
-      <div className="bg-white text-center text-[11px] tracking-[0.2em] py-3 text-foreground uppercase">
-        Order Desserts for Local Pickup
-      </div>
-      <div className="h-8 zigzag-top" style={{ ["--c" as string]: "white" }} />
+      <SiteHeader />
 
-      {/* Nav */}
-      <header className="bg-background">
-        <div className="max-w-7xl mx-auto px-6 py-5 grid grid-cols-3 items-center">
-          <button className="flex items-center gap-2 text-sm text-primary justify-self-start">
-            <User className="h-5 w-5" /> My Account
-          </button>
-          <Link to="/" className="font-script text-3xl text-primary leading-none justify-self-center text-center">
-            Terrific<br /><span className="ml-6">Bites</span>
-          </Link>
-          <button className="flex items-center gap-2 text-sm text-primary justify-self-end">
-            <ShoppingBag className="h-5 w-5" /> Cart
-          </button>
-        </div>
-        <div className="border-t border-border/60" />
-      </header>
-
-      {/* Main */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-14">
-        <h1 className="font-display text-4xl text-primary text-center mb-10">My Account</h1>
+        <h1 className="font-display text-4xl text-primary text-center mb-2">My Account</h1>
+        <p className="text-center text-sm text-muted-foreground mb-10">Welcome back, {user.name ?? user.email ?? "friend"}!</p>
 
         <div className="grid md:grid-cols-[320px_1fr] gap-6">
-          {/* Sidebar */}
           <aside className="bg-white rounded-2xl shadow-sm p-4 h-fit">
             <ul className="space-y-1">
               {menu.map(({ key, label, icon: Icon }) => {
@@ -76,51 +88,118 @@ function AccountPage() {
                     <button
                       onClick={() => setActive(key)}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition ${
-                        isActive
-                          ? "bg-primary text-primary-foreground"
-                          : "text-foreground hover:bg-secondary"
+                        isActive ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-secondary"
                       }`}
                     >
-                      <Icon className="h-5 w-5" />
-                      <span>{label}</span>
+                      <Icon className="h-5 w-5" /><span>{label}</span>
                     </button>
                   </li>
                 );
               })}
+              <li className="pt-2 border-t border-border mt-2">
+                <button
+                  onClick={() => { auth.signOut(); toast.success("Signed out"); navigate({ to: "/" }); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-destructive hover:bg-destructive/10"
+                >
+                  <LogOut className="h-5 w-5" /> Sign Out
+                </button>
+              </li>
             </ul>
           </aside>
 
-          {/* Panel */}
           <section className="bg-white rounded-2xl shadow-sm p-8 min-h-[520px]">
+            {active === "personal" && (
+              <>
+                <h2 className="text-sm font-semibold mb-6">Personal details</h2>
+                <div className="grid md:grid-cols-2 gap-5">
+                  <Field label="Full name" value={profile.name} onChange={(v) => setProfile({ ...profile, name: v })} />
+                  <Field label="Email" type="email" value={profile.email} onChange={(v) => setProfile({ ...profile, email: v })} />
+                  <Field label="Mobile number" type="tel" value={profile.phone} onChange={(v) => setProfile({ ...profile, phone: v })} />
+                  <Field label="Date of birth" type="date" value={profile.birthDate} onChange={(v) => setProfile({ ...profile, birthDate: v })} />
+                </div>
+                <button onClick={saveProfile} className="mt-8 bg-primary text-primary-foreground rounded-md px-8 py-3 text-sm">Save Changes</button>
+              </>
+            )}
+
             {active === "address" && (
               <>
-                <h2 className="text-sm font-semibold mb-4">Recipient details</h2>
-                <button className="w-full border border-border rounded-lg py-5 flex items-center justify-center gap-2 text-sm text-foreground hover:border-primary hover:text-primary transition">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-sm font-semibold">Saved Addresses ({addresses.length})</h2>
+                </div>
+                <div className="space-y-3">
+                  {addresses.map((a) => (
+                    <div key={a.id} className="border border-border rounded-lg p-4 flex items-start justify-between gap-4">
+                      <div>
+                        <p className="font-medium">{a.name}</p>
+                        <p className="text-xs text-muted-foreground">{a.phone}</p>
+                        <p className="text-xs text-muted-foreground">{a.area}{a.address ? ` — ${a.address}` : ""}</p>
+                        {a.extra && <p className="text-xs text-muted-foreground">{a.extra}</p>}
+                      </div>
+                      <button onClick={() => { addressStore.remove(a.id); toast.success("Address removed"); }} className="text-destructive hover:opacity-70" aria-label="Delete">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setShowAddr(true)}
+                  className="mt-4 w-full border border-border rounded-lg py-5 flex items-center justify-center gap-2 text-sm text-foreground hover:border-primary hover:text-primary transition"
+                >
                   <Plus className="h-5 w-5" /> Add Address
                 </button>
               </>
             )}
 
-            {active === "personal" && (
+            {active === "orders" && (
               <>
-                <h2 className="text-sm font-semibold mb-6">Personal details</h2>
-                <div className="grid md:grid-cols-2 gap-5">
-                  {["Full name", "Email", "Mobile number", "Date of birth"].map((l) => (
-                    <div key={l}>
-                      <label className="block text-xs font-semibold mb-2">{l}</label>
-                      <input className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary bg-transparent" />
-                    </div>
-                  ))}
-                </div>
-                <button className="mt-8 bg-primary text-primary-foreground rounded-md px-8 py-3 text-sm">Save Changes</button>
+                <h2 className="text-sm font-semibold mb-4">Order History ({orders.length})</h2>
+                {orders.length === 0 ? (
+                  <div className="text-center py-16">
+                    <p className="text-sm text-muted-foreground">No orders yet.</p>
+                    <Link to="/chocolates" className="mt-4 inline-block text-sm text-primary underline">Start shopping</Link>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {orders.map((o) => (
+                      <div key={o.id} className="border border-border rounded-lg p-4">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="font-semibold text-sm">#{o.id}</p>
+                            <p className="text-xs text-muted-foreground">{new Date(o.createdAt).toLocaleString()}</p>
+                          </div>
+                          <p className="font-semibold">${o.total.toFixed(2)}</p>
+                        </div>
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          {o.items.map((i) => `${i.qty}× ${i.name}`).join(" · ")}
+                        </p>
+                        <p className="mt-1 text-xs">Payment: {o.method}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </>
             )}
 
-            {active !== "address" && active !== "personal" && (
+            {active === "favorite" && (
               <div className="h-full flex flex-col items-center justify-center text-center py-24">
-                <h2 className="font-display text-2xl text-primary">
-                  {menu.find((m) => m.key === active)?.label}
-                </h2>
+                <Heart className="h-10 w-10 text-primary" />
+                <h2 className="mt-3 font-display text-2xl text-primary">Favorites</h2>
+                <p className="text-sm text-muted-foreground mt-3 max-w-sm">Save your favorite desserts here for quick reordering.</p>
+              </div>
+            )}
+
+            {active === "wallet" && (
+              <div className="h-full flex flex-col items-center justify-center text-center py-24">
+                <Wallet className="h-10 w-10 text-primary" />
+                <h2 className="mt-3 font-display text-2xl text-primary">Terrific Wallet</h2>
+                <p className="text-sm text-muted-foreground mt-3">Balance: <span className="font-semibold text-foreground">${(orders.length * 5).toFixed(2)}</span></p>
+                <p className="text-xs text-muted-foreground mt-1">You earn $5 rewards for every order placed.</p>
+              </div>
+            )}
+
+            {(active === "subs" || active === "invoices" || active === "occasions") && (
+              <div className="h-full flex flex-col items-center justify-center text-center py-24">
+                <h2 className="font-display text-2xl text-primary">{menu.find((m) => m.key === active)?.label}</h2>
                 <p className="text-sm text-muted-foreground mt-3 max-w-sm">
                   Nothing here yet. Your {menu.find((m) => m.key === active)?.label.toLowerCase()} will appear in this space.
                 </p>
@@ -130,47 +209,33 @@ function AccountPage() {
         </div>
       </main>
 
-      {/* Zigzag pink dividers */}
-      <div className="h-10" style={{ background: "oklch(0.9 0.05 20)", clipPath: "polygon(0 100%, 5% 0, 10% 100%, 15% 0, 20% 100%, 25% 0, 30% 100%, 35% 0, 40% 100%, 45% 0, 50% 100%, 55% 0, 60% 100%, 65% 0, 70% 100%, 75% 0, 80% 100%, 85% 0, 90% 100%, 95% 0, 100% 100%)" }} />
+      {showAddr && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
+            <button onClick={() => setShowAddr(false)} className="absolute top-4 right-4"><X className="h-5 w-5" /></button>
+            <h3 className="font-semibold mb-4">New Address</h3>
+            <div className="space-y-3">
+              <input value={newAddr.name} onChange={(e) => setNewAddr({ ...newAddr, name: e.target.value })} placeholder="Name" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
+              <input value={newAddr.phone} onChange={(e) => setNewAddr({ ...newAddr, phone: e.target.value })} placeholder="Phone" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
+              <input value={newAddr.area} onChange={(e) => setNewAddr({ ...newAddr, area: e.target.value })} placeholder="City / Area" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
+              <input value={newAddr.address} onChange={(e) => setNewAddr({ ...newAddr, address: e.target.value })} placeholder="Street address" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
+              <input value={newAddr.extra} onChange={(e) => setNewAddr({ ...newAddr, extra: e.target.value })} placeholder="Apt / floor / landmark (optional)" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
+            </div>
+            <button onClick={addAddress} className="mt-4 w-full bg-primary text-primary-foreground rounded-md py-3 text-sm">Save Address</button>
+          </div>
+        </div>
+      )}
 
-      {/* Footer */}
-      <footer className="bg-primary text-primary-foreground">
-        <div className="max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-4 gap-10">
-          <div>
-            <div className="w-16 h-16 bg-background rounded-sm flex items-center justify-center font-script text-primary text-lg">TB</div>
-            <p className="mt-4 text-xs opacity-80 max-w-xs">Worem ipsum dolor sit amet consectetur adipiscing elit magna pulvinar, conubia nascetur sed blandit etiam est.</p>
-            <div className="flex gap-3 mt-5">
-              {[Facebook, Twitter, Instagram, Youtube].map((I, i) => (
-                <a key={i} href="#" aria-label="social" className="h-7 w-7 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20">
-                  <I className="h-3.5 w-3.5" />
-                </a>
-              ))}
-            </div>
-          </div>
-          {[
-            { t: "Column One", l: ["Twenty One", "Thirty Two", "Fourty Three", "Fifty Four"] },
-            { t: "Column Two", l: ["Sixty Five", "Seventy Six", "Eighty Seven", "Ninety Eight"] },
-            { t: "Column Three", l: ["One Two", "Three Four", "Five Six", "Seven Eight"] },
-          ].map((c) => (
-            <div key={c.t}>
-              <h4 className="font-display text-lg mb-4">{c.t}</h4>
-              <ul className="space-y-3 text-sm opacity-90">
-                {c.l.map((li) => <li key={li}><a href="#" className="hover:opacity-100">{li}</a></li>)}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div className="border-t border-primary-foreground/15">
-          <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between text-xs opacity-80">
-            <span>Copyright © 2024 Example company. All Rights Reserved</span>
-            <div className="flex gap-2">
-              {["VISA", "PayPal", "Pay", "MC"].map((p) => (
-                <span key={p} className="bg-primary-foreground text-primary rounded px-2 py-1 text-[10px] font-semibold">{p}</span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
+    </div>
+  );
+}
+
+function Field({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold mb-2">{label}</label>
+      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary bg-transparent" />
     </div>
   );
 }
