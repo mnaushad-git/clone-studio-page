@@ -85,7 +85,7 @@ function ProductPage() {
           </div>
           {thumbs.length > 1 && (
             <div className="mt-4 grid grid-cols-4 gap-3">
-              {thumbs.map((t, i) => (
+              {thumbs.map((t: string, i: number) => (
                 <button key={i} onClick={() => setActive(i)} className={`aspect-square rounded-md overflow-hidden border ${active === i ? "border-primary" : "border-border"}`}>
                   <img src={t} alt="thumbnail" loading="lazy" className="w-full h-full object-cover" />
                 </button>
