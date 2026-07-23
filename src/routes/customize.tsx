@@ -201,9 +201,10 @@ function CustomizePage() {
             <div className="bg-white rounded-2xl shadow-sm p-5 space-y-4">
               <h3 className="font-semibold">Order Summary</h3>
               <div className="space-y-2 text-sm">
-                <Row label="X1  Sprinkle Cupcakes" val="$90.99" />
-                <Row label="X2  Sprinkle Cupcakes" val="$80.99" />
-                <Row label="X3  Sprinkle Cupcakes" val="$80.99" />
+                <Row label={`X${qty}  Sprinkle Cupcakes`} val={`$${(1187.55).toFixed(2)}`} />
+                {selected.map((i) => (
+                  <Row key={i} label={`X1  ${popupExtras[i].name}`} val={popupExtras[i].price} />
+                ))}
               </div>
               <div className="border-t border-border pt-4 space-y-2 text-sm">
                 <Row label="Delivery today with" val="$360.99" bold />
@@ -215,12 +216,12 @@ function CustomizePage() {
                 </div>
               </div>
               <div className="border-t border-border pt-4 space-y-2 text-sm">
-                <Row label="Amount" val="$360.99" />
+                <Row label="Amount" val={`$${total.toFixed(2)}`} />
                 <Row label="Tax" val="$12.99" />
               </div>
               <div className="border-t border-border pt-4 flex items-center justify-between">
                 <span className="font-semibold">Order Total</span>
-                <span className="font-semibold">$400.99</span>
+                <span className="font-semibold">${(total + 12.99).toFixed(2)}</span>
               </div>
             </div>
 
