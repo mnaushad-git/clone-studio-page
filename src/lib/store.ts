@@ -23,6 +23,9 @@ export type Address = {
   timeSlot?: "tomorrow" | "another";
 };
 
+export type OrderStatus = "Processing" | "Paid" | "Delivered";
+export const ORDER_STATUSES: OrderStatus[] = ["Processing", "Paid", "Delivered"];
+
 export type Order = {
   id: string;
   items: { productId: string; name: string; qty: number; unitPrice: number; size?: string; flavor?: string; inscription?: string }[];
@@ -34,6 +37,8 @@ export type Order = {
   address: Address | null;
   method: string;
   createdAt: number;
+  status: OrderStatus;
+  statusHistory: { status: OrderStatus; at: number }[];
 };
 
 export type User = {
