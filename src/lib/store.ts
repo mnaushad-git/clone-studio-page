@@ -50,6 +50,16 @@ export type User = {
   birthDate?: string;
 };
 
+export type Review = {
+  id: string;
+  productId: string;
+  author: string;
+  rating: number; // 1-5
+  title?: string;
+  body: string;
+  createdAt: number;
+};
+
 type State = {
   cart: CartItem[];
   user: User | null;
@@ -57,10 +67,21 @@ type State = {
   orders: Order[];
   promo: { code: string; percent: number } | null;
   lastOrderId: string | null;
+  wishlist: string[];
+  reviews: Review[];
+  recentlyViewed: string[];
 };
 
 const STORAGE_KEY = "tb.state.v1";
 const isBrowser = typeof window !== "undefined";
+
+const seededReviews: Review[] = [
+  { id: "r1", productId: "buttercream-cake", author: "Sara M.", rating: 5, title: "Absolutely divine!", body: "Ordered this for my daughter's birthday — everyone raved about it. Moist, beautifully decorated, and delivered on time.", createdAt: Date.now() - 86400000 * 3 },
+  { id: "r2", productId: "buttercream-cake", author: "Ahmed K.", rating: 4, body: "Great taste and presentation. A little sweet for my liking but overall lovely.", createdAt: Date.now() - 86400000 * 8 },
+  { id: "r3", productId: "choc-truffle", author: "Nadia F.", rating: 5, title: "Melt in your mouth", body: "Rich, silky, and perfectly bittersweet. Will order again.", createdAt: Date.now() - 86400000 * 12 },
+  { id: "r4", productId: "swiss-frosting", author: "Layla H.", rating: 5, body: "Best cupcakes I've had in a long time. The frosting is not too sweet.", createdAt: Date.now() - 86400000 * 5 },
+  { id: "r5", productId: "moose-cream", author: "Omar S.", rating: 4, body: "Very chocolatey and rich. Portion could be a bit bigger.", createdAt: Date.now() - 86400000 * 2 },
+];
 
 const initial: State = {
   cart: [],
@@ -69,6 +90,9 @@ const initial: State = {
   orders: [],
   promo: null,
   lastOrderId: null,
+  wishlist: [],
+  reviews: seededReviews,
+  recentlyViewed: [],
 };
 
 function load(): State {
@@ -82,6 +106,15 @@ function load(): State {
       status: o.status ?? "Processing",
       statusHistory: o.statusHistory ?? [{ status: o.status ?? "Processing", at: o.createdAt }],
     }));
+    parsed.wishlist = parsed.wishlist ?? [];
+    parsed.recentlyViewed = parsed.recentlyViewed ?? [];
+    // Merge seeded reviews with any saved ones (keep custom ones)
+    const savedReviews = parsed.reviews ?? [];
+    const seededIds = new Set(seededReviews.map((r) => r.id));
+    parsed.reviews = [
+      ...seededReviews,
+      ...savedReviews.filter((r) => !seededIds.has(r.id)),
+    ];
     return parsed;
   } catch {
     return initial;
@@ -106,16 +139,8 @@ function subscribe(fn: () => void) {
   return () => listeners.delete(fn);
 }
 
-function getSnapshot() {
-  return state;
-}
-function getServerSnapshot() {
-  return initial;
-}
-
 export function useStore<T>(selector: (s: State) => T): T {
-  const snap = useSyncExternalStore(subscribe, () => selector(state), () => selector(initial));
-  return snap;
+  return useSyncExternalStore(subscribe, () => selector(state), () => selector(initial));
 }
 
 // ---------- Cart ----------
@@ -212,6 +237,22 @@ export function selectTotal(s: State): number {
 export function selectCartCount(s: State): number {
   return s.cart.reduce((n, i) => n + i.qty, 0);
 }
+export function selectWishlistCount(s: State): number {
+  return s.wishlist.length;
+}
+export function selectIsWishlisted(id: string) {
+  return (s: State) => s.wishlist.includes(id);
+}
+export function selectProductReviews(id: string) {
+  return (s: State) => s.reviews.filter((r) => r.productId === id).sort((a, b) => b.createdAt - a.createdAt);
+}
+export function selectAverageRating(id: string) {
+  return (s: State) => {
+    const list = s.reviews.filter((r) => r.productId === id);
+    if (!list.length) return 0;
+    return +(list.reduce((sum, r) => sum + r.rating, 0) / list.length).toFixed(1);
+  };
+}
 
 // ---------- Auth ----------
 export const auth = {
@@ -246,6 +287,55 @@ export const addresses = {
       ...state,
       addresses: state.addresses.map((a) => (a.id === id ? { ...a, ...patch } : a)),
     };
+    emit();
+  },
+};
+
+// ---------- Wishlist ----------
+export const wishlist = {
+  toggle(productId: string): boolean {
+    const has = state.wishlist.includes(productId);
+    state = {
+      ...state,
+      wishlist: has ? state.wishlist.filter((id) => id !== productId) : [...state.wishlist, productId],
+    };
+    emit();
+    return !has;
+  },
+  add(productId: string) {
+    if (state.wishlist.includes(productId)) return;
+    state = { ...state, wishlist: [...state.wishlist, productId] };
+    emit();
+  },
+  remove(productId: string) {
+    state = { ...state, wishlist: state.wishlist.filter((id) => id !== productId) };
+    emit();
+  },
+  clear() {
+    state = { ...state, wishlist: [] };
+    emit();
+  },
+};
+
+// ---------- Reviews ----------
+export const reviews = {
+  add(input: { productId: string; author: string; rating: number; title?: string; body: string }) {
+    const r: Review = {
+      id: "rv-" + Math.random().toString(36).slice(2, 8),
+      createdAt: Date.now(),
+      ...input,
+    };
+    state = { ...state, reviews: [r, ...state.reviews] };
+    emit();
+    return r;
+  },
+};
+
+// ---------- Recently Viewed ----------
+export const recentlyViewed = {
+  track(productId: string) {
+    const filtered = state.recentlyViewed.filter((id) => id !== productId);
+    state = { ...state, recentlyViewed: [productId, ...filtered].slice(0, 12) };
     emit();
   },
 };
