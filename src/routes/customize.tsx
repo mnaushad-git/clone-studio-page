@@ -302,13 +302,14 @@ function CustomizePage() {
 
 function Step({ n, label, active, done }: { n: number; label: string; active?: boolean; done?: boolean }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-semibold ${
+    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+      <div className={`h-8 w-8 sm:h-9 sm:w-9 shrink-0 rounded-full flex items-center justify-center text-sm font-semibold ${
         done ? "bg-[oklch(0.85_0.08_120)] text-primary" : active ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground"
       }`}>
         {done ? <Check className="h-4 w-4" /> : n}
       </div>
-      <span className={`text-sm ${active || done ? "font-semibold" : "text-muted-foreground"}`}>{label}</span>
+      <span className={`hidden sm:inline text-sm truncate ${active || done ? "font-semibold" : "text-muted-foreground"}`}>{label}</span>
+      {active && <span className="sm:hidden text-xs font-semibold truncate">{label}</span>}
     </div>
   );
 }
