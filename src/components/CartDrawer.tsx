@@ -1,9 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { X, Minus, Plus, ShoppingCart, MapPin, Truck } from "lucide-react";
+import { useState } from "react";
+import { X, Minus, Plus, ShoppingCart, MapPin, Truck, Tag } from "lucide-react";
 import {
   useStore,
   cart,
+  promo,
   selectSubtotal,
+  selectDiscount,
   selectTax,
   selectTotal,
   selectDeliveryFee,
