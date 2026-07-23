@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, ShoppingBag, User, Facebook, Instagram, Twitter, Youtube, Play, Truck, Headphones, RotateCcw } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, Truck, Headphones, RotateCcw } from "lucide-react";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 
 import donutsHero from "@/assets/donuts-hero.jpg";
 import personDonut from "@/assets/person-donut.jpg";
@@ -24,27 +26,8 @@ export const Route = createFileRoute("/about")({
 function About() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Announcement */}
-      <div className="bg-white text-center text-[11px] tracking-[0.2em] py-2 text-muted-foreground uppercase">
-        Order Desserts for Local Pickup
-      </div>
+      <SiteHeader />
 
-      <div className="h-8 zigzag-top" style={{ ["--c" as string]: "white" }} />
-
-      {/* Nav */}
-      <header className="bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-lg">🇺🇸</span>
-            <span>English</span>
-          </div>
-          <Link to="/" className="font-script text-3xl text-primary leading-none">Terrific<br /><span className="ml-6">Bites</span></Link>
-          <div className="flex items-center gap-6 text-sm">
-            <Link to="/account" className="flex items-center gap-2"><User className="h-4 w-4" /> My Account</Link>
-            <button className="flex items-center gap-2"><ShoppingBag className="h-4 w-4" /> Cart</button>
-          </div>
-        </div>
-      </header>
 
       {/* Page banner */}
       <section className="relative bg-primary text-primary-foreground overflow-hidden">
