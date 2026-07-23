@@ -74,7 +74,13 @@ function load(): State {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return initial;
-    return { ...initial, ...JSON.parse(raw) };
+    const parsed = { ...initial, ...JSON.parse(raw) } as State;
+    parsed.orders = (parsed.orders ?? []).map((o) => ({
+      ...o,
+      status: o.status ?? "Processing",
+      statusHistory: o.statusHistory ?? [{ status: o.status ?? "Processing", at: o.createdAt }],
+    }));
+    return parsed;
   } catch {
     return initial;
   }
