@@ -254,7 +254,142 @@ function DeliveryPage() {
         </div>
       </main>
 
+      {timeModalOpen && (
+        <AnotherTimeModal
+          initialDate={pickedDate}
+          initialTime={pickedTime}
+          onClose={() => setTimeModalOpen(false)}
+          onConfirm={(d, t) => {
+            setPickedDate(d);
+            setPickedTime(t);
+            setTimeModalOpen(false);
+            toast.success("Delivery time selected");
+          }}
+        />
+      )}
+
       <SiteFooter />
+    </div>
+  );
+}
+
+type Quick = { key: string; label: string; sub: string };
+
+function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { initialDate: string; initialTime: string; onClose: () => void; onConfirm: (date: string, time: string) => void }) {
+  const now = new Date();
+  const quickDates = useMemo<Quick[]>(() => {
+    const fmt = (d: Date) => d.toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long" });
+    const t = new Date(now); t.setDate(t.getDate() + 1);
+    const t2 = new Date(now); t2.setDate(t2.getDate() + 2);
+    return [
+      { key: fmt(t), label: "Tomorrow", sub: t.toLocaleDateString("en-US", { day: "numeric", month: "long" }) },
+      { key: fmt(t2), label: t2.toLocaleDateString("en-US", { weekday: "long" }), sub: t2.toLocaleDateString("en-US", { day: "numeric", month: "long" }) },
+    ];
+  }, []);
+
+  const [mode, setMode] = useState<"quick" | "pick">(initialDate && !quickDates.find((q) => q.key === initialDate) ? "pick" : "quick");
+  const [date, setDate] = useState<string>(initialDate || quickDates[0].key);
+  const [time, setTime] = useState<string>(initialTime);
+  const [calMonth, setCalMonth] = useState<Date>(new Date(now.getFullYear(), now.getMonth(), 1));
+
+  const timeSlots = ["10:00am - 2:00pm", "2:00pm - 6:00pm", "6:00pm - 9:00pm", "9:00am - 12:00pm", "12:00pm - 3:00pm"];
+
+  const monthLabel = calMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const firstDow = new Date(calMonth.getFullYear(), calMonth.getMonth(), 1).getDay();
+  const daysInMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 0).getDate();
+  const cells: (number | null)[] = [
+    ...Array.from({ length: firstDow }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ];
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const pickCalDay = (d: number) => {
+    const chosen = new Date(calMonth.getFullYear(), calMonth.getMonth(), d);
+    setDate(chosen.toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long" }));
+  };
+
+  const confirm = () => {
+    if (!time) return toast.error("Please select a delivery time");
+    onConfirm(date, time);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-lg">Another time</h3>
+          <button onClick={onClose} aria-label="Close"><X className="h-5 w-5" /></button>
+        </div>
+
+        <div className="mt-5">
+          <p className="text-sm mb-3">Select Delivery date</p>
+          <div className="grid grid-cols-3 gap-3">
+            {quickDates.map((q) => (
+              <button key={q.key} onClick={() => { setMode("quick"); setDate(q.key); }} className={`rounded-lg p-4 text-center text-sm transition ${mode === "quick" && date === q.key ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/70"}`}>
+                <p className="font-medium">{q.label}</p>
+                <p className="text-xs mt-1 opacity-90">{q.sub}</p>
+              </button>
+            ))}
+            <button onClick={() => setMode("pick")} className={`rounded-lg p-4 text-center text-sm transition flex flex-col items-center justify-center gap-1 ${mode === "pick" ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/70"}`}>
+              <CalendarPlus className="h-5 w-5" />
+              <span className="font-medium">Pick a date</span>
+            </button>
+          </div>
+        </div>
+
+        {mode === "pick" && (
+          <div className="mt-5">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <button onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1))} className="p-1.5 rounded bg-secondary hover:bg-secondary/70"><ChevronLeft className="h-4 w-4" /></button>
+              <span className="font-medium">{monthLabel}</span>
+              <button onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1))} className="p-1.5 rounded bg-secondary hover:bg-secondary/70"><ChevronRight className="h-4 w-4" /></button>
+            </div>
+            <div className="grid grid-cols-7 text-center text-xs text-muted-foreground mb-1">
+              {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => <div key={d} className="py-1">{d}</div>)}
+            </div>
+            <div className="grid grid-cols-7 text-center text-sm">
+              {cells.map((c, i) => {
+                if (c === null) return <div key={i} className="py-2" />;
+                const cellDate = new Date(calMonth.getFullYear(), calMonth.getMonth(), c);
+                const key = cellDate.toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long" });
+                const isPast = cellDate < new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const selected = key === date;
+                return (
+                  <button
+                    key={i}
+                    disabled={isPast}
+                    onClick={() => pickCalDay(c)}
+                    className={`py-2 m-0.5 rounded transition ${selected ? "bg-[oklch(0.72_0.08_160)] text-white" : isPast ? "text-muted-foreground/50 cursor-not-allowed" : "hover:bg-secondary"}`}
+                  >
+                    {c}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="mt-6">
+          <p className="text-sm mb-3">Select a Delivery time <span className="text-primary">*</span></p>
+          <div className="grid grid-cols-2 gap-3">
+            {timeSlots.map((slot) => (
+              <button key={slot} onClick={() => setTime(slot)} className={`flex items-center justify-between rounded-lg border px-4 py-3 text-sm transition ${time === slot ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
+                <span>{slot}</span>
+                <span className="text-xs text-muted-foreground">EGP 130</span>
+              </button>
+            ))}
+            <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3 text-sm opacity-60">
+              <span>Express Delivery</span>
+              <span className="text-xs text-primary">Not Available</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 flex items-center gap-3">
+          <button onClick={onClose} className="px-6 py-2.5 rounded-md border border-border text-sm hover:bg-secondary">Cancel</button>
+          <button onClick={confirm} className="px-6 py-2.5 rounded-md bg-primary text-primary-foreground text-sm hover:opacity-90">Confirm</button>
+        </div>
+      </div>
     </div>
   );
 }
