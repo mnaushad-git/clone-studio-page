@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Star } from "lucide-react";
 import { toast } from "sonner";
-import { useStore, selectProductReviews, selectAverageRating, reviews as reviewsApi } from "@/lib/store";
+import { useStore, selectAverageRating, reviews as reviewsApi } from "@/lib/store";
 
 export function ProductReviews({ productId }: { productId: string }) {
-  const list = useStore(selectProductReviews(productId));
+  const allReviews = useStore((s) => s.reviews);
+  const list = useMemo(
+    () => allReviews.filter((r) => r.productId === productId).sort((a, b) => b.createdAt - a.createdAt),
+    [allReviews, productId],
+  );
   const avg = useStore(selectAverageRating(productId));
   const user = useStore((s) => s.user);
 
