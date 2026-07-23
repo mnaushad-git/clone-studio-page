@@ -14,8 +14,8 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "Terrific Bites — Artisan Cupcakes, Donuts & Desserts" },
       { name: "description", content: "Handcrafted cupcakes, donuts and indulgent desserts. Order online for local pickup or event catering." },
-      { property: "og:title", content: "Terrific Bites — Artisan Cupcakes & Desserts" },
-      { property: "og:description", content: "Handcrafted cupcakes, donuts and indulgent desserts." },
+      { property: "og:title", content: "Terrific Bites — Artisan Cupcakes, Donuts & Desserts" },
+      { property: "og:description", content: "Handcrafted cupcakes, donuts and indulgent desserts. Order online for local pickup or event catering." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
