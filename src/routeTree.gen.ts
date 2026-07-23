@@ -26,6 +26,8 @@ import { Route as CakesRouteImport } from './routes/cakes'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RecipientsIndexRouteImport } from './routes/recipients.index'
+import { Route as MomentsIndexRouteImport } from './routes/moments.index'
 import { Route as RecipientsSlugRouteImport } from './routes/recipients.$slug'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as MomentsSlugRouteImport } from './routes/moments.$slug'
@@ -115,6 +117,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecipientsIndexRoute = RecipientsIndexRouteImport.update({
+  id: '/recipients/',
+  path: '/recipients/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MomentsIndexRoute = MomentsIndexRouteImport.update({
+  id: '/moments/',
+  path: '/moments/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RecipientsSlugRoute = RecipientsSlugRouteImport.update({
   id: '/recipients/$slug',
   path: '/recipients/$slug',
@@ -152,6 +164,8 @@ export interface FileRoutesByFullPath {
   '/moments/$slug': typeof MomentsSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/recipients/$slug': typeof RecipientsSlugRoute
+  '/moments/': typeof MomentsIndexRoute
+  '/recipients/': typeof RecipientsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -174,6 +188,8 @@ export interface FileRoutesByTo {
   '/moments/$slug': typeof MomentsSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/recipients/$slug': typeof RecipientsSlugRoute
+  '/moments': typeof MomentsIndexRoute
+  '/recipients': typeof RecipientsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -197,6 +213,8 @@ export interface FileRoutesById {
   '/moments/$slug': typeof MomentsSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/recipients/$slug': typeof RecipientsSlugRoute
+  '/moments/': typeof MomentsIndexRoute
+  '/recipients/': typeof RecipientsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -221,6 +239,8 @@ export interface FileRouteTypes {
     | '/moments/$slug'
     | '/product/$id'
     | '/recipients/$slug'
+    | '/moments/'
+    | '/recipients/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -243,6 +263,8 @@ export interface FileRouteTypes {
     | '/moments/$slug'
     | '/product/$id'
     | '/recipients/$slug'
+    | '/moments'
+    | '/recipients'
   id:
     | '__root__'
     | '/'
@@ -265,6 +287,8 @@ export interface FileRouteTypes {
     | '/moments/$slug'
     | '/product/$id'
     | '/recipients/$slug'
+    | '/moments/'
+    | '/recipients/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -288,6 +312,8 @@ export interface RootRouteChildren {
   MomentsSlugRoute: typeof MomentsSlugRoute
   ProductIdRoute: typeof ProductIdRoute
   RecipientsSlugRoute: typeof RecipientsSlugRoute
+  MomentsIndexRoute: typeof MomentsIndexRoute
+  RecipientsIndexRoute: typeof RecipientsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -411,6 +437,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recipients/': {
+      id: '/recipients/'
+      path: '/recipients'
+      fullPath: '/recipients/'
+      preLoaderRoute: typeof RecipientsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/moments/': {
+      id: '/moments/'
+      path: '/moments'
+      fullPath: '/moments/'
+      preLoaderRoute: typeof MomentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recipients/$slug': {
       id: '/recipients/$slug'
       path: '/recipients/$slug'
@@ -456,6 +496,8 @@ const rootRouteChildren: RootRouteChildren = {
   MomentsSlugRoute: MomentsSlugRoute,
   ProductIdRoute: ProductIdRoute,
   RecipientsSlugRoute: RecipientsSlugRoute,
+  MomentsIndexRoute: MomentsIndexRoute,
+  RecipientsIndexRoute: RecipientsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
