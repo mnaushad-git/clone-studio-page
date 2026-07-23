@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { CheckCircle2, Download, Home, MapPin, Truck, ShoppingBag } from "lucide-react";
 import jsPDF from "jspdf";
-import { useStore } from "@/lib/store";
+import { useStore, orders as orderStore } from "@/lib/store";
 import { SiteHeader } from "@/components/SiteHeader";
+import { OrderStatusTimeline } from "@/components/OrderStatusTimeline";
 
 export const Route = createFileRoute("/success")({
   component: SuccessPage,
