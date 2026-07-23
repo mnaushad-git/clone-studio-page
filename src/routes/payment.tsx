@@ -1,9 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { z } from "zod";
+import { toast } from "sonner";
 import {
   User, ShoppingBag, Check, MapPin, Minus, Plus, Ticket,
-  Bike, Truck, Facebook, Instagram, Twitter, Youtube, ChevronDown,
+  Bike, Truck, Facebook, Instagram, Twitter, Youtube, ChevronDown, Loader2, Lock,
 } from "lucide-react";
+
 
 import sprinkleCake from "@/assets/divine-1.jpg";
 import extra1 from "@/assets/prod-swiss.jpg";
