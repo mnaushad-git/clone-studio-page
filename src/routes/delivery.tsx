@@ -79,8 +79,8 @@ function DeliveryPage() {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <SiteHeader />
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8">
-        <div className="bg-white rounded-2xl shadow-sm px-8 py-5 flex items-center gap-4 mb-6">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="bg-white rounded-2xl shadow-sm px-3 sm:px-8 py-4 sm:py-5 flex items-center gap-2 sm:gap-4 mb-6">
           <Step n={1} label="Customize" done />
           <div className="flex-1 h-px bg-border" />
           <Step n={2} label="Delivery Details" active />
@@ -88,7 +88,7 @@ function DeliveryPage() {
           <Step n={3} label="Payment" />
         </div>
 
-        <div className="grid lg:grid-cols-[1fr_400px] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
           <section className="bg-white rounded-2xl shadow-sm p-6">
             <div className="flex items-start justify-between gap-4">
               <div className="flex gap-3">
