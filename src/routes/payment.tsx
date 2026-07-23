@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Check, MapPin, Truck, Bike, Loader2, Lock } from "lucide-react";
+import { Check, MapPin, Truck, Loader2, Lock } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import {
@@ -242,11 +242,6 @@ function Step({ n, label, active, done }: { n: number; label: string; active?: b
   );
 }
 
-// unused Bike prevents lint but keep — no, remove unused import
-// (Bike removed by not importing here)
-
 function Row({ label, val }: { label: string; val: string }) {
   return <div className="flex items-center justify-between"><span>{label}</span><span>{val}</span></div>;
 }
-// silence unused imports if any
-void Bike;
