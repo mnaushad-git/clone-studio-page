@@ -21,6 +21,8 @@ export type Address = {
   isGift?: boolean;
   identitySecret?: boolean;
   timeSlot?: "tomorrow" | "another";
+  deliveryDate?: string;
+  deliveryTime?: string;
 };
 
 export type OrderStatus = "Processing" | "Paid" | "Delivered";

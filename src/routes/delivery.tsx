@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Check, MapPin, Truck, Bike, Ticket, ChevronDown } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Check, MapPin, Truck, Bike, Ticket, ChevronDown, ChevronLeft, ChevronRight, X, CalendarPlus } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -40,6 +40,9 @@ function DeliveryPage() {
   const [extra, setExtra] = useState("");
   const [timeSlot, setTimeSlot] = useState<"tomorrow" | "another">("tomorrow");
   const [promoInput, setPromoInput] = useState(currentPromo?.code ?? "");
+  const [timeModalOpen, setTimeModalOpen] = useState(false);
+  const [pickedDate, setPickedDate] = useState<string>("");
+  const [pickedTime, setPickedTime] = useState<string>("");
 
   const applyPromo = () => {
     if (!promoInput.trim()) return;
@@ -51,16 +54,22 @@ function DeliveryPage() {
     if (!name.trim()) return toast.error("Recipient name is required");
     if (!phone.trim()) return toast.error("Recipient phone is required");
     if (!gift && (!area || !address.trim())) return toast.error("Please add a delivery address");
+    if (gift && timeSlot === "another" && (!pickedDate || !pickedTime)) return toast.error("Please pick a delivery date and time");
+
+    const deliveryDate = gift ? (timeSlot === "tomorrow" ? "Tomorrow" : pickedDate) : undefined;
+    const deliveryTime = gift ? (timeSlot === "tomorrow" ? "10:00am - 2:00pm" : pickedTime) : undefined;
 
     addressStore.add({
       name,
       phone: `+966 ${phone}`,
       area: gift ? "Gift" : area,
-      address: gift ? `Delivery: ${timeSlot}` : address,
+      address: gift ? `${deliveryDate} · ${deliveryTime}` : address,
       extra: extra || undefined,
       isGift: gift,
       identitySecret: secret,
       timeSlot: gift ? timeSlot : undefined,
+      deliveryDate,
+      deliveryTime,
     });
     toast.success("Delivery details saved");
     navigate({ to: "/payment" });
@@ -164,9 +173,9 @@ function DeliveryPage() {
                       <p className="font-semibold">Tomorrow</p>
                       <p className="text-xs text-muted-foreground mt-1">10:00am – 2:00pm</p>
                     </button>
-                    <button onClick={() => setTimeSlot("another")} className={`rounded-xl border p-5 text-center transition ${timeSlot === "another" ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
+                    <button onClick={() => { setTimeSlot("another"); setTimeModalOpen(true); }} className={`rounded-xl border p-5 text-center transition ${timeSlot === "another" ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
                       <p className="font-semibold">Another time</p>
-                      <p className="text-xs text-muted-foreground mt-1">Choose date & time</p>
+                      <p className="text-xs text-muted-foreground mt-1">{timeSlot === "another" && pickedDate && pickedTime ? `${pickedDate} · ${pickedTime}` : "Choose date & time"}</p>
                     </button>
                   </div>
                 </div>
@@ -245,7 +254,142 @@ function DeliveryPage() {
         </div>
       </main>
 
+      {timeModalOpen && (
+        <AnotherTimeModal
+          initialDate={pickedDate}
+          initialTime={pickedTime}
+          onClose={() => setTimeModalOpen(false)}
+          onConfirm={(d, t) => {
+            setPickedDate(d);
+            setPickedTime(t);
+            setTimeModalOpen(false);
+            toast.success("Delivery time selected");
+          }}
+        />
+      )}
+
       <SiteFooter />
+    </div>
+  );
+}
+
+type Quick = { key: string; label: string; sub: string };
+
+function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { initialDate: string; initialTime: string; onClose: () => void; onConfirm: (date: string, time: string) => void }) {
+  const now = new Date();
+  const quickDates = useMemo<Quick[]>(() => {
+    const fmt = (d: Date) => d.toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long" });
+    const t = new Date(now); t.setDate(t.getDate() + 1);
+    const t2 = new Date(now); t2.setDate(t2.getDate() + 2);
+    return [
+      { key: fmt(t), label: "Tomorrow", sub: t.toLocaleDateString("en-US", { day: "numeric", month: "long" }) },
+      { key: fmt(t2), label: t2.toLocaleDateString("en-US", { weekday: "long" }), sub: t2.toLocaleDateString("en-US", { day: "numeric", month: "long" }) },
+    ];
+  }, []);
+
+  const [mode, setMode] = useState<"quick" | "pick">(initialDate && !quickDates.find((q) => q.key === initialDate) ? "pick" : "quick");
+  const [date, setDate] = useState<string>(initialDate || quickDates[0].key);
+  const [time, setTime] = useState<string>(initialTime);
+  const [calMonth, setCalMonth] = useState<Date>(new Date(now.getFullYear(), now.getMonth(), 1));
+
+  const timeSlots = ["10:00am - 2:00pm", "2:00pm - 6:00pm", "6:00pm - 9:00pm", "9:00am - 12:00pm", "12:00pm - 3:00pm"];
+
+  const monthLabel = calMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const firstDow = new Date(calMonth.getFullYear(), calMonth.getMonth(), 1).getDay();
+  const daysInMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 0).getDate();
+  const cells: (number | null)[] = [
+    ...Array.from({ length: firstDow }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ];
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const pickCalDay = (d: number) => {
+    const chosen = new Date(calMonth.getFullYear(), calMonth.getMonth(), d);
+    setDate(chosen.toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long" }));
+  };
+
+  const confirm = () => {
+    if (!time) return toast.error("Please select a delivery time");
+    onConfirm(date, time);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-lg">Another time</h3>
+          <button onClick={onClose} aria-label="Close"><X className="h-5 w-5" /></button>
+        </div>
+
+        <div className="mt-5">
+          <p className="text-sm mb-3">Select Delivery date</p>
+          <div className="grid grid-cols-3 gap-3">
+            {quickDates.map((q) => (
+              <button key={q.key} onClick={() => { setMode("quick"); setDate(q.key); }} className={`rounded-lg p-4 text-center text-sm transition ${mode === "quick" && date === q.key ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/70"}`}>
+                <p className="font-medium">{q.label}</p>
+                <p className="text-xs mt-1 opacity-90">{q.sub}</p>
+              </button>
+            ))}
+            <button onClick={() => setMode("pick")} className={`rounded-lg p-4 text-center text-sm transition flex flex-col items-center justify-center gap-1 ${mode === "pick" ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/70"}`}>
+              <CalendarPlus className="h-5 w-5" />
+              <span className="font-medium">Pick a date</span>
+            </button>
+          </div>
+        </div>
+
+        {mode === "pick" && (
+          <div className="mt-5">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <button onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1))} className="p-1.5 rounded bg-secondary hover:bg-secondary/70"><ChevronLeft className="h-4 w-4" /></button>
+              <span className="font-medium">{monthLabel}</span>
+              <button onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1))} className="p-1.5 rounded bg-secondary hover:bg-secondary/70"><ChevronRight className="h-4 w-4" /></button>
+            </div>
+            <div className="grid grid-cols-7 text-center text-xs text-muted-foreground mb-1">
+              {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => <div key={d} className="py-1">{d}</div>)}
+            </div>
+            <div className="grid grid-cols-7 text-center text-sm">
+              {cells.map((c, i) => {
+                if (c === null) return <div key={i} className="py-2" />;
+                const cellDate = new Date(calMonth.getFullYear(), calMonth.getMonth(), c);
+                const key = cellDate.toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long" });
+                const isPast = cellDate < new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const selected = key === date;
+                return (
+                  <button
+                    key={i}
+                    disabled={isPast}
+                    onClick={() => pickCalDay(c)}
+                    className={`py-2 m-0.5 rounded transition ${selected ? "bg-[oklch(0.72_0.08_160)] text-white" : isPast ? "text-muted-foreground/50 cursor-not-allowed" : "hover:bg-secondary"}`}
+                  >
+                    {c}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="mt-6">
+          <p className="text-sm mb-3">Select a Delivery time <span className="text-primary">*</span></p>
+          <div className="grid grid-cols-2 gap-3">
+            {timeSlots.map((slot) => (
+              <button key={slot} onClick={() => setTime(slot)} className={`flex items-center justify-between rounded-lg border px-4 py-3 text-sm transition ${time === slot ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
+                <span>{slot}</span>
+                <span className="text-xs text-muted-foreground">EGP 130</span>
+              </button>
+            ))}
+            <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3 text-sm opacity-60">
+              <span>Express Delivery</span>
+              <span className="text-xs text-primary">Not Available</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 flex items-center gap-3">
+          <button onClick={onClose} className="px-6 py-2.5 rounded-md border border-border text-sm hover:bg-secondary">Cancel</button>
+          <button onClick={confirm} className="px-6 py-2.5 rounded-md bg-primary text-primary-foreground text-sm hover:opacity-90">Confirm</button>
+        </div>
+      </div>
     </div>
   );
 }
