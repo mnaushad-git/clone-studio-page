@@ -175,6 +175,59 @@ function PaymentPage() {
               })}
             </section>
 
+            {selected === "credit" && (
+              <section className="bg-white rounded-2xl shadow-sm p-6 space-y-4">
+                <h2 className="font-semibold">Card details</h2>
+                <div>
+                  <label className="text-xs text-muted-foreground">Name on card</label>
+                  <input
+                    value={card.name}
+                    onChange={(e) => setCard({ ...card, name: e.target.value })}
+                    maxLength={80}
+                    className={`mt-1 w-full border rounded-md px-3 py-2 text-sm outline-none focus:border-primary ${errors.name ? "border-destructive" : "border-border"}`}
+                    placeholder="Full name"
+                  />
+                  {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name}</p>}
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground">Card number</label>
+                  <input
+                    inputMode="numeric"
+                    value={card.number}
+                    onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })}
+                    className={`mt-1 w-full border rounded-md px-3 py-2 text-sm outline-none focus:border-primary ${errors.number ? "border-destructive" : "border-border"}`}
+                    placeholder="1234 5678 9012 3456"
+                  />
+                  {errors.number && <p className="mt-1 text-xs text-destructive">{errors.number}</p>}
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-muted-foreground">Expiry (MM/YY)</label>
+                    <input
+                      inputMode="numeric"
+                      value={card.expiry}
+                      onChange={(e) => setCard({ ...card, expiry: formatExpiry(e.target.value) })}
+                      className={`mt-1 w-full border rounded-md px-3 py-2 text-sm outline-none focus:border-primary ${errors.expiry ? "border-destructive" : "border-border"}`}
+                      placeholder="MM/YY"
+                    />
+                    {errors.expiry && <p className="mt-1 text-xs text-destructive">{errors.expiry}</p>}
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">CVC</label>
+                    <input
+                      inputMode="numeric"
+                      value={card.cvc}
+                      onChange={(e) => setCard({ ...card, cvc: e.target.value.replace(/\D/g, "").slice(0, 4) })}
+                      className={`mt-1 w-full border rounded-md px-3 py-2 text-sm outline-none focus:border-primary ${errors.cvc ? "border-destructive" : "border-border"}`}
+                      placeholder="123"
+                    />
+                    {errors.cvc && <p className="mt-1 text-xs text-destructive">{errors.cvc}</p>}
+                  </div>
+                </div>
+              </section>
+            )}
+
+
             {/* Extras */}
             <section className="bg-white rounded-2xl shadow-sm p-6">
               <div className="flex items-center justify-between mb-5">
