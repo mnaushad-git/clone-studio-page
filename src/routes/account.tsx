@@ -168,12 +168,36 @@ function AccountPage() {
                             <p className="font-semibold text-sm">#{o.id}</p>
                             <p className="text-xs text-muted-foreground">{new Date(o.createdAt).toLocaleString()}</p>
                           </div>
-                          <p className="font-semibold">${o.total.toFixed(2)}</p>
+                          <div className="text-right">
+                            <p className="font-semibold">${o.total.toFixed(2)}</p>
+                            <span
+                              className={`inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                                o.status === "Delivered"
+                                  ? "bg-primary/15 text-primary"
+                                  : o.status === "Paid"
+                                  ? "bg-secondary text-foreground"
+                                  : "bg-amber-100 text-amber-800"
+                              }`}
+                            >
+                              {o.status}
+                            </span>
+                          </div>
                         </div>
-                        <p className="mt-2 text-xs text-muted-foreground">
+                        <OrderStatusTimeline order={o} compact />
+                        <p className="mt-1 text-xs text-muted-foreground">
                           {o.items.map((i) => `${i.qty}× ${i.name}`).join(" · ")}
                         </p>
-                        <p className="mt-1 text-xs">Payment: {o.method}</p>
+                        <div className="mt-2 flex items-center justify-between">
+                          <p className="text-xs">Payment: {o.method}</p>
+                          {o.status !== "Delivered" && (
+                            <button
+                              onClick={() => orderStore.advance(o.id)}
+                              className="text-xs text-primary hover:underline"
+                            >
+                              Mark as {o.status === "Processing" ? "Paid" : "Delivered"}
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
