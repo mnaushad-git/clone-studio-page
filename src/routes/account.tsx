@@ -7,7 +7,8 @@ import {
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { useStore, auth, addresses as addressStore } from "@/lib/store";
+import { useStore, auth, addresses as addressStore, orders as orderStore } from "@/lib/store";
+import { OrderStatusTimeline } from "@/components/OrderStatusTimeline";
 
 export const Route = createFileRoute("/account")({
   component: AccountPage,
