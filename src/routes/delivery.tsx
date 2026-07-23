@@ -31,6 +31,7 @@ function DeliveryPage() {
   const [area, setArea] = useState("");
   const [address, setAddress] = useState("");
   const [extra, setExtra] = useState("");
+  const [timeSlot, setTimeSlot] = useState<"tomorrow" | "another">("tomorrow");
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -109,55 +110,93 @@ function DeliveryPage() {
                 <input type="checkbox" checked={secret} onChange={(e) => setSecret(e.target.checked)} className="h-4 w-4 accent-primary" />
               </label>
 
-              {/* Map */}
-              <div className="relative rounded-lg overflow-hidden border border-border h-56 bg-secondary">
-                <img
-                  src="https://maps.googleapis.com/maps/api/staticmap?center=Cambridge,UK&zoom=12&size=800x400&maptype=roadmap"
-                  alt="Map"
-                  className="w-full h-full object-cover opacity-90"
-                  onError={(e) => ((e.currentTarget.style.display = "none"))}
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <button className="bg-primary text-primary-foreground rounded-md px-6 py-3 text-sm shadow-lg">
-                    Change Location
-                  </button>
-                </div>
-                <div className="absolute top-2 left-2 bg-white rounded shadow text-[11px] flex">
-                  <span className="px-2 py-1 border-r border-border">Map</span>
-                  <span className="px-2 py-1">Satellite</span>
-                </div>
-              </div>
+              {!gift && (
+                <>
+                  {/* Map */}
+                  <div className="relative rounded-lg overflow-hidden border border-border h-56 bg-secondary">
+                    <img
+                      src="https://maps.googleapis.com/maps/api/staticmap?center=Cambridge,UK&zoom=12&size=800x400&maptype=roadmap"
+                      alt="Map"
+                      className="w-full h-full object-cover opacity-90"
+                      onError={(e) => ((e.currentTarget.style.display = "none"))}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <button className="bg-primary text-primary-foreground rounded-md px-6 py-3 text-sm shadow-lg">
+                        Change Location
+                      </button>
+                    </div>
+                    <div className="absolute top-2 left-2 bg-white rounded shadow text-[11px] flex">
+                      <span className="px-2 py-1 border-r border-border">Map</span>
+                      <span className="px-2 py-1">Satellite</span>
+                    </div>
+                  </div>
 
-              <Field label="Recipient Area" required>
-                <div className="relative">
-                  <select
-                    value={area}
-                    onChange={(e) => setArea(e.target.value)}
-                    className="w-full appearance-none border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary bg-white"
-                  >
-                    <option value="">Select area</option>
-                    <option>Riyadh</option>
-                    <option>Jeddah</option>
-                    <option>Dammam</option>
-                  </select>
-                  <ChevronDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                </div>
-              </Field>
+                  <Field label="Recipient Area" required>
+                    <div className="relative">
+                      <select
+                        value={area}
+                        onChange={(e) => setArea(e.target.value)}
+                        className="w-full appearance-none border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary bg-white"
+                      >
+                        <option value="">Select area</option>
+                        <option>Riyadh</option>
+                        <option>Jeddah</option>
+                        <option>Dammam</option>
+                      </select>
+                      <ChevronDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                    </div>
+                  </Field>
 
-              <Field label="Recipient Address" required>
-                <input value={address} onChange={(e) => setAddress(e.target.value)} className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary" />
-              </Field>
+                  <Field label="Recipient Address" required>
+                    <input value={address} onChange={(e) => setAddress(e.target.value)} className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary" />
+                  </Field>
 
-              <Field label="Extra Address" required>
-                <input
-                  value={extra}
-                  onChange={(e) => setExtra(e.target.value)}
-                  placeholder="Extra address details (opational)"
-                  className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary placeholder:text-muted-foreground"
-                />
-              </Field>
+                  <Field label="Extra Address" required>
+                    <input
+                      value={extra}
+                      onChange={(e) => setExtra(e.target.value)}
+                      placeholder="Extra address details (opational)"
+                      className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary placeholder:text-muted-foreground"
+                    />
+                  </Field>
+                </>
+              )}
             </div>
           </section>
+
+          {gift && (
+            <section className="bg-white rounded-2xl shadow-sm p-6">
+              <div className="flex items-center gap-2 mb-5">
+                <Bike className="h-5 w-5 text-primary" />
+                <h2 className="font-semibold">Delivery time</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => setTimeSlot("tomorrow")}
+                  className={`rounded-xl border p-5 text-center transition ${
+                    timeSlot === "tomorrow"
+                      ? "border-primary bg-[oklch(0.95_0.03_20)]"
+                      : "border-border hover:border-primary"
+                  }`}
+                >
+                  <p className="font-semibold">Delivery time</p>
+                  <p className="text-sm mt-2">Tomorrow</p>
+                  <p className="text-xs text-muted-foreground mt-1">10:00am - 2:00pm</p>
+                </button>
+                <button
+                  onClick={() => setTimeSlot("another")}
+                  className={`rounded-xl border p-5 text-center transition ${
+                    timeSlot === "another"
+                      ? "border-primary bg-[oklch(0.95_0.03_20)]"
+                      : "border-border hover:border-primary"
+                  }`}
+                >
+                  <p className="font-semibold">Another time</p>
+                  <p className="text-xs text-muted-foreground mt-2">Choose another<br />date and time</p>
+                </button>
+              </div>
+            </section>
+          )}
 
           {/* Right column */}
           <aside className="space-y-4">
