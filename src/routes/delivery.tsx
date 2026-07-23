@@ -173,9 +173,9 @@ function DeliveryPage() {
                       <p className="font-semibold">Tomorrow</p>
                       <p className="text-xs text-muted-foreground mt-1">10:00am – 2:00pm</p>
                     </button>
-                    <button onClick={() => setTimeSlot("another")} className={`rounded-xl border p-5 text-center transition ${timeSlot === "another" ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
+                    <button onClick={() => { setTimeSlot("another"); setTimeModalOpen(true); }} className={`rounded-xl border p-5 text-center transition ${timeSlot === "another" ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
                       <p className="font-semibold">Another time</p>
-                      <p className="text-xs text-muted-foreground mt-1">Choose date & time</p>
+                      <p className="text-xs text-muted-foreground mt-1">{timeSlot === "another" && pickedDate && pickedTime ? `${pickedDate} · ${pickedTime}` : "Choose date & time"}</p>
                     </button>
                   </div>
                 </div>
