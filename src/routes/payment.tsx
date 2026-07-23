@@ -55,10 +55,59 @@ function BrandBadge({ type }: { type: "apple" | "mc" | "paypal" | "visa" }) {
   return <span className={`${base} bg-white border border-border text-[#1a1f71]`}>VISA</span>;
 }
 
+const cardSchema = z.object({
+  name: z.string().trim().min(2, "Enter the name on card").max(80),
+  number: z.string().transform((v) => v.replace(/\s+/g, ""))
+    .pipe(z.string().regex(/^\d{13,19}$/, "Card number must be 13–19 digits")),
+  expiry: z.string().regex(/^(0[1-9]|1[0-2])\/\d{2}$/, "Use MM/YY"),
+  cvc: z.string().regex(/^\d{3,4}$/, "CVC must be 3–4 digits"),
+});
+
 function PaymentPage() {
+  const navigate = useNavigate();
   const [qty, setQty] = useState(1);
   const [promo, setPromo] = useState("");
   const [selected, setSelected] = useState("apple");
+  const [card, setCard] = useState({ name: "", number: "", expiry: "", cvc: "" });
+  const [errors, setErrors] = useState<Partial<Record<keyof typeof card, string>>>({});
+  const [loading, setLoading] = useState(false);
+
+  const handleConfirm = async () => {
+    setErrors({});
+    if (!selected) {
+      toast.error("Please choose a payment method");
+      return;
+    }
+    if (selected === "credit") {
+      const parsed = cardSchema.safeParse(card);
+      if (!parsed.success) {
+        const fieldErrors: Partial<Record<keyof typeof card, string>> = {};
+        for (const issue of parsed.error.issues) {
+          const key = issue.path[0] as keyof typeof card;
+          if (!fieldErrors[key]) fieldErrors[key] = issue.message;
+        }
+        setErrors(fieldErrors);
+        toast.error("Please fix the highlighted fields");
+        return;
+      }
+    }
+    setLoading(true);
+    try {
+      await new Promise((r) => setTimeout(r, 1500));
+      toast.success("Payment confirmed! Your order is on its way.");
+      setTimeout(() => navigate({ to: "/" }), 900);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCardNumber = (v: string) =>
+    v.replace(/\D/g, "").slice(0, 19).replace(/(.{4})/g, "$1 ").trim();
+  const formatExpiry = (v: string) => {
+    const d = v.replace(/\D/g, "").slice(0, 4);
+    return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
+  };
+
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
