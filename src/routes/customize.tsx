@@ -61,8 +61,8 @@ function CustomizePage() {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <SiteHeader />
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8">
-        <div className="bg-white rounded-2xl shadow-sm px-8 py-5 flex items-center gap-4 mb-6">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="bg-white rounded-2xl shadow-sm px-3 sm:px-8 py-4 sm:py-5 flex items-center gap-2 sm:gap-4 mb-6">
           <Step n={1} label="Customize" active done />
           <div className="flex-1 h-px bg-border" />
           <Step n={2} label="Delivery Details" />
