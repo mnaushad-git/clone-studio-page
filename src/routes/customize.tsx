@@ -124,18 +124,26 @@ function CustomizePage() {
                 <button onClick={() => setShowExtras(true)} className="text-sm text-primary hover:underline">View All</button>
               </div>
               <div className="grid grid-cols-3 gap-4">
-                {extras.map((e, i) => (
-                  <div key={i} className="text-center">
-                    <div className="aspect-square rounded-full overflow-hidden bg-secondary">
-                      <img src={e.img} alt={e.name} width={400} height={400} loading="lazy" className="w-full h-full object-cover" />
+                {extras.map((e, i) => {
+                  const isSel = selected.includes(i);
+                  return (
+                    <div key={i} className="text-center">
+                      <div className="aspect-square rounded-full overflow-hidden bg-secondary">
+                        <img src={e.img} alt={e.name} width={400} height={400} loading="lazy" className="w-full h-full object-cover" />
+                      </div>
+                      <p className="mt-3 text-sm font-medium">{e.name}</p>
+                      <p className="text-xs text-muted-foreground">{e.code}</p>
+                      <button
+                        onClick={() => toggle(i)}
+                        className={`mt-3 w-full border rounded-md py-2 text-sm transition ${
+                          isSel ? "bg-primary text-primary-foreground border-primary" : "border-border hover:border-primary hover:text-primary"
+                        }`}
+                      >
+                        {isSel ? "Added" : "Add"}
+                      </button>
                     </div>
-                    <p className="mt-3 text-sm font-medium">{e.name}</p>
-                    <p className="text-xs text-muted-foreground">{e.code}</p>
-                    <button className="mt-3 w-full border border-border rounded-md py-2 text-sm hover:border-primary hover:text-primary transition">
-                      Add
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           </div>
