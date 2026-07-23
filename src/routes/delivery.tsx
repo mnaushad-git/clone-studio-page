@@ -40,6 +40,9 @@ function DeliveryPage() {
   const [extra, setExtra] = useState("");
   const [timeSlot, setTimeSlot] = useState<"tomorrow" | "another">("tomorrow");
   const [promoInput, setPromoInput] = useState(currentPromo?.code ?? "");
+  const [timeModalOpen, setTimeModalOpen] = useState(false);
+  const [pickedDate, setPickedDate] = useState<string>("");
+  const [pickedTime, setPickedTime] = useState<string>("");
 
   const applyPromo = () => {
     if (!promoInput.trim()) return;
