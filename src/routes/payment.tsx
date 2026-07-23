@@ -1,9 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { z } from "zod";
+import { toast } from "sonner";
 import {
   User, ShoppingBag, Check, MapPin, Minus, Plus, Ticket,
-  Bike, Truck, Facebook, Instagram, Twitter, Youtube, ChevronDown,
+  Bike, Truck, Facebook, Instagram, Twitter, Youtube, ChevronDown, Loader2, Lock,
 } from "lucide-react";
+
 
 import sprinkleCake from "@/assets/divine-1.jpg";
 import extra1 from "@/assets/prod-swiss.jpg";
@@ -52,10 +55,59 @@ function BrandBadge({ type }: { type: "apple" | "mc" | "paypal" | "visa" }) {
   return <span className={`${base} bg-white border border-border text-[#1a1f71]`}>VISA</span>;
 }
 
+const cardSchema = z.object({
+  name: z.string().trim().min(2, "Enter the name on card").max(80),
+  number: z.string().transform((v) => v.replace(/\s+/g, ""))
+    .pipe(z.string().regex(/^\d{13,19}$/, "Card number must be 13–19 digits")),
+  expiry: z.string().regex(/^(0[1-9]|1[0-2])\/\d{2}$/, "Use MM/YY"),
+  cvc: z.string().regex(/^\d{3,4}$/, "CVC must be 3–4 digits"),
+});
+
 function PaymentPage() {
+  const navigate = useNavigate();
   const [qty, setQty] = useState(1);
   const [promo, setPromo] = useState("");
   const [selected, setSelected] = useState("apple");
+  const [card, setCard] = useState({ name: "", number: "", expiry: "", cvc: "" });
+  const [errors, setErrors] = useState<Partial<Record<keyof typeof card, string>>>({});
+  const [loading, setLoading] = useState(false);
+
+  const handleConfirm = async () => {
+    setErrors({});
+    if (!selected) {
+      toast.error("Please choose a payment method");
+      return;
+    }
+    if (selected === "credit") {
+      const parsed = cardSchema.safeParse(card);
+      if (!parsed.success) {
+        const fieldErrors: Partial<Record<keyof typeof card, string>> = {};
+        for (const issue of parsed.error.issues) {
+          const key = issue.path[0] as keyof typeof card;
+          if (!fieldErrors[key]) fieldErrors[key] = issue.message;
+        }
+        setErrors(fieldErrors);
+        toast.error("Please fix the highlighted fields");
+        return;
+      }
+    }
+    setLoading(true);
+    try {
+      await new Promise((r) => setTimeout(r, 1500));
+      toast.success("Payment confirmed! Your order is on its way.");
+      setTimeout(() => navigate({ to: "/" }), 900);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCardNumber = (v: string) =>
+    v.replace(/\D/g, "").slice(0, 19).replace(/(.{4})/g, "$1 ").trim();
+  const formatExpiry = (v: string) => {
+    const d = v.replace(/\D/g, "").slice(0, 4);
+    return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
+  };
+
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -122,6 +174,59 @@ function PaymentPage() {
                 );
               })}
             </section>
+
+            {selected === "credit" && (
+              <section className="bg-white rounded-2xl shadow-sm p-6 space-y-4">
+                <h2 className="font-semibold">Card details</h2>
+                <div>
+                  <label className="text-xs text-muted-foreground">Name on card</label>
+                  <input
+                    value={card.name}
+                    onChange={(e) => setCard({ ...card, name: e.target.value })}
+                    maxLength={80}
+                    className={`mt-1 w-full border rounded-md px-3 py-2 text-sm outline-none focus:border-primary ${errors.name ? "border-destructive" : "border-border"}`}
+                    placeholder="Full name"
+                  />
+                  {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name}</p>}
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground">Card number</label>
+                  <input
+                    inputMode="numeric"
+                    value={card.number}
+                    onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })}
+                    className={`mt-1 w-full border rounded-md px-3 py-2 text-sm outline-none focus:border-primary ${errors.number ? "border-destructive" : "border-border"}`}
+                    placeholder="1234 5678 9012 3456"
+                  />
+                  {errors.number && <p className="mt-1 text-xs text-destructive">{errors.number}</p>}
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs text-muted-foreground">Expiry (MM/YY)</label>
+                    <input
+                      inputMode="numeric"
+                      value={card.expiry}
+                      onChange={(e) => setCard({ ...card, expiry: formatExpiry(e.target.value) })}
+                      className={`mt-1 w-full border rounded-md px-3 py-2 text-sm outline-none focus:border-primary ${errors.expiry ? "border-destructive" : "border-border"}`}
+                      placeholder="MM/YY"
+                    />
+                    {errors.expiry && <p className="mt-1 text-xs text-destructive">{errors.expiry}</p>}
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">CVC</label>
+                    <input
+                      inputMode="numeric"
+                      value={card.cvc}
+                      onChange={(e) => setCard({ ...card, cvc: e.target.value.replace(/\D/g, "").slice(0, 4) })}
+                      className={`mt-1 w-full border rounded-md px-3 py-2 text-sm outline-none focus:border-primary ${errors.cvc ? "border-destructive" : "border-border"}`}
+                      placeholder="123"
+                    />
+                    {errors.cvc && <p className="mt-1 text-xs text-destructive">{errors.cvc}</p>}
+                  </div>
+                </div>
+              </section>
+            )}
+
 
             {/* Extras */}
             <section className="bg-white rounded-2xl shadow-sm p-6">
@@ -224,9 +329,19 @@ function PaymentPage() {
               </div>
             </div>
 
-            <button className="w-full bg-primary text-primary-foreground rounded-md py-4 font-semibold hover:opacity-90 transition">
-              Continue to Payment
+            <button
+              type="button"
+              onClick={handleConfirm}
+              disabled={loading}
+              className="w-full bg-primary text-primary-foreground rounded-md py-4 font-semibold hover:opacity-90 transition inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Processing…</>
+              ) : (
+                <><Lock className="h-4 w-4" /> Confirm payment · $400.99</>
+              )}
             </button>
+
           </aside>
         </div>
       </main>
