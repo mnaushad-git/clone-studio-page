@@ -19,12 +19,24 @@ const FREE_DELIVERY_THRESHOLD = 200;
 export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const items = useStore((s) => s.cart);
   const subtotal = useStore(selectSubtotal);
+  const discount = useStore(selectDiscount);
   const tax = useStore(selectTax);
   const total = useStore(selectTotal);
   const delivery = useStore(selectDeliveryFee);
   const count = useStore(selectCartCount);
+  const activePromo = useStore((s) => s.promo);
+  const [code, setCode] = useState("");
+  const [err, setErr] = useState<string | null>(null);
 
   if (!open) return null;
+
+  function applyPromo() {
+    setErr(null);
+    if (!code.trim()) return;
+    const ok = promo.apply(code);
+    if (!ok) setErr("Invalid promo code");
+    else setCode("");
+  }
 
   const remaining = Math.max(0, FREE_DELIVERY_THRESHOLD - subtotal);
   const progress = Math.min(100, (subtotal / FREE_DELIVERY_THRESHOLD) * 100);
