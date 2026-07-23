@@ -23,6 +23,9 @@ export type Address = {
   timeSlot?: "tomorrow" | "another";
 };
 
+export type OrderStatus = "Processing" | "Paid" | "Delivered";
+export const ORDER_STATUSES: OrderStatus[] = ["Processing", "Paid", "Delivered"];
+
 export type Order = {
   id: string;
   items: { productId: string; name: string; qty: number; unitPrice: number; size?: string; flavor?: string; inscription?: string }[];
@@ -34,6 +37,8 @@ export type Order = {
   address: Address | null;
   method: string;
   createdAt: number;
+  status: OrderStatus;
+  statusHistory: { status: OrderStatus; at: number }[];
 };
 
 export type User = {
@@ -69,7 +74,13 @@ function load(): State {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return initial;
-    return { ...initial, ...JSON.parse(raw) };
+    const parsed = { ...initial, ...JSON.parse(raw) } as State;
+    parsed.orders = (parsed.orders ?? []).map((o) => ({
+      ...o,
+      status: o.status ?? "Processing",
+      statusHistory: o.statusHistory ?? [{ status: o.status ?? "Processing", at: o.createdAt }],
+    }));
+    return parsed;
   } catch {
     return initial;
   }
@@ -257,6 +268,7 @@ export const orders = {
     const tax = selectTax(state);
     const deliveryFee = selectDeliveryFee(state);
     const total = selectTotal(state);
+    const now = Date.now();
     const order: Order = {
       id: "TB-" + Math.random().toString(36).slice(2, 8).toUpperCase(),
       items,
@@ -267,7 +279,9 @@ export const orders = {
       total,
       address: input.address,
       method: input.method,
-      createdAt: Date.now(),
+      createdAt: now,
+      status: "Processing",
+      statusHistory: [{ status: "Processing", at: now }],
     };
     state = {
       ...state,
@@ -278,6 +292,30 @@ export const orders = {
     };
     emit();
     return order;
+  },
+  setStatus(id: string, status: OrderStatus) {
+    state = {
+      ...state,
+      orders: state.orders.map((o) =>
+        o.id === id
+          ? {
+              ...o,
+              status,
+              statusHistory: o.statusHistory.some((h) => h.status === status)
+                ? o.statusHistory
+                : [...o.statusHistory, { status, at: Date.now() }],
+            }
+          : o,
+      ),
+    };
+    emit();
+  },
+  advance(id: string) {
+    const o = state.orders.find((x) => x.id === id);
+    if (!o) return;
+    const idx = ORDER_STATUSES.indexOf(o.status);
+    const next = ORDER_STATUSES[idx + 1];
+    if (next) this.setStatus(id, next);
   },
 };
 

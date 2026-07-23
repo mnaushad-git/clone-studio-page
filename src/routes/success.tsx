@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { CheckCircle2, Download, Home, MapPin, Truck, ShoppingBag } from "lucide-react";
 import jsPDF from "jspdf";
-import { useStore } from "@/lib/store";
+import { useStore, orders as orderStore } from "@/lib/store";
 import { SiteHeader } from "@/components/SiteHeader";
+import { OrderStatusTimeline } from "@/components/OrderStatusTimeline";
 
 export const Route = createFileRoute("/success")({
   component: SuccessPage,
@@ -22,6 +24,14 @@ export const Route = createFileRoute("/success")({
 function SuccessPage() {
   const lastOrderId = useStore((s) => s.lastOrderId);
   const order = useStore((s) => s.orders.find((o) => o.id === s.lastOrderId) ?? null);
+
+  useEffect(() => {
+    if (order && order.status === "Processing") {
+      const t = setTimeout(() => orderStore.setStatus(order.id, "Paid"), 600);
+      return () => clearTimeout(t);
+    }
+  }, [order?.id, order?.status]);
+
 
   const downloadInvoice = () => {
     if (!order) return;
@@ -130,6 +140,21 @@ function SuccessPage() {
           <div className="mt-4 inline-flex items-center gap-2 bg-secondary rounded-full px-4 py-1.5 text-sm">
             Order # <span className="font-semibold">{order.id}</span>
           </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm p-6 mt-6">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-semibold">Order Status</h2>
+            {order.status !== "Delivered" && (
+              <button
+                onClick={() => orderStore.advance(order.id)}
+                className="text-xs text-primary hover:underline"
+              >
+                Mark as {order.status === "Processing" ? "Paid" : "Delivered"}
+              </button>
+            )}
+          </div>
+          <OrderStatusTimeline order={order} />
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm p-6 mt-6">
