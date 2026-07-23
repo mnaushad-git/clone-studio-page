@@ -1,9 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { X, Minus, Plus, ShoppingCart, MapPin, Truck } from "lucide-react";
+import { useState } from "react";
+import { X, Minus, Plus, ShoppingCart, MapPin, Truck, Tag } from "lucide-react";
 import {
   useStore,
   cart,
+  promo,
   selectSubtotal,
+  selectDiscount,
   selectTax,
   selectTotal,
   selectDeliveryFee,
@@ -16,12 +19,24 @@ const FREE_DELIVERY_THRESHOLD = 200;
 export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const items = useStore((s) => s.cart);
   const subtotal = useStore(selectSubtotal);
+  const discount = useStore(selectDiscount);
   const tax = useStore(selectTax);
   const total = useStore(selectTotal);
   const delivery = useStore(selectDeliveryFee);
   const count = useStore(selectCartCount);
+  const activePromo = useStore((s) => s.promo);
+  const [code, setCode] = useState("");
+  const [err, setErr] = useState<string | null>(null);
 
   if (!open) return null;
+
+  function applyPromo() {
+    setErr(null);
+    if (!code.trim()) return;
+    const ok = promo.apply(code);
+    if (!ok) setErr("Invalid promo code");
+    else setCode("");
+  }
 
   const remaining = Math.max(0, FREE_DELIVERY_THRESHOLD - subtotal);
   const progress = Math.min(100, (subtotal / FREE_DELIVERY_THRESHOLD) * 100);
@@ -157,6 +172,14 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                   <span>Amount</span>
                   <span>${subtotal.toFixed(2)}</span>
                 </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-primary">
+                    <span className="flex items-center gap-1.5">
+                      <Tag className="h-4 w-4" /> Discount ({activePromo?.code} −{activePromo?.percent}%)
+                    </span>
+                    <span>−${discount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span>Tax</span>
                   <span>${tax.toFixed(2)}</span>
@@ -166,6 +189,47 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                 <span className="font-semibold">Order Total</span>
                 <span className="font-semibold text-lg">${total.toFixed(2)}</span>
               </div>
+            </div>
+
+            {/* Promo code */}
+            <div className="border border-border rounded-lg p-4 space-y-2">
+              <label className="text-sm font-semibold text-primary flex items-center gap-1.5">
+                <Tag className="h-4 w-4" /> Promo code
+              </label>
+              {activePromo ? (
+                <div className="flex items-center justify-between text-sm">
+                  <span>
+                    <span className="font-semibold">{activePromo.code}</span>{" "}
+                    <span className="text-muted-foreground">applied (−{activePromo.percent}%)</span>
+                  </span>
+                  <button
+                    onClick={() => { promo.clear(); setErr(null); }}
+                    className="text-xs text-primary underline hover:no-underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex gap-2">
+                    <input
+                      value={code}
+                      onChange={(e) => { setCode(e.target.value); setErr(null); }}
+                      onKeyDown={(e) => { if (e.key === "Enter") applyPromo(); }}
+                      placeholder="Enter code (e.g. WELCOME10)"
+                      maxLength={20}
+                      className="flex-1 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                    <button
+                      onClick={applyPromo}
+                      className="bg-primary text-primary-foreground rounded-md px-4 text-sm font-semibold hover:opacity-90 transition"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                  {err && <p className="text-xs text-destructive">{err}</p>}
+                </>
+              )}
             </div>
 
             {/* Actions */}
