@@ -95,7 +95,7 @@ function PaymentPage() {
     try {
       await new Promise((r) => setTimeout(r, 1500));
       toast.success("Payment confirmed! Your order is on its way.");
-      setTimeout(() => navigate({ to: "/" }), 900);
+      setTimeout(() => navigate({ to: "/success" }), 700);
     } finally {
       setLoading(false);
     }
