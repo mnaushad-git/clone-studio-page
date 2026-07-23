@@ -1,11 +1,20 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { ChevronRight, Minus, Plus, Cake, ChevronDown } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronRight, Minus, Plus, Cake, ChevronDown, Heart, Star } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { ProductCard } from "@/components/ProductCard";
+import { ProductReviews } from "@/components/ProductReviews";
 import { getProduct, products } from "@/lib/products";
-import { cart } from "@/lib/store";
+import {
+  cart,
+  wishlist,
+  recentlyViewed,
+  useStore,
+  selectIsWishlisted,
+  selectAverageRating,
+} from "@/lib/store";
 
 export const Route = createFileRoute("/product/$id")({
   component: ProductPage,
@@ -41,6 +50,19 @@ function ProductPage() {
   const [tab, setTab] = useState(0);
   const [inscription, setInscription] = useState("");
 
+  const wished = useStore(selectIsWishlisted(product.id));
+  const avg = useStore(selectAverageRating(product.id));
+  const recentIds = useStore((s) => s.recentlyViewed);
+
+  useEffect(() => {
+    recentlyViewed.track(product.id);
+    setActive(0);
+    setSizeIdx(0);
+    setFlavorIdx(0);
+    setQty(1);
+    setInscription("");
+  }, [product.id]);
+
   const selectedSize = product.sizes?.[sizeIdx];
   const selectedFlavor = product.flavors?.[flavorIdx];
   const unitPrice = product.price + (selectedSize?.delta ?? 0);
@@ -62,7 +84,17 @@ function ProductPage() {
     setTimeout(() => navigate({ to: "/customize" }), 200);
   };
 
+  const toggleWish = () => {
+    const added = wishlist.toggle(product.id);
+    toast.success(added ? "Added to wishlist" : "Removed from wishlist");
+  };
+
   const related = products.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
+  const recent = recentIds
+    .filter((id) => id !== product.id)
+    .map((id) => getProduct(id))
+    .filter((p): p is NonNullable<ReturnType<typeof getProduct>> => !!p)
+    .slice(0, 4);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -72,7 +104,7 @@ function ProductPage() {
         <nav className="flex items-center gap-2 text-xs text-muted-foreground">
           <Link to="/" className="hover:text-primary">Home</Link>
           <ChevronRight className="h-3 w-3" />
-          <Link to="/chocolates" className="hover:text-primary capitalize">{product.category}</Link>
+          <Link to="/shop" className="hover:text-primary capitalize">{product.category}</Link>
           <ChevronRight className="h-3 w-3" />
           <span className="text-primary">{product.name}</span>
         </nav>
@@ -80,8 +112,15 @@ function ProductPage() {
 
       <section className="max-w-7xl mx-auto px-6 pt-6 pb-16 grid md:grid-cols-2 gap-12">
         <div>
-          <div className="bg-secondary rounded-md overflow-hidden aspect-square flex items-center justify-center">
+          <div className="bg-secondary rounded-md overflow-hidden aspect-square flex items-center justify-center relative">
             <img src={thumbs[active]} alt={product.name} className="w-full h-full object-cover" />
+            <button
+              onClick={toggleWish}
+              aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
+              className="absolute top-4 end-4 h-10 w-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow hover:scale-110 transition"
+            >
+              <Heart className={`h-5 w-5 ${wished ? "text-red-500 fill-red-500" : "text-foreground"}`} />
+            </button>
           </div>
           {thumbs.length > 1 && (
             <div className="mt-4 grid grid-cols-4 gap-3">
@@ -110,6 +149,16 @@ function ProductPage() {
           </div>
 
           <h1 className="mt-6 font-display text-3xl text-primary">{product.name}</h1>
+          {avg > 0 && (
+            <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-0.5">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <Star key={n} className={`h-4 w-4 ${n <= Math.round(avg) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/40"}`} />
+                ))}
+              </div>
+              <span className="font-semibold text-foreground">{avg.toFixed(1)}</span>
+            </div>
+          )}
           {product.description && <p className="mt-2 text-sm text-muted-foreground">{product.description}</p>}
 
           {product.sizes && (
@@ -141,13 +190,20 @@ function ProductPage() {
             </div>
           )}
 
-          <div className="mt-6 grid grid-cols-[auto_1fr] gap-3">
+          <div className="mt-6 grid grid-cols-[auto_1fr_auto] gap-3">
             <div className="flex items-center border border-border rounded-md">
               <button onClick={() => setQty(Math.max(1, qty - 1))} className="p-3"><Minus className="h-4 w-4" /></button>
               <span className="w-10 text-center">{qty}</span>
               <button onClick={() => setQty(qty + 1)} className="p-3"><Plus className="h-4 w-4" /></button>
             </div>
             <button onClick={addToCart} className="bg-foreground text-background rounded-md font-semibold hover:opacity-90">Add To Cart</button>
+            <button
+              onClick={toggleWish}
+              aria-label="Save"
+              className="h-full border border-border rounded-md px-4 hover:border-primary transition inline-flex items-center justify-center"
+            >
+              <Heart className={`h-4 w-4 ${wished ? "text-red-500 fill-red-500" : "text-foreground"}`} />
+            </button>
           </div>
           <button onClick={buyNow} className="mt-3 w-full bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90">Buy Now</button>
 
@@ -194,21 +250,26 @@ function ProductPage() {
         </div>
       </section>
 
+      <ProductReviews productId={product.id} />
+
       {related.length > 0 && (
         <section className="max-w-7xl mx-auto px-6 pb-16">
-          <div className="bg-secondary rounded-lg p-8">
-            <h2 className="font-display text-2xl text-primary mb-6">You May Also Like</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-              {related.map((r) => (
-                <Link key={r.id} to="/product/$id" params={{ id: r.id }} className="group">
-                  <div className="aspect-square overflow-hidden rounded-md">
-                    <img src={r.image} alt={r.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-                  </div>
-                  <h3 className="mt-3 font-display text-primary text-sm">{r.name}</h3>
-                  <div className="text-xs text-muted-foreground">${r.price.toFixed(2)}</div>
-                </Link>
-              ))}
-            </div>
+          <h2 className="font-display text-2xl text-primary mb-6">You May Also Like</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {related.map((r) => (
+              <ProductCard key={r.id} product={r} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {recent.length > 0 && (
+        <section className="max-w-7xl mx-auto px-6 pb-16">
+          <h2 className="font-display text-2xl text-primary mb-6">Recently Viewed</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {recent.map((r) => (
+              <ProductCard key={r.id} product={r} />
+            ))}
           </div>
         </section>
       )}
