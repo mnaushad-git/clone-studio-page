@@ -1,40 +1,77 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronDown, ShoppingBag, User } from "lucide-react";
+import { ChevronDown, Menu, ShoppingBag, User } from "lucide-react";
 import { useState } from "react";
 import { useStore, selectCartCount } from "@/lib/store";
 import { CartDrawer } from "./CartDrawer";
+import { MegaMenu } from "./MegaMenu";
+import { useLang, setLang, useT } from "@/lib/i18n";
 
 export function SiteHeader({ variant = "cream" }: { variant?: "cream" | "white" }) {
   const count = useStore(selectCartCount);
   const user = useStore((s) => s.user);
   const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+  const lang = useLang();
+  const t = useT();
   const bg = variant === "white" ? "bg-white" : "bg-background";
 
   return (
     <>
       <div className="bg-white text-center text-[11px] tracking-[0.2em] py-2 text-muted-foreground uppercase">
-        Order Desserts for Local Pickup
+        {t("orderPickup")}
       </div>
       <div className="h-8 zigzag-top" style={{ ["--c" as string]: "white" }} />
 
       <header className={bg}>
         <div className="max-w-7xl mx-auto px-6 py-4 grid grid-cols-3 items-center">
-          <div className="flex items-center gap-2 text-sm justify-self-start">
-            <span className="text-lg">🇺🇸</span>
-            <span>English</span>
-            <ChevronDown className="h-3 w-3" />
+          <div className="flex items-center gap-4 text-sm justify-self-start">
+            <button
+              onClick={() => setMenuOpen(true)}
+              aria-label={t("menu")}
+              className="h-9 w-9 rounded-full flex items-center justify-center hover:bg-secondary transition"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <div className="relative">
+              <button
+                onClick={() => setLangOpen((v) => !v)}
+                onBlur={() => setTimeout(() => setLangOpen(false), 150)}
+                className="flex items-center gap-2 hover:text-primary transition"
+              >
+                <span className="text-lg">{lang === "ar" ? "🇸🇦" : "🇺🇸"}</span>
+                <span>{lang === "ar" ? t("arabic") : t("english")}</span>
+                <ChevronDown className="h-3 w-3" />
+              </button>
+              {langOpen && (
+                <div className="absolute top-full mt-2 start-0 bg-white border border-border rounded-md shadow-md py-1 min-w-32 z-30">
+                  <button
+                    className={`block w-full text-start px-3 py-1.5 text-sm hover:bg-secondary ${lang === "en" ? "font-semibold" : ""}`}
+                    onMouseDown={() => { setLang("en"); setLangOpen(false); }}
+                  >
+                    🇺🇸 English
+                  </button>
+                  <button
+                    className={`block w-full text-start px-3 py-1.5 text-sm hover:bg-secondary ${lang === "ar" ? "font-semibold" : ""}`}
+                    onMouseDown={() => { setLang("ar"); setLangOpen(false); }}
+                  >
+                    🇸🇦 العربية
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           <Link to="/" className="font-script text-3xl text-primary leading-none justify-self-center text-center">
-            Terrific<br /><span className="ml-6">Bites</span>
+            Terrific<br /><span className="ms-6">Bites</span>
           </Link>
           <div className="flex items-center gap-6 text-sm justify-self-end">
             <Link to={user ? "/account" : "/login"} className="flex items-center gap-2 hover:text-primary transition">
-              <User className="h-4 w-4" /> {user?.name ? user.name.split(" ")[0] : "My Account"}
+              <User className="h-4 w-4" /> {user?.name ? user.name.split(" ")[0] : t("myAccount")}
             </Link>
             <button onClick={() => setOpen(true)} className="flex items-center gap-2 hover:text-primary transition relative">
-              <ShoppingBag className="h-4 w-4" /> Cart
+              <ShoppingBag className="h-4 w-4" /> {t("cart")}
               {count > 0 && (
-                <span className="absolute -top-2 -right-3 h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center">
+                <span className="absolute -top-2 -end-3 h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center">
                   {count}
                 </span>
               )}
@@ -44,6 +81,7 @@ export function SiteHeader({ variant = "cream" }: { variant?: "cream" | "white" 
       </header>
 
       <CartDrawer open={open} onClose={() => setOpen(false)} />
+      <MegaMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
     </>
   );
 }
