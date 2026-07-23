@@ -54,16 +54,22 @@ function DeliveryPage() {
     if (!name.trim()) return toast.error("Recipient name is required");
     if (!phone.trim()) return toast.error("Recipient phone is required");
     if (!gift && (!area || !address.trim())) return toast.error("Please add a delivery address");
+    if (gift && timeSlot === "another" && (!pickedDate || !pickedTime)) return toast.error("Please pick a delivery date and time");
+
+    const deliveryDate = gift ? (timeSlot === "tomorrow" ? "Tomorrow" : pickedDate) : undefined;
+    const deliveryTime = gift ? (timeSlot === "tomorrow" ? "10:00am - 2:00pm" : pickedTime) : undefined;
 
     addressStore.add({
       name,
       phone: `+966 ${phone}`,
       area: gift ? "Gift" : area,
-      address: gift ? `Delivery: ${timeSlot}` : address,
+      address: gift ? `${deliveryDate} · ${deliveryTime}` : address,
       extra: extra || undefined,
       isGift: gift,
       identitySecret: secret,
       timeSlot: gift ? timeSlot : undefined,
+      deliveryDate,
+      deliveryTime,
     });
     toast.success("Delivery details saved");
     navigate({ to: "/payment" });
