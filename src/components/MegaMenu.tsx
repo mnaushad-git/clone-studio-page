@@ -12,15 +12,17 @@ export function MegaMenu({ open, onClose }: { open: boolean; onClose: () => void
   const t = useT();
 
   const tiles = [
-    { label: t("moments"), img: moments, to: "/chocolates" as const },
-    { label: t("recipients"), img: recipients, to: "/chocolates" as const },
+    { label: t("moments"), img: moments, to: "/moments" as const },
+    { label: t("recipients"), img: recipients, to: "/recipients" as const },
   ];
 
   const rows = [
-    { label: t("cakes"), img: cakes, to: "/chocolates" as const },
+    { label: t("cakes"), img: cakes, to: "/cakes" as const },
     { label: t("chocolates"), img: chocolates, to: "/chocolates" as const },
-    { label: t("donuts"), img: donuts, to: "/chocolates" as const },
-    { label: t("gifts"), img: gifts, to: "/chocolates" as const },
+    { label: t("donuts"), img: donuts, to: "/donuts" as const },
+    { label: t("gifts"), img: gifts, to: "/gifts" as const },
+    { label: "Cupcakes", img: moments, to: "/cupcakes" as const },
+    { label: "Extras", img: gifts, to: "/extras" as const },
   ];
 
   return (

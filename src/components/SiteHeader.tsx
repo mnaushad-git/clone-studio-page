@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronDown, Menu, ShoppingBag, User } from "lucide-react";
+import { ChevronDown, Heart, Menu, Search, ShoppingBag, User } from "lucide-react";
 import { useState } from "react";
 import { useStore, selectCartCount } from "@/lib/store";
 import { CartDrawer } from "./CartDrawer";
@@ -8,6 +8,7 @@ import { useLang, setLang, useT } from "@/lib/i18n";
 
 export function SiteHeader({ variant = "cream" }: { variant?: "cream" | "white" }) {
   const count = useStore(selectCartCount);
+  const wishCount = useStore((s) => s.wishlist.length);
   const user = useStore((s) => s.user);
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -64,12 +65,23 @@ export function SiteHeader({ variant = "cream" }: { variant?: "cream" | "white" 
           <Link to="/" className="font-script text-3xl text-primary leading-none justify-self-center text-center">
             Terrific<br /><span className="ms-6">Bites</span>
           </Link>
-          <div className="flex items-center gap-6 text-sm justify-self-end">
+          <div className="flex items-center gap-5 text-sm justify-self-end">
+            <Link to="/shop" aria-label="Search" className="hover:text-primary transition">
+              <Search className="h-4 w-4" />
+            </Link>
+            <Link to="/wishlist" aria-label="Wishlist" className="hover:text-primary transition relative">
+              <Heart className="h-4 w-4" />
+              {wishCount > 0 && (
+                <span className="absolute -top-2 -end-2 h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center">
+                  {wishCount}
+                </span>
+              )}
+            </Link>
             <Link to={user ? "/account" : "/login"} className="flex items-center gap-2 hover:text-primary transition">
-              <User className="h-4 w-4" /> {user?.name ? user.name.split(" ")[0] : t("myAccount")}
+              <User className="h-4 w-4" /> <span className="hidden sm:inline">{user?.name ? user.name.split(" ")[0] : t("myAccount")}</span>
             </Link>
             <button onClick={() => setOpen(true)} className="flex items-center gap-2 hover:text-primary transition relative">
-              <ShoppingBag className="h-4 w-4" /> {t("cart")}
+              <ShoppingBag className="h-4 w-4" /> <span className="hidden sm:inline">{t("cart")}</span>
               {count > 0 && (
                 <span className="absolute -top-2 -end-3 h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold flex items-center justify-center">
                   {count}

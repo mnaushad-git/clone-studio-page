@@ -9,18 +9,34 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ShopRouteImport } from './routes/shop'
 import { Route as PaymentRouteImport } from './routes/payment'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as GiftsRouteImport } from './routes/gifts'
+import { Route as ExtrasRouteImport } from './routes/extras'
+import { Route as DonutsRouteImport } from './routes/donuts'
 import { Route as DeliveryRouteImport } from './routes/delivery'
 import { Route as CustomizeRouteImport } from './routes/customize'
+import { Route as CupcakesRouteImport } from './routes/cupcakes'
 import { Route as ChocolatesRouteImport } from './routes/chocolates'
+import { Route as CakesRouteImport } from './routes/cakes'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RecipientsIndexRouteImport } from './routes/recipients.index'
+import { Route as MomentsIndexRouteImport } from './routes/moments.index'
+import { Route as RecipientsSlugRouteImport } from './routes/recipients.$slug'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as MomentsSlugRouteImport } from './routes/moments.$slug'
 
+const WishlistRoute = WishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SuccessRoute = SuccessRouteImport.update({
   id: '/success',
   path: '/success',
@@ -29,6 +45,11 @@ const SuccessRoute = SuccessRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PaymentRoute = PaymentRouteImport.update({
@@ -41,6 +62,21 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GiftsRoute = GiftsRouteImport.update({
+  id: '/gifts',
+  path: '/gifts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExtrasRoute = ExtrasRouteImport.update({
+  id: '/extras',
+  path: '/extras',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DonutsRoute = DonutsRouteImport.update({
+  id: '/donuts',
+  path: '/donuts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DeliveryRoute = DeliveryRouteImport.update({
   id: '/delivery',
   path: '/delivery',
@@ -51,9 +87,19 @@ const CustomizeRoute = CustomizeRouteImport.update({
   path: '/customize',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CupcakesRoute = CupcakesRouteImport.update({
+  id: '/cupcakes',
+  path: '/cupcakes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChocolatesRoute = ChocolatesRouteImport.update({
   id: '/chocolates',
   path: '/chocolates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CakesRoute = CakesRouteImport.update({
+  id: '/cakes',
+  path: '/cakes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountRoute = AccountRouteImport.update({
@@ -71,9 +117,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecipientsIndexRoute = RecipientsIndexRouteImport.update({
+  id: '/recipients/',
+  path: '/recipients/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MomentsIndexRoute = MomentsIndexRouteImport.update({
+  id: '/moments/',
+  path: '/moments/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecipientsSlugRoute = RecipientsSlugRouteImport.update({
+  id: '/recipients/$slug',
+  path: '/recipients/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductIdRoute = ProductIdRouteImport.update({
   id: '/product/$id',
   path: '/product/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MomentsSlugRoute = MomentsSlugRouteImport.update({
+  id: '/moments/$slug',
+  path: '/moments/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -81,41 +147,74 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/cakes': typeof CakesRoute
   '/chocolates': typeof ChocolatesRoute
+  '/cupcakes': typeof CupcakesRoute
   '/customize': typeof CustomizeRoute
   '/delivery': typeof DeliveryRoute
+  '/donuts': typeof DonutsRoute
+  '/extras': typeof ExtrasRoute
+  '/gifts': typeof GiftsRoute
   '/login': typeof LoginRoute
   '/payment': typeof PaymentRoute
+  '/shop': typeof ShopRoute
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
+  '/wishlist': typeof WishlistRoute
+  '/moments/$slug': typeof MomentsSlugRoute
   '/product/$id': typeof ProductIdRoute
+  '/recipients/$slug': typeof RecipientsSlugRoute
+  '/moments/': typeof MomentsIndexRoute
+  '/recipients/': typeof RecipientsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/cakes': typeof CakesRoute
   '/chocolates': typeof ChocolatesRoute
+  '/cupcakes': typeof CupcakesRoute
   '/customize': typeof CustomizeRoute
   '/delivery': typeof DeliveryRoute
+  '/donuts': typeof DonutsRoute
+  '/extras': typeof ExtrasRoute
+  '/gifts': typeof GiftsRoute
   '/login': typeof LoginRoute
   '/payment': typeof PaymentRoute
+  '/shop': typeof ShopRoute
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
+  '/wishlist': typeof WishlistRoute
+  '/moments/$slug': typeof MomentsSlugRoute
   '/product/$id': typeof ProductIdRoute
+  '/recipients/$slug': typeof RecipientsSlugRoute
+  '/moments': typeof MomentsIndexRoute
+  '/recipients': typeof RecipientsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/cakes': typeof CakesRoute
   '/chocolates': typeof ChocolatesRoute
+  '/cupcakes': typeof CupcakesRoute
   '/customize': typeof CustomizeRoute
   '/delivery': typeof DeliveryRoute
+  '/donuts': typeof DonutsRoute
+  '/extras': typeof ExtrasRoute
+  '/gifts': typeof GiftsRoute
   '/login': typeof LoginRoute
   '/payment': typeof PaymentRoute
+  '/shop': typeof ShopRoute
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
+  '/wishlist': typeof WishlistRoute
+  '/moments/$slug': typeof MomentsSlugRoute
   '/product/$id': typeof ProductIdRoute
+  '/recipients/$slug': typeof RecipientsSlugRoute
+  '/moments/': typeof MomentsIndexRoute
+  '/recipients/': typeof RecipientsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -123,58 +222,109 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/account'
+    | '/cakes'
     | '/chocolates'
+    | '/cupcakes'
     | '/customize'
     | '/delivery'
+    | '/donuts'
+    | '/extras'
+    | '/gifts'
     | '/login'
     | '/payment'
+    | '/shop'
     | '/signup'
     | '/success'
+    | '/wishlist'
+    | '/moments/$slug'
     | '/product/$id'
+    | '/recipients/$slug'
+    | '/moments/'
+    | '/recipients/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/account'
+    | '/cakes'
     | '/chocolates'
+    | '/cupcakes'
     | '/customize'
     | '/delivery'
+    | '/donuts'
+    | '/extras'
+    | '/gifts'
     | '/login'
     | '/payment'
+    | '/shop'
     | '/signup'
     | '/success'
+    | '/wishlist'
+    | '/moments/$slug'
     | '/product/$id'
+    | '/recipients/$slug'
+    | '/moments'
+    | '/recipients'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/account'
+    | '/cakes'
     | '/chocolates'
+    | '/cupcakes'
     | '/customize'
     | '/delivery'
+    | '/donuts'
+    | '/extras'
+    | '/gifts'
     | '/login'
     | '/payment'
+    | '/shop'
     | '/signup'
     | '/success'
+    | '/wishlist'
+    | '/moments/$slug'
     | '/product/$id'
+    | '/recipients/$slug'
+    | '/moments/'
+    | '/recipients/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
+  CakesRoute: typeof CakesRoute
   ChocolatesRoute: typeof ChocolatesRoute
+  CupcakesRoute: typeof CupcakesRoute
   CustomizeRoute: typeof CustomizeRoute
   DeliveryRoute: typeof DeliveryRoute
+  DonutsRoute: typeof DonutsRoute
+  ExtrasRoute: typeof ExtrasRoute
+  GiftsRoute: typeof GiftsRoute
   LoginRoute: typeof LoginRoute
   PaymentRoute: typeof PaymentRoute
+  ShopRoute: typeof ShopRoute
   SignupRoute: typeof SignupRoute
   SuccessRoute: typeof SuccessRoute
+  WishlistRoute: typeof WishlistRoute
+  MomentsSlugRoute: typeof MomentsSlugRoute
   ProductIdRoute: typeof ProductIdRoute
+  RecipientsSlugRoute: typeof RecipientsSlugRoute
+  MomentsIndexRoute: typeof MomentsIndexRoute
+  RecipientsIndexRoute: typeof RecipientsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wishlist': {
+      id: '/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof WishlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/success': {
       id: '/success'
       path: '/success'
@@ -187,6 +337,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/payment': {
@@ -203,6 +360,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gifts': {
+      id: '/gifts'
+      path: '/gifts'
+      fullPath: '/gifts'
+      preLoaderRoute: typeof GiftsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/extras': {
+      id: '/extras'
+      path: '/extras'
+      fullPath: '/extras'
+      preLoaderRoute: typeof ExtrasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/donuts': {
+      id: '/donuts'
+      path: '/donuts'
+      fullPath: '/donuts'
+      preLoaderRoute: typeof DonutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/delivery': {
       id: '/delivery'
       path: '/delivery'
@@ -217,11 +395,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomizeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cupcakes': {
+      id: '/cupcakes'
+      path: '/cupcakes'
+      fullPath: '/cupcakes'
+      preLoaderRoute: typeof CupcakesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chocolates': {
       id: '/chocolates'
       path: '/chocolates'
       fullPath: '/chocolates'
       preLoaderRoute: typeof ChocolatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cakes': {
+      id: '/cakes'
+      path: '/cakes'
+      fullPath: '/cakes'
+      preLoaderRoute: typeof CakesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account': {
@@ -245,11 +437,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recipients/': {
+      id: '/recipients/'
+      path: '/recipients'
+      fullPath: '/recipients/'
+      preLoaderRoute: typeof RecipientsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/moments/': {
+      id: '/moments/'
+      path: '/moments'
+      fullPath: '/moments/'
+      preLoaderRoute: typeof MomentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recipients/$slug': {
+      id: '/recipients/$slug'
+      path: '/recipients/$slug'
+      fullPath: '/recipients/$slug'
+      preLoaderRoute: typeof RecipientsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/product/$id': {
       id: '/product/$id'
       path: '/product/$id'
       fullPath: '/product/$id'
       preLoaderRoute: typeof ProductIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/moments/$slug': {
+      id: '/moments/$slug'
+      path: '/moments/$slug'
+      fullPath: '/moments/$slug'
+      preLoaderRoute: typeof MomentsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -259,25 +479,26 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
+  CakesRoute: CakesRoute,
   ChocolatesRoute: ChocolatesRoute,
+  CupcakesRoute: CupcakesRoute,
   CustomizeRoute: CustomizeRoute,
   DeliveryRoute: DeliveryRoute,
+  DonutsRoute: DonutsRoute,
+  ExtrasRoute: ExtrasRoute,
+  GiftsRoute: GiftsRoute,
   LoginRoute: LoginRoute,
   PaymentRoute: PaymentRoute,
+  ShopRoute: ShopRoute,
   SignupRoute: SignupRoute,
   SuccessRoute: SuccessRoute,
+  WishlistRoute: WishlistRoute,
+  MomentsSlugRoute: MomentsSlugRoute,
   ProductIdRoute: ProductIdRoute,
+  RecipientsSlugRoute: RecipientsSlugRoute,
+  MomentsIndexRoute: MomentsIndexRoute,
+  RecipientsIndexRoute: RecipientsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

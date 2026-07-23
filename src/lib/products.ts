@@ -28,29 +28,50 @@ import extraIcecream from "@/assets/extra-icecream.jpg";
 import extraCheesecake from "@/assets/extra-cheesecake.jpg";
 import extraDonutsPair from "@/assets/extra-donuts-pair.jpg";
 
+export type Category = "cupcakes" | "cakes" | "chocolates" | "donuts" | "gifts" | "extras";
+
+export const OCCASIONS = [
+  "Birthday",
+  "Anniversary",
+  "Wedding",
+  "Graduation",
+  "Congratulations",
+  "Thank You",
+] as const;
+export type Occasion = (typeof OCCASIONS)[number];
+
+export const RECIPIENTS = ["For Him", "For Her", "For Kids", "For Family"] as const;
+export type Recipient = (typeof RECIPIENTS)[number];
+
 export type Product = {
   id: string;
   name: string;
   price: number;
   image: string;
   thumbs?: string[];
-  category: "cupcakes" | "cakes" | "chocolates" | "donuts" | "gifts" | "extras";
+  category: Category;
   tags?: string[];
   sizes?: { label: string; sub?: string; delta?: number }[];
   flavors?: string[];
   description?: string;
   isNew?: boolean;
+  occasions?: Occasion[];
+  recipients?: Recipient[];
 };
 
 export const products: Product[] = [
   { id: "swiss-frosting", name: "Swiss Frosting", price: 12.5, image: prodSwiss, category: "cupcakes", isNew: true,
-    description: "Silky Swiss meringue buttercream on our signature vanilla sponge." },
+    description: "Silky Swiss meringue buttercream on our signature vanilla sponge.",
+    occasions: ["Birthday", "Thank You"], recipients: ["For Her", "For Family"] },
   { id: "moose-cream", name: "Moose Cream", price: 14.0, image: prodMoose, category: "cupcakes",
-    description: "Rich chocolate mousse crowned with cocoa curls." },
+    description: "Rich chocolate mousse crowned with cocoa curls.",
+    occasions: ["Birthday", "Congratulations"], recipients: ["For Him", "For Her"] },
   { id: "butter-frosting", name: "Butter Frosting", price: 11.0, image: prodButter, category: "cupcakes",
-    description: "Classic American butter frosting on golden butter cake." },
+    description: "Classic American butter frosting on golden butter cake.",
+    occasions: ["Thank You", "Congratulations"], recipients: ["For Family"] },
   { id: "light-sponge", name: "Light Sponge", price: 9.5, image: prodLight, category: "cupcakes",
-    description: "Airy sponge with a whisper of vanilla — light and delicate." },
+    description: "Airy sponge with a whisper of vanilla — light and delicate.",
+    occasions: ["Thank You"], recipients: ["For Her", "For Family"] },
 
   { id: "buttercream-cake", name: "Buttercream Cake", price: 300, image: cakeMain,
     thumbs: [cakeMain, cakeT2, cakeT3, cakeT4], category: "cakes",
@@ -59,38 +80,60 @@ export const products: Product[] = [
       { label: "9 INCH", sub: "3 Layers", delta: 80 },
     ],
     flavors: ["Vanilla", "Chocolate"],
-    description: "Three luscious layers of buttercream cake, finished with rainbow sprinkles and a cherry on top." },
+    description: "Three luscious layers of buttercream cake, finished with rainbow sprinkles and a cherry on top.",
+    occasions: ["Birthday", "Anniversary", "Wedding", "Graduation"], recipients: ["For Family", "For Her", "For Him"] },
 
   { id: "birthday-pair", name: "Birthday Pair Cups", price: 22, image: giftDonuts, category: "gifts",
-    description: "A pair of celebration cupcakes ready to gift." },
+    description: "A pair of celebration cupcakes ready to gift.",
+    occasions: ["Birthday", "Congratulations"], recipients: ["For Him", "For Her", "For Kids"] },
   { id: "butter-delight", name: "Butter Frosting Delight", price: 18, image: giftButter, category: "gifts",
-    description: "Butter-frosted bites in a golden gift box." },
+    description: "Butter-frosted bites in a golden gift box.",
+    occasions: ["Anniversary", "Thank You"], recipients: ["For Her"] },
   { id: "cream-cheese-donut", name: "Cream & Cheese Donut", price: 8, image: giftCream, category: "donuts",
-    description: "Fluffy donut filled with cream cheese frosting." },
+    description: "Fluffy donut filled with cream cheese frosting.",
+    occasions: ["Birthday"], recipients: ["For Kids"] },
   { id: "whisk-whimsy", name: "Whisk & Whimsy Cupcake", price: 15, image: giftWhisk, category: "gifts",
-    description: "Whimsical cupcake decorated by hand." },
+    description: "Whimsical cupcake decorated by hand.",
+    occasions: ["Birthday", "Graduation"], recipients: ["For Kids", "For Her"] },
 
   { id: "sprinkle-1", name: "Sprinkle Cupcakes", price: 4.5, image: divine1, category: "cupcakes",
-    description: "Colorful sprinkle-topped cupcakes for any occasion." },
-  { id: "sprinkle-2", name: "Cherry Sprinkle", price: 4.5, image: divine2, category: "cupcakes" },
-  { id: "sprinkle-3", name: "Pink Whip", price: 4.5, image: divine3, category: "cupcakes" },
-  { id: "sprinkle-4", name: "Confetti Whip", price: 4.5, image: divine4, category: "cupcakes" },
+    description: "Colorful sprinkle-topped cupcakes for any occasion.",
+    occasions: ["Birthday"], recipients: ["For Kids"] },
+  { id: "sprinkle-2", name: "Cherry Sprinkle", price: 4.5, image: divine2, category: "cupcakes",
+    occasions: ["Birthday"], recipients: ["For Kids", "For Her"] },
+  { id: "sprinkle-3", name: "Pink Whip", price: 4.5, image: divine3, category: "cupcakes",
+    occasions: ["Birthday", "Thank You"], recipients: ["For Her"] },
+  { id: "sprinkle-4", name: "Confetti Whip", price: 4.5, image: divine4, category: "cupcakes",
+    occasions: ["Birthday", "Congratulations"], recipients: ["For Kids"] },
 
   { id: "choc-truffle", name: "Chocolate Truffle", price: 6.99, image: c1, category: "chocolates",
-    description: "Dark chocolate truffles rolled in cocoa." },
-  { id: "choc-praline", name: "Hazelnut Praline", price: 7.5, image: c2, category: "chocolates" },
-  { id: "choc-ganache", name: "Ganache Bites", price: 8.25, image: c3, category: "chocolates" },
-  { id: "choc-caramel", name: "Salted Caramel", price: 7.25, image: c4, category: "chocolates" },
-  { id: "choc-mint", name: "Mint Delight", price: 6.5, image: c5, category: "chocolates" },
-  { id: "choc-orange", name: "Orange Zest", price: 6.75, image: c6, category: "chocolates" },
-  { id: "choc-almond", name: "Roasted Almond", price: 7.99, image: c7, category: "chocolates" },
-  { id: "choc-white", name: "White Dream", price: 6.25, image: c8, category: "chocolates" },
-  { id: "choc-berry", name: "Berry Truffle", price: 7.99, image: c9, category: "chocolates" },
+    description: "Dark chocolate truffles rolled in cocoa.",
+    occasions: ["Anniversary", "Thank You"], recipients: ["For Her", "For Him"] },
+  { id: "choc-praline", name: "Hazelnut Praline", price: 7.5, image: c2, category: "chocolates",
+    occasions: ["Anniversary"], recipients: ["For Him"] },
+  { id: "choc-ganache", name: "Ganache Bites", price: 8.25, image: c3, category: "chocolates",
+    occasions: ["Anniversary", "Wedding"], recipients: ["For Her"] },
+  { id: "choc-caramel", name: "Salted Caramel", price: 7.25, image: c4, category: "chocolates",
+    occasions: ["Thank You"], recipients: ["For Him", "For Her"] },
+  { id: "choc-mint", name: "Mint Delight", price: 6.5, image: c5, category: "chocolates",
+    occasions: ["Thank You"], recipients: ["For Him"] },
+  { id: "choc-orange", name: "Orange Zest", price: 6.75, image: c6, category: "chocolates",
+    occasions: ["Congratulations"], recipients: ["For Her"] },
+  { id: "choc-almond", name: "Roasted Almond", price: 7.99, image: c7, category: "chocolates",
+    occasions: ["Anniversary"], recipients: ["For Him"] },
+  { id: "choc-white", name: "White Dream", price: 6.25, image: c8, category: "chocolates",
+    occasions: ["Wedding"], recipients: ["For Her"] },
+  { id: "choc-berry", name: "Berry Truffle", price: 7.99, image: c9, category: "chocolates",
+    occasions: ["Anniversary", "Thank You"], recipients: ["For Her"] },
 
-  { id: "extra-donut", name: "Fanky Donut", price: 4.89, image: extraDonut, category: "extras" },
-  { id: "extra-icecream", name: "Icecream Cone", price: 5.49, image: extraIcecream, category: "extras" },
-  { id: "extra-cheesecake", name: "Mini Cheesecake", price: 6.29, image: extraCheesecake, category: "extras" },
-  { id: "extra-donuts-pair", name: "Donuts Pair", price: 7.89, image: extraDonutsPair, category: "extras" },
+  { id: "extra-donut", name: "Fanky Donut", price: 4.89, image: extraDonut, category: "extras",
+    occasions: ["Birthday"], recipients: ["For Kids"] },
+  { id: "extra-icecream", name: "Icecream Cone", price: 5.49, image: extraIcecream, category: "extras",
+    occasions: ["Birthday"], recipients: ["For Kids"] },
+  { id: "extra-cheesecake", name: "Mini Cheesecake", price: 6.29, image: extraCheesecake, category: "extras",
+    occasions: ["Thank You"], recipients: ["For Family"] },
+  { id: "extra-donuts-pair", name: "Donuts Pair", price: 7.89, image: extraDonutsPair, category: "extras",
+    occasions: ["Birthday"], recipients: ["For Kids", "For Family"] },
 ];
 
 export const productMap: Record<string, Product> = Object.fromEntries(
@@ -109,3 +152,25 @@ export const featured = {
   extras: products.filter((p) => p.category === "extras"),
   new: products.filter((p) => p.isNew),
 };
+
+export const CATEGORY_LABEL: Record<Category, string> = {
+  cupcakes: "Cupcakes",
+  cakes: "Cakes",
+  chocolates: "Chocolates",
+  donuts: "Donuts",
+  gifts: "Gifts",
+  extras: "Extras",
+};
+
+export function slugToOccasion(slug: string): Occasion | undefined {
+  return OCCASIONS.find((o) => o.toLowerCase().replace(/\s+/g, "-") === slug.toLowerCase());
+}
+export function slugToRecipient(slug: string): Recipient | undefined {
+  return RECIPIENTS.find((r) => r.toLowerCase().replace(/\s+/g, "-") === slug.toLowerCase());
+}
+export function occasionToSlug(o: Occasion) {
+  return o.toLowerCase().replace(/\s+/g, "-");
+}
+export function recipientToSlug(r: Recipient) {
+  return r.toLowerCase().replace(/\s+/g, "-");
+}
