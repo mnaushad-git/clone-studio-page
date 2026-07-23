@@ -31,6 +31,7 @@ function DeliveryPage() {
   const [area, setArea] = useState("");
   const [address, setAddress] = useState("");
   const [extra, setExtra] = useState("");
+  const [timeSlot, setTimeSlot] = useState<"tomorrow" | "another">("tomorrow");
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
