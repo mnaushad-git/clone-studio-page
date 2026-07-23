@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ProductRouteImport } from './routes/product'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as DeliveryRouteImport } from './routes/delivery'
 import { Route as CustomizeRouteImport } from './routes/customize'
 import { Route as ChocolatesRouteImport } from './routes/chocolates'
 import { Route as AccountRouteImport } from './routes/account'
@@ -30,6 +31,11 @@ const ProductRoute = ProductRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeliveryRoute = DeliveryRouteImport.update({
+  id: '/delivery',
+  path: '/delivery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CustomizeRoute = CustomizeRouteImport.update({
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/chocolates': typeof ChocolatesRoute
   '/customize': typeof CustomizeRoute
+  '/delivery': typeof DeliveryRoute
   '/login': typeof LoginRoute
   '/product': typeof ProductRoute
   '/signup': typeof SignupRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/chocolates': typeof ChocolatesRoute
   '/customize': typeof CustomizeRoute
+  '/delivery': typeof DeliveryRoute
   '/login': typeof LoginRoute
   '/product': typeof ProductRoute
   '/signup': typeof SignupRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/chocolates': typeof ChocolatesRoute
   '/customize': typeof CustomizeRoute
+  '/delivery': typeof DeliveryRoute
   '/login': typeof LoginRoute
   '/product': typeof ProductRoute
   '/signup': typeof SignupRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/chocolates'
     | '/customize'
+    | '/delivery'
     | '/login'
     | '/product'
     | '/signup'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/chocolates'
     | '/customize'
+    | '/delivery'
     | '/login'
     | '/product'
     | '/signup'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/chocolates'
     | '/customize'
+    | '/delivery'
     | '/login'
     | '/product'
     | '/signup'
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   ChocolatesRoute: typeof ChocolatesRoute
   CustomizeRoute: typeof CustomizeRoute
+  DeliveryRoute: typeof DeliveryRoute
   LoginRoute: typeof LoginRoute
   ProductRoute: typeof ProductRoute
   SignupRoute: typeof SignupRoute
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/delivery': {
+      id: '/delivery'
+      path: '/delivery'
+      fullPath: '/delivery'
+      preLoaderRoute: typeof DeliveryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/customize': {
@@ -180,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   ChocolatesRoute: ChocolatesRoute,
   CustomizeRoute: CustomizeRoute,
+  DeliveryRoute: DeliveryRoute,
   LoginRoute: LoginRoute,
   ProductRoute: ProductRoute,
   SignupRoute: SignupRoute,
