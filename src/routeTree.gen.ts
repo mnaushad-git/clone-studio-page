@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ProductRouteImport } from './routes/product'
+import { Route as PaymentRouteImport } from './routes/payment'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DeliveryRouteImport } from './routes/delivery'
 import { Route as CustomizeRouteImport } from './routes/customize'
@@ -26,6 +27,11 @@ const SignupRoute = SignupRouteImport.update({
 const ProductRoute = ProductRouteImport.update({
   id: '/product',
   path: '/product',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentRoute = PaymentRouteImport.update({
+  id: '/payment',
+  path: '/payment',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/customize': typeof CustomizeRoute
   '/delivery': typeof DeliveryRoute
   '/login': typeof LoginRoute
+  '/payment': typeof PaymentRoute
   '/product': typeof ProductRoute
   '/signup': typeof SignupRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/customize': typeof CustomizeRoute
   '/delivery': typeof DeliveryRoute
   '/login': typeof LoginRoute
+  '/payment': typeof PaymentRoute
   '/product': typeof ProductRoute
   '/signup': typeof SignupRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/customize': typeof CustomizeRoute
   '/delivery': typeof DeliveryRoute
   '/login': typeof LoginRoute
+  '/payment': typeof PaymentRoute
   '/product': typeof ProductRoute
   '/signup': typeof SignupRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/customize'
     | '/delivery'
     | '/login'
+    | '/payment'
     | '/product'
     | '/signup'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/customize'
     | '/delivery'
     | '/login'
+    | '/payment'
     | '/product'
     | '/signup'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/customize'
     | '/delivery'
     | '/login'
+    | '/payment'
     | '/product'
     | '/signup'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   CustomizeRoute: typeof CustomizeRoute
   DeliveryRoute: typeof DeliveryRoute
   LoginRoute: typeof LoginRoute
+  PaymentRoute: typeof PaymentRoute
   ProductRoute: typeof ProductRoute
   SignupRoute: typeof SignupRoute
 }
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/product'
       fullPath: '/product'
       preLoaderRoute: typeof ProductRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment': {
+      id: '/payment'
+      path: '/payment'
+      fullPath: '/payment'
+      preLoaderRoute: typeof PaymentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   CustomizeRoute: CustomizeRoute,
   DeliveryRoute: DeliveryRoute,
   LoginRoute: LoginRoute,
+  PaymentRoute: PaymentRoute,
   ProductRoute: ProductRoute,
   SignupRoute: SignupRoute,
 }
