@@ -143,6 +143,21 @@ function SuccessPage() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm p-6 mt-6">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="font-semibold">Order Status</h2>
+            {order.status !== "Delivered" && (
+              <button
+                onClick={() => orderStore.advance(order.id)}
+                className="text-xs text-primary hover:underline"
+              >
+                Mark as {order.status === "Processing" ? "Paid" : "Delivered"}
+              </button>
+            )}
+          </div>
+          <OrderStatusTimeline order={order} />
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm p-6 mt-6">
           <h2 className="font-semibold mb-4">Order Details</h2>
           <div className="divide-y divide-border">
             {order.items.map((it, i) => (
