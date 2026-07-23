@@ -163,7 +163,39 @@ function DeliveryPage() {
             </div>
           </section>
 
-          {gift && <DeliveryTimeCard />}
+          {gift && (
+            <section className="bg-white rounded-2xl shadow-sm p-6">
+              <div className="flex items-center gap-2 mb-5">
+                <Bike className="h-5 w-5 text-primary" />
+                <h2 className="font-semibold">Delivery time</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => setTimeSlot("tomorrow")}
+                  className={`rounded-xl border p-5 text-center transition ${
+                    timeSlot === "tomorrow"
+                      ? "border-primary bg-[oklch(0.95_0.03_20)]"
+                      : "border-border hover:border-primary"
+                  }`}
+                >
+                  <p className="font-semibold">Delivery time</p>
+                  <p className="text-sm mt-2">Tomorrow</p>
+                  <p className="text-xs text-muted-foreground mt-1">10:00am - 2:00pm</p>
+                </button>
+                <button
+                  onClick={() => setTimeSlot("another")}
+                  className={`rounded-xl border p-5 text-center transition ${
+                    timeSlot === "another"
+                      ? "border-primary bg-[oklch(0.95_0.03_20)]"
+                      : "border-border hover:border-primary"
+                  }`}
+                >
+                  <p className="font-semibold">Another time</p>
+                  <p className="text-xs text-muted-foreground mt-2">Choose another<br />date and time</p>
+                </button>
+              </div>
+            </section>
+          )}
 
           {/* Right column */}
           <aside className="space-y-4">
