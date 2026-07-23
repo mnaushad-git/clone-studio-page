@@ -124,18 +124,26 @@ function CustomizePage() {
                 <button onClick={() => setShowExtras(true)} className="text-sm text-primary hover:underline">View All</button>
               </div>
               <div className="grid grid-cols-3 gap-4">
-                {extras.map((e, i) => (
-                  <div key={i} className="text-center">
-                    <div className="aspect-square rounded-full overflow-hidden bg-secondary">
-                      <img src={e.img} alt={e.name} width={400} height={400} loading="lazy" className="w-full h-full object-cover" />
+                {extras.map((e, i) => {
+                  const isSel = selected.includes(i);
+                  return (
+                    <div key={i} className="text-center">
+                      <div className="aspect-square rounded-full overflow-hidden bg-secondary">
+                        <img src={e.img} alt={e.name} width={400} height={400} loading="lazy" className="w-full h-full object-cover" />
+                      </div>
+                      <p className="mt-3 text-sm font-medium">{e.name}</p>
+                      <p className="text-xs text-muted-foreground">{e.code}</p>
+                      <button
+                        onClick={() => toggle(i)}
+                        className={`mt-3 w-full border rounded-md py-2 text-sm transition ${
+                          isSel ? "bg-primary text-primary-foreground border-primary" : "border-border hover:border-primary hover:text-primary"
+                        }`}
+                      >
+                        {isSel ? "Added" : "Add"}
+                      </button>
                     </div>
-                    <p className="mt-3 text-sm font-medium">{e.name}</p>
-                    <p className="text-xs text-muted-foreground">{e.code}</p>
-                    <button className="mt-3 w-full border border-border rounded-md py-2 text-sm hover:border-primary hover:text-primary transition">
-                      Add
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           </div>
@@ -201,9 +209,10 @@ function CustomizePage() {
             <div className="bg-white rounded-2xl shadow-sm p-5 space-y-4">
               <h3 className="font-semibold">Order Summary</h3>
               <div className="space-y-2 text-sm">
-                <Row label="X1  Sprinkle Cupcakes" val="$90.99" />
-                <Row label="X2  Sprinkle Cupcakes" val="$80.99" />
-                <Row label="X3  Sprinkle Cupcakes" val="$80.99" />
+                <Row label={`X${qty}  Sprinkle Cupcakes`} val={`$${(1187.55).toFixed(2)}`} />
+                {selected.map((i) => (
+                  <Row key={i} label={`X1  ${popupExtras[i].name}`} val={popupExtras[i].price} />
+                ))}
               </div>
               <div className="border-t border-border pt-4 space-y-2 text-sm">
                 <Row label="Delivery today with" val="$360.99" bold />
@@ -215,12 +224,12 @@ function CustomizePage() {
                 </div>
               </div>
               <div className="border-t border-border pt-4 space-y-2 text-sm">
-                <Row label="Amount" val="$360.99" />
+                <Row label="Amount" val={`$${total.toFixed(2)}`} />
                 <Row label="Tax" val="$12.99" />
               </div>
               <div className="border-t border-border pt-4 flex items-center justify-between">
                 <span className="font-semibold">Order Total</span>
-                <span className="font-semibold">$400.99</span>
+                <span className="font-semibold">${(total + 12.99).toFixed(2)}</span>
               </div>
             </div>
 
