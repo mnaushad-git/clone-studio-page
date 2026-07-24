@@ -261,20 +261,153 @@ function CustomizePage() {
         </div>
       </main>
 
-      {showMsg && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
-            <button onClick={() => setShowMsg(false)} className="absolute top-4 right-4"><X className="h-5 w-5" /></button>
-            <h3 className="font-semibold mb-3">Add a personal message</h3>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value.slice(0, 200))}
-              rows={4}
-              placeholder="Happy Birthday!"
-              className="w-full border border-border rounded-md p-3 text-sm outline-none focus:border-primary"
-            />
-            <p className="text-xs text-muted-foreground mt-1">{message.length}/200</p>
-            <button onClick={() => setShowMsg(false)} className="mt-4 w-full bg-primary text-primary-foreground rounded-md py-3 text-sm">Save</button>
+      {giftModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-start sm:items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl my-8 p-6 sm:p-8 relative">
+            <button onClick={() => setGiftModalOpen(false)} aria-label="Close" className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
+              <X className="h-5 w-5" />
+            </button>
+            <h3 className="font-semibold text-lg">Customize Gift Card</h3>
+            <p className="text-sm text-muted-foreground mt-1">Choose a card design and add a personal message to make it extra special.</p>
+            <div className="border-t border-border my-5" />
+
+            <div className="grid grid-cols-2 rounded-lg overflow-hidden border border-border mb-6">
+              <button
+                onClick={() => setGiftTab("card")}
+                className={`py-3 text-sm font-medium transition ${giftTab === "card" ? "bg-primary text-primary-foreground" : "bg-secondary/40 text-foreground"}`}
+              >
+                Select Card
+              </button>
+              <button
+                onClick={() => setGiftTab("message")}
+                className={`py-3 text-sm font-medium transition ${giftTab === "message" ? "bg-primary text-primary-foreground" : "bg-secondary/40 text-foreground"}`}
+              >
+                Add a Message
+              </button>
+            </div>
+
+            {giftTab === "card" ? (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {GIFT_CARDS.map((c) => {
+                  const active = selectedCard === c.id;
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => setSelectedCard(c.id)}
+                      className={`rounded-lg overflow-hidden border-2 transition ${active ? "border-primary" : "border-transparent hover:border-border"}`}
+                    >
+                      <div className="aspect-square bg-secondary/40">
+                        <img src={c.image} alt={c.label} loading="lazy" className="w-full h-full object-cover" />
+                      </div>
+                      <p className="text-xs py-2 text-center">{c.label}{active ? " ✓" : ""}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <input
+                  value={msgTo}
+                  onChange={(e) => setMsgTo(e.target.value)}
+                  placeholder="To: (Optional)"
+                  className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary"
+                />
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value.slice(0, 200))}
+                  rows={4}
+                  placeholder="Type your message and express your feelings"
+                  className="w-full border border-border rounded-md p-3 text-sm outline-none focus:border-primary resize-none"
+                />
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Not sure what to say?</span>
+                  <button onClick={() => setShowSuggested((v) => !v)} className="text-[oklch(0.55_0.13_160)] font-medium hover:underline">
+                    Try Suggested Messages
+                  </button>
+                </div>
+                {showSuggested && (
+                  <div className="space-y-2 bg-secondary/30 rounded-md p-3">
+                    {SUGGESTED_MESSAGES.map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => { setMessage(s); setShowSuggested(false); }}
+                        className="block w-full text-left text-xs text-foreground hover:text-primary py-1"
+                      >
+                        “{s}”
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div className="relative">
+                  <input
+                    value={msgFrom}
+                    onChange={(e) => setMsgFrom(e.target.value)}
+                    placeholder="From: (Optional)"
+                    className="w-full border border-border rounded-md px-4 py-3 pr-28 text-sm outline-none focus:border-primary"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[oklch(0.55_0.13_160)] text-xs">
+                    <PenLine className="h-3.5 w-3.5" /> Signature
+                  </span>
+                </div>
+                {showLinkField ? (
+                  <input
+                    autoFocus
+                    value={msgLink}
+                    onChange={(e) => setMsgLink(e.target.value)}
+                    placeholder="https://open.spotify.com/…"
+                    className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary"
+                  />
+                ) : (
+                  <button
+                    onClick={() => setShowLinkField(true)}
+                    className="w-full flex items-center justify-center gap-2 text-[oklch(0.55_0.13_160)] text-sm py-2 hover:underline"
+                  >
+                    <Link2 className="h-4 w-4" /> Paste a Link to a Song or Video
+                  </button>
+                )}
+                <p className="text-xs text-muted-foreground text-right">{message.length}/200</p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-center gap-3 mt-6">
+              <button
+                onClick={() => setShowPreview(true)}
+                className="border border-border rounded-md px-6 py-2.5 text-sm hover:bg-secondary/50 transition"
+              >
+                Preview
+              </button>
+              <button
+                onClick={() => {
+                  if (giftTab === "card" && !selectedCard) setSelectedCard(GIFT_CARDS[0].id);
+                  setGiftModalOpen(false);
+                  toast.success("Gift card saved");
+                }}
+                className="bg-primary text-primary-foreground rounded-md px-6 py-2.5 text-sm hover:opacity-90 transition"
+              >
+                Save & Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPreview && (
+        <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4" onClick={() => setShowPreview(false)}>
+          <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative">
+            <button onClick={() => setShowPreview(false)} aria-label="Close" className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
+              <X className="h-5 w-5" />
+            </button>
+            <div className="aspect-[4/3] rounded-lg overflow-hidden mb-4">
+              <img src={activeCard.image} alt={activeCard.label} className="w-full h-full object-cover" />
+            </div>
+            {msgTo && <p className="text-sm font-medium">To: {msgTo}</p>}
+            <p className="mt-2 text-sm whitespace-pre-wrap min-h-[3rem]">{message || "Your message preview will appear here."}</p>
+            {msgFrom && <p className="mt-3 text-sm font-medium text-right">— {msgFrom}</p>}
+            {msgLink && (
+              <a href={msgLink} target="_blank" rel="noreferrer" className="mt-3 flex items-center gap-1 text-xs text-[oklch(0.55_0.13_160)] hover:underline">
+                <Link2 className="h-3 w-3" /> {msgLink}
+              </a>
+            )}
           </div>
         </div>
       )}
