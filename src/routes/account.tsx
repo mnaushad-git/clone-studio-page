@@ -257,3 +257,38 @@ function Field({ label, value, onChange, type = "text" }: { label: string; value
     </div>
   );
 }
+
+function WalletPanel() {
+  const points = useStore((s) => s.loyaltyPoints);
+  const history = useStore((s) => s.loyaltyHistory);
+  const dollars = (points / 100).toFixed(2);
+  return (
+    <div className="py-6">
+      <div className="rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground p-6 text-center">
+        <Wallet className="h-8 w-8 mx-auto opacity-90" />
+        <p className="mt-2 text-xs uppercase tracking-widest opacity-80">Terrific Points</p>
+        <p className="mt-1 font-display text-4xl">{points}</p>
+        <p className="mt-1 text-xs opacity-80">≈ ${dollars} reward value</p>
+        <p className="mt-3 text-[11px] opacity-70">Earn 1 point per $1 spent. 100 points = $1 off.</p>
+      </div>
+      <h3 className="mt-6 text-sm font-semibold">Activity</h3>
+      {history.length === 0 ? (
+        <p className="mt-2 text-sm text-muted-foreground">No activity yet — place an order to earn points.</p>
+      ) : (
+        <ul className="mt-3 divide-y divide-border">
+          {history.slice(0, 20).map((h) => (
+            <li key={h.id} className="flex items-center justify-between py-3 text-sm">
+              <div>
+                <p className="font-medium">{h.note}</p>
+                <p className="text-xs text-muted-foreground">{new Date(h.at).toLocaleString()}</p>
+              </div>
+              <span className={h.type === "earn" ? "text-primary font-semibold" : "text-muted-foreground"}>
+                {h.type === "earn" ? "+" : "−"}{h.points} pts
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
