@@ -155,6 +155,23 @@ function SuccessPage() {
             )}
           </div>
           <OrderStatusTimeline order={order} />
+          {order.trackingToken && (
+            <div className="mt-4 flex items-center justify-between rounded-lg border border-border bg-secondary/40 px-3 py-2 text-xs">
+              <span className="truncate">Share tracking: <span className="font-mono">/track/{order.trackingToken}</span></span>
+              <div className="flex gap-2 shrink-0">
+                <Link to="/track/$id" params={{ id: order.trackingToken }} className="text-primary font-medium hover:underline">Open</Link>
+                <button
+                  onClick={() => navigator.clipboard?.writeText(`${window.location.origin}/track/${order.trackingToken}`)}
+                  className="text-primary font-medium hover:underline"
+                >Copy link</button>
+              </div>
+            </div>
+          )}
+          {order.pointsEarned ? (
+            <div className="mt-3 rounded-lg bg-primary/10 text-primary text-xs px-3 py-2 font-medium">
+              🎉 You earned {order.pointsEarned} loyalty points on this order.
+            </div>
+          ) : null}
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm p-6 mt-6">
