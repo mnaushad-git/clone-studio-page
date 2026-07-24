@@ -138,7 +138,7 @@ function CustomizePage() {
                         <img src={e.image} alt={e.name} loading="lazy" className="w-full h-full object-cover" />
                       </Link>
                       <p className="mt-3 text-sm font-medium">{e.name}</p>
-                      <p className="text-xs text-muted-foreground">SAR ${e.price.toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground">SAR {e.price.toFixed(2)}</p>
                       <button
                         onClick={() => {
                           cart.add({ productId: e.id });
@@ -204,7 +204,7 @@ function CustomizePage() {
                       </div>
                     </div>
                     <div className="flex items-center justify-between mt-3">
-                      <p className="font-semibold">SAR ${(it.unitPrice * it.qty).toFixed(2)}</p>
+                      <p className="font-semibold">SAR {(it.unitPrice * it.qty).toFixed(2)}</p>
                       <button onClick={() => cart.remove(it.lineId)} className="text-xs text-primary underline">Remove</button>
                     </div>
                   </div>
@@ -246,7 +246,7 @@ function CustomizePage() {
               </div>
               <div className="border-t border-border pt-4 flex items-center justify-between">
                 <span className="font-semibold">Order Total</span>
-                <span className="font-semibold text-lg">SAR ${total.toFixed(2)}</span>
+                <span className="font-semibold text-lg">SAR {total.toFixed(2)}</span>
               </div>
             </div>
 
@@ -430,7 +430,7 @@ function CustomizePage() {
                       <img src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-cover" />
                     </div>
                     <p className="text-center text-sm font-medium mt-3">{p.name}</p>
-                    <p className="text-center text-sm mt-1">SAR ${p.price.toFixed(2)}</p>
+                    <p className="text-center text-sm mt-1">SAR {p.price.toFixed(2)}</p>
                     <button
                       onClick={() => cart.add({ productId: p.id })}
                       className={`mt-3 w-full border rounded-md py-2 text-sm transition ${
@@ -446,7 +446,7 @@ function CustomizePage() {
             <div className="mt-8 flex items-center justify-between border-t border-border pt-6">
               <div className="flex items-center gap-3 text-sm">
                 <span className="text-muted-foreground">Order Total</span>
-                <span className="font-semibold text-base">SAR ${total.toFixed(2)}</span>
+                <span className="font-semibold text-base">SAR {total.toFixed(2)}</span>
               </div>
               <button onClick={() => setShowExtras(false)} className="bg-primary text-primary-foreground rounded-md px-8 py-3 text-sm hover:opacity-90">
                 Continue

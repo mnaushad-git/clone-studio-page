@@ -186,17 +186,17 @@ function SuccessPage() {
                   </p>
                   {it.inscription && <p className="text-xs italic text-muted-foreground">"{it.inscription}"</p>}
                 </div>
-                <p>SAR ${(it.qty * it.unitPrice).toFixed(2)}</p>
+                <p>SAR {(it.qty * it.unitPrice).toFixed(2)}</p>
               </div>
             ))}
           </div>
           <div className="border-t border-border mt-4 pt-4 space-y-2 text-sm">
-            <div className="flex justify-between"><span>Subtotal</span><span>SAR ${order.subtotal.toFixed(2)}</span></div>
-            {order.discount > 0 && <div className="flex justify-between text-primary"><span>Discount</span><span>-SAR ${order.discount.toFixed(2)}</span></div>}
+            <div className="flex justify-between"><span>Subtotal</span><span>SAR {order.subtotal.toFixed(2)}</span></div>
+            {order.discount > 0 && <div className="flex justify-between text-primary"><span>Discount</span><span>-SAR {order.discount.toFixed(2)}</span></div>}
             <div className="flex justify-between"><span>Delivery</span><span>{order.deliveryFee === 0 ? "Free" : `SAR ${order.deliveryFee.toFixed(2)}`}</span></div>
-            <div className="flex justify-between"><span>Tax</span><span>SAR ${order.tax.toFixed(2)}</span></div>
+            <div className="flex justify-between"><span>Tax</span><span>SAR {order.tax.toFixed(2)}</span></div>
             <div className="flex justify-between font-semibold text-base pt-2 border-t border-border">
-              <span>Total</span><span>SAR ${order.total.toFixed(2)}</span>
+              <span>Total</span><span>SAR {order.total.toFixed(2)}</span>
             </div>
           </div>
 

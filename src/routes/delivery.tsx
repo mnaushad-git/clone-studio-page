@@ -215,7 +215,7 @@ function DeliveryPage() {
                         <p className="text-sm font-medium truncate">{p?.name}</p>
                         <p className="text-xs text-muted-foreground">Qty {it.qty}</p>
                       </div>
-                      <p className="text-sm font-semibold">SAR ${(it.unitPrice * it.qty).toFixed(2)}</p>
+                      <p className="text-sm font-semibold">SAR {(it.unitPrice * it.qty).toFixed(2)}</p>
                     </div>
                   );
                 })}
@@ -243,7 +243,7 @@ function DeliveryPage() {
               </div>
               <div className="border-t border-border pt-4 flex items-center justify-between">
                 <span className="font-semibold">Order Total</span>
-                <span className="font-semibold text-lg">SAR ${total.toFixed(2)}</span>
+                <span className="font-semibold text-lg">SAR {total.toFixed(2)}</span>
               </div>
             </div>
 
