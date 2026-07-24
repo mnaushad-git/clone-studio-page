@@ -186,6 +186,12 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                     <span>−${discount.toFixed(2)}</span>
                   </div>
                 )}
+                {pointsDisc > 0 && (
+                  <div className="flex justify-between text-primary">
+                    <span className="flex items-center gap-1.5"><Wallet className="h-4 w-4" /> Points ({redeemed} pts)</span>
+                    <span>−${pointsDisc.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span>Tax</span>
                   <span>${tax.toFixed(2)}</span>
