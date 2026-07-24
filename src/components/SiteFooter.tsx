@@ -8,7 +8,7 @@ export function SiteFooter() {
       <footer className="bg-primary text-primary-foreground">
         <div className="max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-4 gap-10">
           <div>
-            <div className="w-16 h-16 bg-background rounded-sm flex items-center justify-center font-script text-primary text-lg">TB</div>
+            <img src={logoFooter.url} alt="Terrific Bites" className="h-16 w-auto object-contain" />
             <p className="mt-4 text-xs opacity-80 max-w-xs">Handcrafted cupcakes, donuts and desserts baked fresh daily. Made with love in our neighborhood bakery.</p>
             <div className="flex gap-3 mt-5">
               {[Facebook, Instagram, Twitter, Youtube].map((I, i) => (
