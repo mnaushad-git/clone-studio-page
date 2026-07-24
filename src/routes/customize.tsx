@@ -54,9 +54,19 @@ function CustomizePage() {
 
   const [promoInput, setPromoInput] = useState(currentPromo?.code ?? "");
   const [message, setMessage] = useState("");
-  const [showMsg, setShowMsg] = useState(false);
-  const [giftCardSelected, setGiftCardSelected] = useState(false);
+  const [msgTo, setMsgTo] = useState("");
+  const [msgFrom, setMsgFrom] = useState("");
+  const [msgLink, setMsgLink] = useState("");
+  const [showLinkField, setShowLinkField] = useState(false);
+  const [showSuggested, setShowSuggested] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [giftModalOpen, setGiftModalOpen] = useState(false);
+  const [giftTab, setGiftTab] = useState<"card" | "message">("card");
+  const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [showExtras, setShowExtras] = useState(false);
+
+  const giftCardSelected = selectedCard !== null;
+  const activeCard = GIFT_CARDS.find((c) => c.id === selectedCard) ?? GIFT_CARDS[0];
 
   const remainingForFree = Math.max(0, 200 - (subtotal - discount));
   const progress = Math.min(100, ((subtotal - discount) / 200) * 100);
