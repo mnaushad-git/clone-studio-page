@@ -213,14 +213,7 @@ function AccountPage() {
               </div>
             )}
 
-            {active === "wallet" && (
-              <div className="h-full flex flex-col items-center justify-center text-center py-24">
-                <Wallet className="h-10 w-10 text-primary" />
-                <h2 className="mt-3 font-display text-2xl text-primary">Terrific Wallet</h2>
-                <p className="text-sm text-muted-foreground mt-3">Balance: <span className="font-semibold text-foreground">${(orders.length * 5).toFixed(2)}</span></p>
-                <p className="text-xs text-muted-foreground mt-1">You earn $5 rewards for every order placed.</p>
-              </div>
-            )}
+            {active === "wallet" && <WalletPanel />}
 
             {(active === "subs" || active === "invoices" || active === "occasions") && (
               <div className="h-full flex flex-col items-center justify-center text-center py-24">
@@ -261,6 +254,41 @@ function Field({ label, value, onChange, type = "text" }: { label: string; value
     <div>
       <label className="block text-xs font-semibold mb-2">{label}</label>
       <input type={type} value={value} onChange={(e) => onChange(e.target.value)} className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary bg-transparent" />
+    </div>
+  );
+}
+
+function WalletPanel() {
+  const points = useStore((s) => s.loyaltyPoints);
+  const history = useStore((s) => s.loyaltyHistory);
+  const dollars = (points / 100).toFixed(2);
+  return (
+    <div className="py-6">
+      <div className="rounded-2xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground p-6 text-center">
+        <Wallet className="h-8 w-8 mx-auto opacity-90" />
+        <p className="mt-2 text-xs uppercase tracking-widest opacity-80">Terrific Points</p>
+        <p className="mt-1 font-display text-4xl">{points}</p>
+        <p className="mt-1 text-xs opacity-80">≈ ${dollars} reward value</p>
+        <p className="mt-3 text-[11px] opacity-70">Earn 1 point per $1 spent. 100 points = $1 off.</p>
+      </div>
+      <h3 className="mt-6 text-sm font-semibold">Activity</h3>
+      {history.length === 0 ? (
+        <p className="mt-2 text-sm text-muted-foreground">No activity yet — place an order to earn points.</p>
+      ) : (
+        <ul className="mt-3 divide-y divide-border">
+          {history.slice(0, 20).map((h) => (
+            <li key={h.id} className="flex items-center justify-between py-3 text-sm">
+              <div>
+                <p className="font-medium">{h.note}</p>
+                <p className="text-xs text-muted-foreground">{new Date(h.at).toLocaleString()}</p>
+              </div>
+              <span className={h.type === "earn" ? "text-primary font-semibold" : "text-muted-foreground"}>
+                {h.type === "earn" ? "+" : "−"}{h.points} pts
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

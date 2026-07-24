@@ -1,12 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { X, Minus, Plus, ShoppingCart, MapPin, Truck, Tag } from "lucide-react";
+import { X, Minus, Plus, ShoppingCart, MapPin, Truck, Tag, Wallet } from "lucide-react";
 import {
   useStore,
   cart,
   promo,
+  loyalty,
   selectSubtotal,
   selectDiscount,
+  selectPointsDiscount,
   selectTax,
   selectTotal,
   selectDeliveryFee,
@@ -25,7 +27,11 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   const delivery = useStore(selectDeliveryFee);
   const count = useStore(selectCartCount);
   const activePromo = useStore((s) => s.promo);
+  const points = useStore((s) => s.loyaltyPoints);
+  const redeemed = useStore((s) => s.redeemedPoints);
+  const pointsDisc = useStore(selectPointsDiscount);
   const [code, setCode] = useState("");
+  const [ptsInput, setPtsInput] = useState("");
   const [err, setErr] = useState<string | null>(null);
 
   if (!open) return null;
@@ -180,6 +186,12 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                     <span>−${discount.toFixed(2)}</span>
                   </div>
                 )}
+                {pointsDisc > 0 && (
+                  <div className="flex justify-between text-primary">
+                    <span className="flex items-center gap-1.5"><Wallet className="h-4 w-4" /> Points ({redeemed} pts)</span>
+                    <span>−${pointsDisc.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span>Tax</span>
                   <span>${tax.toFixed(2)}</span>
@@ -231,6 +243,41 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                 </>
               )}
             </div>
+
+            {/* Loyalty points */}
+            {points > 0 && (
+              <div className="border border-border rounded-lg p-4 space-y-2">
+                <label className="text-sm font-semibold text-primary flex items-center gap-1.5">
+                  <Wallet className="h-4 w-4" /> Redeem Points
+                </label>
+                <p className="text-xs text-muted-foreground">Balance: {points} pts (20 pts = $1)</p>
+                {redeemed > 0 ? (
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Using <span className="font-semibold">{redeemed}</span> pts (−${pointsDisc.toFixed(2)})</span>
+                    <button onClick={() => loyalty.clearRedeem()} className="text-xs text-primary underline hover:no-underline">Remove</button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      min={0}
+                      max={points}
+                      value={ptsInput}
+                      onChange={(e) => setPtsInput(e.target.value)}
+                      placeholder={`Max ${points}`}
+                      className="flex-1 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                    <button
+                      onClick={() => {
+                        const n = Math.min(points, Math.max(0, parseInt(ptsInput || "0", 10)));
+                        if (n > 0) { loyalty.setRedeemPoints(n); setPtsInput(""); }
+                      }}
+                      className="bg-primary text-primary-foreground rounded-md px-4 text-sm font-semibold hover:opacity-90 transition"
+                    >Apply</button>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Actions */}
             <div className="space-y-2">

@@ -39,6 +39,8 @@ type Props = {
   forcedOccasion?: Occasion;
   forcedRecipient?: Recipient;
   showSearch?: boolean;
+  hideHeader?: boolean;
+  hero?: React.ReactNode;
 };
 
 export function ShopGrid({
@@ -49,6 +51,8 @@ export function ShopGrid({
   forcedOccasion,
   forcedRecipient,
   showSearch = true,
+  hideHeader = false,
+  hero,
 }: Props) {
   const [category, setCategory] = useState<Category | "all">(initialCategory);
   const [prices, setPrices] = useState<number[]>([]);
@@ -99,24 +103,28 @@ export function ShopGrid({
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader />
+      {!hideHeader && <SiteHeader />}
 
-      <div className="max-w-7xl mx-auto px-6 pt-10 pb-6 text-center">
-        <h1 className="font-display text-4xl md:text-5xl text-primary">{title}</h1>
-        <nav className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground flex-wrap">
-          <Link to="/" className="hover:text-primary">Home</Link>
-          {(breadcrumb ?? []).map((b, i) => (
-            <span key={i} className="flex items-center gap-2">
-              <ChevronRight className="h-3 w-3" />
-              {b.to ? (
-                <Link to={b.to} className="hover:text-primary">{b.label}</Link>
-              ) : (
-                <span className="text-primary">{b.label}</span>
-              )}
-            </span>
-          ))}
-        </nav>
-      </div>
+      {hero ? (
+        <div>{hero}</div>
+      ) : (
+        <div className="max-w-7xl mx-auto px-6 pt-10 pb-6 text-center">
+          <h1 className="font-display text-4xl md:text-5xl text-primary">{title}</h1>
+          <nav className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground flex-wrap">
+            <Link to="/" className="hover:text-primary">Home</Link>
+            {(breadcrumb ?? []).map((b, i) => (
+              <span key={i} className="flex items-center gap-2">
+                <ChevronRight className="h-3 w-3" />
+                {b.to ? (
+                  <Link to={b.to} className="hover:text-primary">{b.label}</Link>
+                ) : (
+                  <span className="text-primary">{b.label}</span>
+                )}
+              </span>
+            ))}
+          </nav>
+        </div>
+      )}
 
       {showSearch && (
         <div className="max-w-3xl mx-auto px-6 pb-6">

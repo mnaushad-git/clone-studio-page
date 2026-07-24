@@ -3,6 +3,7 @@ import { Heart, Plus, Star } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/products";
 import { cart, wishlist, useStore, selectIsWishlisted, selectAverageRating } from "@/lib/store";
+import { DeliveryCountdown } from "./DeliveryCountdown";
 
 export function ProductCard({ product }: { product: Product }) {
   const wished = useStore(selectIsWishlisted(product.id));
@@ -36,15 +37,16 @@ export function ProductCard({ product }: { product: Product }) {
           aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
           className="absolute top-3 end-3 h-9 w-9 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow hover:scale-110 transition"
         >
-          <Heart
-            className={`h-4 w-4 ${wished ? "text-red-500 fill-red-500" : "text-foreground"}`}
-          />
+          <Heart className={`h-4 w-4 ${wished ? "text-red-500 fill-red-500" : "text-foreground"}`} />
         </button>
-        {product.isNew && (
-          <span className="absolute top-3 start-3 bg-primary text-primary-foreground text-[10px] uppercase tracking-wider px-2 py-1 rounded">
-            New
-          </span>
-        )}
+        <div className="absolute top-3 start-3 flex flex-col gap-1">
+          {product.isNew && (
+            <span className="bg-primary text-primary-foreground text-[10px] uppercase tracking-wider px-2 py-1 rounded">
+              New
+            </span>
+          )}
+          <DeliveryCountdown variant="chip" />
+        </div>
       </div>
       <div className="p-4 flex-1 flex flex-col">
         <div className="flex items-center justify-between gap-2">

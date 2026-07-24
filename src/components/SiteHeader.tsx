@@ -1,21 +1,24 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronDown, Heart, Menu, Search, ShoppingBag, User } from "lucide-react";
+import { ChevronDown, Heart, MapPin, Menu, Search, ShoppingBag, User } from "lucide-react";
 import { useState } from "react";
 import { useStore, selectCartCount } from "@/lib/store";
 import { CartDrawer } from "./CartDrawer";
 import { MegaMenu } from "./MegaMenu";
 import { useLang, setLang, useT } from "@/lib/i18n";
+import { FLAGS } from "@/lib/location";
 
 export function SiteHeader({ variant = "cream" }: { variant?: "cream" | "white" }) {
   const count = useStore(selectCartCount);
   const wishCount = useStore((s) => s.wishlist.length);
   const user = useStore((s) => s.user);
+  const city = useStore((s) => s.location);
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const lang = useLang();
   const t = useT();
   const bg = variant === "white" ? "bg-white" : "bg-background";
+  const openLocation = () => window.dispatchEvent(new CustomEvent("tb:open-location"));
 
   return (
     <>
@@ -63,6 +66,16 @@ export function SiteHeader({ variant = "cream" }: { variant?: "cream" | "white" 
                 </div>
               )}
             </div>
+            <button
+              onClick={openLocation}
+              className="hidden md:inline-flex items-center gap-1 hover:text-primary transition text-xs"
+              aria-label="Change delivery location"
+            >
+              <MapPin className="h-4 w-4" />
+              <span className="max-w-[110px] truncate">
+                {city ? `${FLAGS[city.countryCode] ?? ""} ${city.city}` : "Deliver to…"}
+              </span>
+            </button>
           </div>
           <Link to="/" className="font-script text-2xl sm:text-3xl text-primary leading-none justify-self-center text-center whitespace-nowrap">
             Terrific<br /><span className="ms-6">Bites</span>
