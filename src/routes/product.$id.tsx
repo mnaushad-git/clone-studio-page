@@ -136,7 +136,7 @@ function ProductPage() {
         <div>
           <div className="flex items-start justify-between gap-4">
             <div>
-              <div className="text-3xl font-bold text-foreground">${unitPrice.toFixed(2)}</div>
+              <div className="text-3xl font-bold text-foreground">SAR ${unitPrice.toFixed(2)}</div>
               <div className="text-xs text-muted-foreground mt-1">All prices include VAT</div>
             </div>
             <div className="text-right">
