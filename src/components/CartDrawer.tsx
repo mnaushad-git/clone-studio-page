@@ -270,7 +270,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                     <button
                       onClick={() => {
                         const n = Math.min(points, Math.max(0, parseInt(ptsInput || "0", 10)));
-                        if (n > 0) { loyalty.redeem(n); setPtsInput(""); }
+                        if (n > 0) { loyalty.setRedeemPoints(n); setPtsInput(""); }
                       }}
                       className="bg-primary text-primary-foreground rounded-md px-4 text-sm font-semibold hover:opacity-90 transition"
                     >Apply</button>
