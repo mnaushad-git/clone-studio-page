@@ -250,7 +250,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                 <label className="text-sm font-semibold text-primary flex items-center gap-1.5">
                   <Wallet className="h-4 w-4" /> Redeem Points
                 </label>
-                <p className="text-xs text-muted-foreground">Balance: {points} pts (20 pts = $1)</p>
+                <p className="text-xs text-muted-foreground">Balance: {points} pts (20 pts = SAR 1)</p>
                 {redeemed > 0 ? (
                   <div className="flex items-center justify-between text-sm">
                     <span>Using <span className="font-semibold">{redeemed}</span> pts (−${pointsDisc.toFixed(2)})</span>
