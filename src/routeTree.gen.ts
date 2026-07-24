@@ -21,6 +21,7 @@ import { Route as DonutsRouteImport } from './routes/donuts'
 import { Route as DeliveryRouteImport } from './routes/delivery'
 import { Route as CustomizeRouteImport } from './routes/customize'
 import { Route as CupcakesRouteImport } from './routes/cupcakes'
+import { Route as CorporateRouteImport } from './routes/corporate'
 import { Route as ChocolatesRouteImport } from './routes/chocolates'
 import { Route as CakesRouteImport } from './routes/cakes'
 import { Route as AccountRouteImport } from './routes/account'
@@ -28,9 +29,11 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RecipientsIndexRouteImport } from './routes/recipients.index'
 import { Route as MomentsIndexRouteImport } from './routes/moments.index'
+import { Route as TrackIdRouteImport } from './routes/track.$id'
 import { Route as RecipientsSlugRouteImport } from './routes/recipients.$slug'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as MomentsSlugRouteImport } from './routes/moments.$slug'
+import { Route as ConfirmAddressTokenRouteImport } from './routes/confirm-address.$token'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -92,6 +95,11 @@ const CupcakesRoute = CupcakesRouteImport.update({
   path: '/cupcakes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CorporateRoute = CorporateRouteImport.update({
+  id: '/corporate',
+  path: '/corporate',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChocolatesRoute = ChocolatesRouteImport.update({
   id: '/chocolates',
   path: '/chocolates',
@@ -127,6 +135,11 @@ const MomentsIndexRoute = MomentsIndexRouteImport.update({
   path: '/moments/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackIdRoute = TrackIdRouteImport.update({
+  id: '/track/$id',
+  path: '/track/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RecipientsSlugRoute = RecipientsSlugRouteImport.update({
   id: '/recipients/$slug',
   path: '/recipients/$slug',
@@ -142,6 +155,11 @@ const MomentsSlugRoute = MomentsSlugRouteImport.update({
   path: '/moments/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConfirmAddressTokenRoute = ConfirmAddressTokenRouteImport.update({
+  id: '/confirm-address/$token',
+  path: '/confirm-address/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -149,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/cakes': typeof CakesRoute
   '/chocolates': typeof ChocolatesRoute
+  '/corporate': typeof CorporateRoute
   '/cupcakes': typeof CupcakesRoute
   '/customize': typeof CustomizeRoute
   '/delivery': typeof DeliveryRoute
@@ -161,9 +180,11 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
   '/wishlist': typeof WishlistRoute
+  '/confirm-address/$token': typeof ConfirmAddressTokenRoute
   '/moments/$slug': typeof MomentsSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/recipients/$slug': typeof RecipientsSlugRoute
+  '/track/$id': typeof TrackIdRoute
   '/moments/': typeof MomentsIndexRoute
   '/recipients/': typeof RecipientsIndexRoute
 }
@@ -173,6 +194,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/cakes': typeof CakesRoute
   '/chocolates': typeof ChocolatesRoute
+  '/corporate': typeof CorporateRoute
   '/cupcakes': typeof CupcakesRoute
   '/customize': typeof CustomizeRoute
   '/delivery': typeof DeliveryRoute
@@ -185,9 +207,11 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
   '/wishlist': typeof WishlistRoute
+  '/confirm-address/$token': typeof ConfirmAddressTokenRoute
   '/moments/$slug': typeof MomentsSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/recipients/$slug': typeof RecipientsSlugRoute
+  '/track/$id': typeof TrackIdRoute
   '/moments': typeof MomentsIndexRoute
   '/recipients': typeof RecipientsIndexRoute
 }
@@ -198,6 +222,7 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/cakes': typeof CakesRoute
   '/chocolates': typeof ChocolatesRoute
+  '/corporate': typeof CorporateRoute
   '/cupcakes': typeof CupcakesRoute
   '/customize': typeof CustomizeRoute
   '/delivery': typeof DeliveryRoute
@@ -210,9 +235,11 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
   '/wishlist': typeof WishlistRoute
+  '/confirm-address/$token': typeof ConfirmAddressTokenRoute
   '/moments/$slug': typeof MomentsSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/recipients/$slug': typeof RecipientsSlugRoute
+  '/track/$id': typeof TrackIdRoute
   '/moments/': typeof MomentsIndexRoute
   '/recipients/': typeof RecipientsIndexRoute
 }
@@ -224,6 +251,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/cakes'
     | '/chocolates'
+    | '/corporate'
     | '/cupcakes'
     | '/customize'
     | '/delivery'
@@ -236,9 +264,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/success'
     | '/wishlist'
+    | '/confirm-address/$token'
     | '/moments/$slug'
     | '/product/$id'
     | '/recipients/$slug'
+    | '/track/$id'
     | '/moments/'
     | '/recipients/'
   fileRoutesByTo: FileRoutesByTo
@@ -248,6 +278,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/cakes'
     | '/chocolates'
+    | '/corporate'
     | '/cupcakes'
     | '/customize'
     | '/delivery'
@@ -260,9 +291,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/success'
     | '/wishlist'
+    | '/confirm-address/$token'
     | '/moments/$slug'
     | '/product/$id'
     | '/recipients/$slug'
+    | '/track/$id'
     | '/moments'
     | '/recipients'
   id:
@@ -272,6 +305,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/cakes'
     | '/chocolates'
+    | '/corporate'
     | '/cupcakes'
     | '/customize'
     | '/delivery'
@@ -284,9 +318,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/success'
     | '/wishlist'
+    | '/confirm-address/$token'
     | '/moments/$slug'
     | '/product/$id'
     | '/recipients/$slug'
+    | '/track/$id'
     | '/moments/'
     | '/recipients/'
   fileRoutesById: FileRoutesById
@@ -297,6 +333,7 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   CakesRoute: typeof CakesRoute
   ChocolatesRoute: typeof ChocolatesRoute
+  CorporateRoute: typeof CorporateRoute
   CupcakesRoute: typeof CupcakesRoute
   CustomizeRoute: typeof CustomizeRoute
   DeliveryRoute: typeof DeliveryRoute
@@ -309,9 +346,11 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SuccessRoute: typeof SuccessRoute
   WishlistRoute: typeof WishlistRoute
+  ConfirmAddressTokenRoute: typeof ConfirmAddressTokenRoute
   MomentsSlugRoute: typeof MomentsSlugRoute
   ProductIdRoute: typeof ProductIdRoute
   RecipientsSlugRoute: typeof RecipientsSlugRoute
+  TrackIdRoute: typeof TrackIdRoute
   MomentsIndexRoute: typeof MomentsIndexRoute
   RecipientsIndexRoute: typeof RecipientsIndexRoute
 }
@@ -402,6 +441,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CupcakesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/corporate': {
+      id: '/corporate'
+      path: '/corporate'
+      fullPath: '/corporate'
+      preLoaderRoute: typeof CorporateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chocolates': {
       id: '/chocolates'
       path: '/chocolates'
@@ -451,6 +497,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MomentsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/track/$id': {
+      id: '/track/$id'
+      path: '/track/$id'
+      fullPath: '/track/$id'
+      preLoaderRoute: typeof TrackIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recipients/$slug': {
       id: '/recipients/$slug'
       path: '/recipients/$slug'
@@ -472,6 +525,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MomentsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/confirm-address/$token': {
+      id: '/confirm-address/$token'
+      path: '/confirm-address/$token'
+      fullPath: '/confirm-address/$token'
+      preLoaderRoute: typeof ConfirmAddressTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -481,6 +541,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   CakesRoute: CakesRoute,
   ChocolatesRoute: ChocolatesRoute,
+  CorporateRoute: CorporateRoute,
   CupcakesRoute: CupcakesRoute,
   CustomizeRoute: CustomizeRoute,
   DeliveryRoute: DeliveryRoute,
@@ -493,9 +554,11 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SuccessRoute: SuccessRoute,
   WishlistRoute: WishlistRoute,
+  ConfirmAddressTokenRoute: ConfirmAddressTokenRoute,
   MomentsSlugRoute: MomentsSlugRoute,
   ProductIdRoute: ProductIdRoute,
   RecipientsSlugRoute: RecipientsSlugRoute,
+  TrackIdRoute: TrackIdRoute,
   MomentsIndexRoute: MomentsIndexRoute,
   RecipientsIndexRoute: RecipientsIndexRoute,
 }
