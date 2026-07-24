@@ -169,7 +169,7 @@ function AccountPage() {
                             <p className="text-xs text-muted-foreground">{new Date(o.createdAt).toLocaleString()}</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold">${o.total.toFixed(2)}</p>
+                            <p className="font-semibold">SAR ${o.total.toFixed(2)}</p>
                             <span
                               className={`inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full font-medium ${
                                 o.status === "Delivered"

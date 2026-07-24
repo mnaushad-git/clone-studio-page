@@ -25,10 +25,10 @@ const CATEGORIES: { key: Category | "all"; label: string }[] = [
 ];
 
 const PRICE_BUCKETS = [
-  { label: "Under $10", min: 0, max: 10 },
-  { label: "$10 – $25", min: 10, max: 25 },
-  { label: "$25 – $100", min: 25, max: 100 },
-  { label: "$100+", min: 100, max: Infinity },
+  { label: "Under SAR 10", min: 0, max: 10 },
+  { label: "SAR 10 – SAR 25", min: 10, max: 25 },
+  { label: "SAR 25 – SAR 100", min: 25, max: 100 },
+  { label: "SAR 100+", min: 100, max: Infinity },
 ];
 
 type Props = {

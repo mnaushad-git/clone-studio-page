@@ -75,8 +75,8 @@ function SuccessPage() {
     order.items.forEach((it) => {
       doc.text(it.name + (it.size ? ` (${it.size})` : ""), 40, y);
       doc.text(String(it.qty), 320, y);
-      doc.text(`$${it.unitPrice.toFixed(2)}`, 400, y);
-      doc.text(`$${(it.qty * it.unitPrice).toFixed(2)}`, w - 40, y, { align: "right" });
+      doc.text(`SAR ${it.unitPrice.toFixed(2)}`, 400, y);
+      doc.text(`SAR ${(it.qty * it.unitPrice).toFixed(2)}`, w - 40, y, { align: "right" });
       y += 18;
     });
 
@@ -84,23 +84,23 @@ function SuccessPage() {
     doc.line(40, y, w - 40, y);
     y += 20;
     doc.text("Subtotal", 400, y);
-    doc.text(`$${order.subtotal.toFixed(2)}`, w - 40, y, { align: "right" });
+    doc.text(`SAR ${order.subtotal.toFixed(2)}`, w - 40, y, { align: "right" });
     if (order.discount > 0) {
       y += 16;
       doc.text("Discount", 400, y);
-      doc.text(`-$${order.discount.toFixed(2)}`, w - 40, y, { align: "right" });
+      doc.text(`-SAR ${order.discount.toFixed(2)}`, w - 40, y, { align: "right" });
     }
     y += 16;
     doc.text("Delivery", 400, y);
-    doc.text(order.deliveryFee === 0 ? "Free" : `$${order.deliveryFee.toFixed(2)}`, w - 40, y, { align: "right" });
+    doc.text(order.deliveryFee === 0 ? "Free" : `SAR ${order.deliveryFee.toFixed(2)}`, w - 40, y, { align: "right" });
     y += 16;
     doc.text("Tax", 400, y);
-    doc.text(`$${order.tax.toFixed(2)}`, w - 40, y, { align: "right" });
+    doc.text(`SAR ${order.tax.toFixed(2)}`, w - 40, y, { align: "right" });
     y += 20;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
     doc.text("Total", 400, y);
-    doc.text(`$${order.total.toFixed(2)}`, w - 40, y, { align: "right" });
+    doc.text(`SAR ${order.total.toFixed(2)}`, w - 40, y, { align: "right" });
 
     y += 50;
     doc.setFont("helvetica", "normal");
@@ -186,17 +186,17 @@ function SuccessPage() {
                   </p>
                   {it.inscription && <p className="text-xs italic text-muted-foreground">"{it.inscription}"</p>}
                 </div>
-                <p>${(it.qty * it.unitPrice).toFixed(2)}</p>
+                <p>SAR ${(it.qty * it.unitPrice).toFixed(2)}</p>
               </div>
             ))}
           </div>
           <div className="border-t border-border mt-4 pt-4 space-y-2 text-sm">
-            <div className="flex justify-between"><span>Subtotal</span><span>${order.subtotal.toFixed(2)}</span></div>
-            {order.discount > 0 && <div className="flex justify-between text-primary"><span>Discount</span><span>-${order.discount.toFixed(2)}</span></div>}
-            <div className="flex justify-between"><span>Delivery</span><span>{order.deliveryFee === 0 ? "Free" : `$${order.deliveryFee.toFixed(2)}`}</span></div>
-            <div className="flex justify-between"><span>Tax</span><span>${order.tax.toFixed(2)}</span></div>
+            <div className="flex justify-between"><span>Subtotal</span><span>SAR ${order.subtotal.toFixed(2)}</span></div>
+            {order.discount > 0 && <div className="flex justify-between text-primary"><span>Discount</span><span>-SAR ${order.discount.toFixed(2)}</span></div>}
+            <div className="flex justify-between"><span>Delivery</span><span>{order.deliveryFee === 0 ? "Free" : `SAR ${order.deliveryFee.toFixed(2)}`}</span></div>
+            <div className="flex justify-between"><span>Tax</span><span>SAR ${order.tax.toFixed(2)}</span></div>
             <div className="flex justify-between font-semibold text-base pt-2 border-t border-border">
-              <span>Total</span><span>${order.total.toFixed(2)}</span>
+              <span>Total</span><span>SAR ${order.total.toFixed(2)}</span>
             </div>
           </div>
 
