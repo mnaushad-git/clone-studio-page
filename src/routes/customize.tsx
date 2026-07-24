@@ -173,7 +173,7 @@ function CustomizePage() {
                 <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden">
                   <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
                 </div>
-                <span className="text-xs text-muted-foreground">$200</span>
+                <span className="text-xs text-muted-foreground">SAR 200</span>
               </div>
             </div>
 

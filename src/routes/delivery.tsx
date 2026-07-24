@@ -195,7 +195,7 @@ function DeliveryPage() {
                 <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden">
                   <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${Math.min(100, ((subtotal - discount) / 200) * 100)}%` }} />
                 </div>
-                <span className="text-xs text-muted-foreground">$200</span>
+                <span className="text-xs text-muted-foreground">SAR 200</span>
               </div>
             </div>
 
