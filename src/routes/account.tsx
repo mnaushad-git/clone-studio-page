@@ -213,14 +213,7 @@ function AccountPage() {
               </div>
             )}
 
-            {active === "wallet" && (
-              <div className="h-full flex flex-col items-center justify-center text-center py-24">
-                <Wallet className="h-10 w-10 text-primary" />
-                <h2 className="mt-3 font-display text-2xl text-primary">Terrific Wallet</h2>
-                <p className="text-sm text-muted-foreground mt-3">Balance: <span className="font-semibold text-foreground">${(orders.length * 5).toFixed(2)}</span></p>
-                <p className="text-xs text-muted-foreground mt-1">You earn $5 rewards for every order placed.</p>
-              </div>
-            )}
+            {active === "wallet" && <WalletPanel />}
 
             {(active === "subs" || active === "invoices" || active === "occasions") && (
               <div className="h-full flex flex-col items-center justify-center text-center py-24">
