@@ -108,13 +108,13 @@ function CustomizePage() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <button onClick={() => setGiftCardSelected(!giftCardSelected)} className="group">
+                <button onClick={() => { setGiftTab("card"); setGiftModalOpen(true); }} className="group">
                   <div className={`aspect-square rounded-lg overflow-hidden border-2 ${giftCardSelected ? "border-primary" : "border-dashed border-border"}`}>
-                    <img src={giftCard} alt="Gift card" loading="lazy" className="w-full h-full object-cover" />
+                    <img src={activeCard.image} alt="Gift card" loading="lazy" className="w-full h-full object-cover" />
                   </div>
-                  <p className="text-center text-sm mt-3">{giftCardSelected ? "Gift Card ✓" : "Select Gift Card"}</p>
+                  <p className="text-center text-sm mt-3">{giftCardSelected ? `${activeCard.label} ✓` : "Select Gift Card"}</p>
                 </button>
-                <button onClick={() => setShowMsg(true)} className="group">
+                <button onClick={() => { setGiftTab("message"); setGiftModalOpen(true); }} className="group">
                   <div className="aspect-square rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-3 text-muted-foreground p-4 text-center">
                     <MessageSquare className="h-6 w-6" />
                     <span className="text-sm">{message ? `"${message.slice(0, 40)}${message.length > 40 ? "…" : ""}"` : "Tap to add message"}</span>
