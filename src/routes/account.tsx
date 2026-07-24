@@ -268,7 +268,7 @@ function WalletPanel() {
         <Wallet className="h-8 w-8 mx-auto opacity-90" />
         <p className="mt-2 text-xs uppercase tracking-widest opacity-80">Terrific Points</p>
         <p className="mt-1 font-display text-4xl">{points}</p>
-        <p className="mt-1 text-xs opacity-80">≈ ${dollars} reward value</p>
+        <p className="mt-1 text-xs opacity-80">≈ SAR {dollars} reward value</p>
         <p className="mt-3 text-[11px] opacity-70">Earn 1 point per SAR 1 spent. 100 points = SAR 1 off.</p>
       </div>
       <h3 className="mt-6 text-sm font-semibold">Activity</h3>
