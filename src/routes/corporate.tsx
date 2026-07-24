@@ -135,7 +135,7 @@ function CorporatePage() {
                   <option>Other</option>
                 </select>
               </div>
-              <Field label="Budget" value={form.budget} onChange={(v) => setForm({ ...form, budget: v })} placeholder="$5,000" />
+              <Field label="Budget" value={form.budget} onChange={(v) => setForm({ ...form, budget: v })} placeholder="SAR 5,000" />
               <Field label="Needed by" type="date" value={form.when} onChange={(v) => setForm({ ...form, when: v })} />
               <div className="sm:col-span-2">
                 <label className="text-xs text-muted-foreground">Notes</label>

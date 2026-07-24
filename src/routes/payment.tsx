@@ -193,7 +193,7 @@ function PaymentPage() {
                         <p className="text-sm font-medium truncate">{p?.name}</p>
                         <p className="text-xs text-muted-foreground">Qty {it.qty}</p>
                       </div>
-                      <p className="text-sm font-semibold">${(it.unitPrice * it.qty).toFixed(2)}</p>
+                      <p className="text-sm font-semibold">SAR {(it.unitPrice * it.qty).toFixed(2)}</p>
                     </div>
                   );
                 })}
@@ -202,16 +202,16 @@ function PaymentPage() {
 
             <div className="bg-white rounded-2xl shadow-sm p-5 space-y-3 text-sm">
               <h3 className="font-semibold">Order Summary</h3>
-              <Row label="Subtotal" val={`$${subtotal.toFixed(2)}`} />
-              {discount > 0 && <Row label={`Discount (${currentPromo?.code})`} val={`-$${discount.toFixed(2)}`} />}
-              <Row label="Delivery" val={deliveryFee === 0 ? "Free" : `$${deliveryFee.toFixed(2)}`} />
-              <Row label="Tax" val={`$${tax.toFixed(2)}`} />
+              <Row label="Subtotal" val={`SAR ${subtotal.toFixed(2)}`} />
+              {discount > 0 && <Row label={`Discount (${currentPromo?.code})`} val={`-SAR ${discount.toFixed(2)}`} />}
+              <Row label="Delivery" val={deliveryFee === 0 ? "Free" : `SAR ${deliveryFee.toFixed(2)}`} />
+              <Row label="Tax" val={`SAR ${tax.toFixed(2)}`} />
               <div className="flex items-center gap-2 text-xs text-foreground/80 pt-1">
                 <Truck className="h-3.5 w-3.5" /> Skinniy Express
               </div>
               <div className="border-t border-border pt-3 flex items-center justify-between">
                 <span className="font-semibold">Order Total</span>
-                <span className="font-semibold text-lg">${total.toFixed(2)}</span>
+                <span className="font-semibold text-lg">SAR {total.toFixed(2)}</span>
               </div>
             </div>
 

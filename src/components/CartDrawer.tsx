@@ -74,7 +74,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               </div>
               <div>
                 <h4 className="font-semibold text-sm text-primary leading-snug">{p.name}</h4>
-                <p className="text-xs text-muted-foreground mt-0.5">${p.price.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">SAR {p.price.toFixed(2)}</p>
               </div>
               <button
                 onClick={() => cart.add({ productId: p.id, qty: 1 })}
@@ -125,7 +125,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                 <Truck className="h-6 w-6 text-primary shrink-0" />
                 <p className="text-sm flex-1">
                   {remaining > 0 ? (
-                    <>Only <span className="font-semibold">${remaining.toFixed(2)}</span> to Go for Free Delivery!</>
+                    <>Only <span className="font-semibold">SAR {remaining.toFixed(2)}</span> to Go for Free Delivery!</>
                   ) : (
                     <span className="font-semibold text-primary">You've unlocked Free Delivery!</span>
                   )}
@@ -155,7 +155,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                         <span className="text-muted-foreground me-2">x{it.qty}</span>
                         {p?.name}
                       </span>
-                      <span>${(it.unitPrice * it.qty).toFixed(2)}</span>
+                      <span>SAR {(it.unitPrice * it.qty).toFixed(2)}</span>
                     </div>
                   );
                 })}
@@ -165,7 +165,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                   <span className="text-muted-foreground flex items-center gap-1.5">
                     <Truck className="h-4 w-4" /> Delivery
                   </span>
-                  <span>{delivery === 0 ? "Free" : `$${delivery.toFixed(2)}`}</span>
+                  <span>{delivery === 0 ? "Free" : `SAR ${delivery.toFixed(2)}`}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground flex items-center gap-1.5">
@@ -176,7 +176,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               <div className="px-4 py-3 border-t border-border text-sm space-y-1.5">
                 <div className="flex justify-between">
                   <span>Amount</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>SAR {subtotal.toFixed(2)}</span>
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between text-primary">
@@ -194,12 +194,12 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                 )}
                 <div className="flex justify-between">
                   <span>Tax</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>SAR {tax.toFixed(2)}</span>
                 </div>
               </div>
               <div className="px-4 py-3 border-t border-border flex justify-between items-center">
                 <span className="font-semibold">Order Total</span>
-                <span className="font-semibold text-lg">${total.toFixed(2)}</span>
+                <span className="font-semibold text-lg">SAR {total.toFixed(2)}</span>
               </div>
             </div>
 
@@ -250,7 +250,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                 <label className="text-sm font-semibold text-primary flex items-center gap-1.5">
                   <Wallet className="h-4 w-4" /> Redeem Points
                 </label>
-                <p className="text-xs text-muted-foreground">Balance: {points} pts (20 pts = $1)</p>
+                <p className="text-xs text-muted-foreground">Balance: {points} pts (20 pts = SAR 1)</p>
                 {redeemed > 0 ? (
                   <div className="flex items-center justify-between text-sm">
                     <span>Using <span className="font-semibold">{redeemed}</span> pts (−${pointsDisc.toFixed(2)})</span>
@@ -327,7 +327,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                         </div>
                       </div>
                       <div className="flex flex-col items-end justify-between">
-                        <span className="text-sm font-semibold">${(it.unitPrice * it.qty).toFixed(2)}</span>
+                        <span className="text-sm font-semibold">SAR {(it.unitPrice * it.qty).toFixed(2)}</span>
                         <button
                           onClick={() => cart.remove(it.lineId)}
                           className="text-xs text-primary underline hover:no-underline"

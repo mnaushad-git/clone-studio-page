@@ -102,7 +102,7 @@ type State = {
 const STORAGE_KEY = "tb.state.v1";
 const isBrowser = typeof window !== "undefined";
 export const POINTS_PER_DOLLAR = 1;
-export const POINTS_REDEEM_RATE = 20; // 20 pts = $1
+export const POINTS_REDEEM_RATE = 20; // 20 pts = SAR 1
 
 const seededReviews: Review[] = [
   { id: "r1", productId: "buttercream-cake", author: "Sara M.", rating: 5, title: "Absolutely divine!", body: "Ordered this for my daughter's birthday — everyone raved about it. Moist, beautifully decorated, and delivered on time.", createdAt: Date.now() - 86400000 * 3, verified: true },

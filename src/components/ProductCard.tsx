@@ -57,7 +57,7 @@ export function ProductCard({ product }: { product: Product }) {
           >
             {product.name}
           </Link>
-          <span className="text-sm text-primary font-semibold whitespace-nowrap">${product.price.toFixed(2)}</span>
+          <span className="text-sm text-primary font-semibold whitespace-nowrap">SAR {product.price.toFixed(2)}</span>
         </div>
         {avg > 0 && (
           <div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">

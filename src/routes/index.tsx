@@ -77,7 +77,7 @@ function Index() {
                 <img src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
               </div>
               <h3 className="mt-3 font-display text-sm text-primary uppercase tracking-wider">{p.name}</h3>
-              <p className="text-xs text-muted-foreground mt-1">${p.price.toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground mt-1">SAR {p.price.toFixed(2)}</p>
             </Link>
           ))}
         </div>
@@ -93,7 +93,7 @@ function Index() {
                 <img src={g.image} alt={g.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
               </div>
               <h3 className="mt-4 font-display text-sm text-primary uppercase tracking-wider">{g.name}</h3>
-              <p className="text-xs text-muted-foreground">${g.price.toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground">SAR {g.price.toFixed(2)}</p>
             </Link>
           ))}
         </div>
@@ -115,7 +115,7 @@ function Index() {
                     <img src={d.image} alt={d.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
                   </div>
                   <h3 className="mt-3 font-display text-sm text-primary uppercase tracking-wider">{d.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">${d.price.toFixed(2)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">SAR {d.price.toFixed(2)}</p>
                 </Link>
               ))}
             </div>
@@ -134,7 +134,7 @@ function Index() {
                 <img src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
               </div>
               <h3 className="mt-3 font-display text-sm text-primary uppercase tracking-wider">{p.name}</h3>
-              <p className="text-xs text-muted-foreground mt-1">${p.price.toFixed(2)}</p>
+              <p className="text-xs text-muted-foreground mt-1">SAR {p.price.toFixed(2)}</p>
             </Link>
           ))}
         </div>

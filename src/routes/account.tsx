@@ -169,7 +169,7 @@ function AccountPage() {
                             <p className="text-xs text-muted-foreground">{new Date(o.createdAt).toLocaleString()}</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold">${o.total.toFixed(2)}</p>
+                            <p className="font-semibold">SAR {o.total.toFixed(2)}</p>
                             <span
                               className={`inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full font-medium ${
                                 o.status === "Delivered"
@@ -269,7 +269,7 @@ function WalletPanel() {
         <p className="mt-2 text-xs uppercase tracking-widest opacity-80">Terrific Points</p>
         <p className="mt-1 font-display text-4xl">{points}</p>
         <p className="mt-1 text-xs opacity-80">≈ ${dollars} reward value</p>
-        <p className="mt-3 text-[11px] opacity-70">Earn 1 point per $1 spent. 100 points = $1 off.</p>
+        <p className="mt-3 text-[11px] opacity-70">Earn 1 point per SAR 1 spent. 100 points = SAR 1 off.</p>
       </div>
       <h3 className="mt-6 text-sm font-semibold">Activity</h3>
       {history.length === 0 ? (
