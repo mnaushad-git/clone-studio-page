@@ -27,7 +27,11 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   const delivery = useStore(selectDeliveryFee);
   const count = useStore(selectCartCount);
   const activePromo = useStore((s) => s.promo);
+  const points = useStore((s) => s.loyaltyPoints);
+  const redeemed = useStore((s) => s.redeemedPoints);
+  const pointsDisc = useStore(selectPointsDiscount);
   const [code, setCode] = useState("");
+  const [ptsInput, setPtsInput] = useState("");
   const [err, setErr] = useState<string | null>(null);
 
   if (!open) return null;
