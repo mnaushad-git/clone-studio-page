@@ -1,14 +1,32 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  Check, MessageSquare, Minus, Plus, Ticket, Bike, MapPin, Truck, X,
+  Check, MessageSquare, Minus, Plus, Ticket, Bike, MapPin, Truck, X, Link2, PenLine,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import giftCard from "@/assets/gift-card.jpg";
+import giftCardRed from "@/assets/gift-card-red.jpg";
+import giftCardCream from "@/assets/gift-card-cream.jpg";
+import giftCardBrown from "@/assets/gift-card-brown.jpg";
 import { useStore, cart, promo, selectSubtotal, selectDiscount, selectTax, selectDeliveryFee, selectTotal } from "@/lib/store";
 import { featured, getProduct } from "@/lib/products";
+
+const GIFT_CARDS = [
+  { id: "classic", label: "Classic", image: giftCard },
+  { id: "red", label: "Red Ribbon", image: giftCardRed },
+  { id: "cream", label: "Cream", image: giftCardCream },
+  { id: "brown", label: "Luxe Brown", image: giftCardBrown },
+];
+
+const SUGGESTED_MESSAGES = [
+  "Wishing you a day as sweet as you are. Happy Birthday!",
+  "Thank you for everything you do — you deserve all the treats.",
+  "Just a little something to brighten your day.",
+  "Congratulations! Celebrate with something delicious.",
+  "Sending sweet hugs and love your way.",
+];
 
 export const Route = createFileRoute("/customize")({
   component: CustomizePage,
