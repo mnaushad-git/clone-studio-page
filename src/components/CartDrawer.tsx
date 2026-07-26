@@ -21,18 +21,27 @@ const FREE_DELIVERY_THRESHOLD = 200;
 export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const items = useStore((s) => s.cart);
   const subtotal = useStore(selectSubtotal);
-  const discount = useStore(selectDiscount);
-  const tax = useStore(selectTax);
-  const total = useStore(selectTotal);
-  const delivery = useStore(selectDeliveryFee);
+  const discountRaw = useStore(selectDiscount);
+  const taxRaw = useStore(selectTax);
+  const totalRaw = useStore(selectTotal);
+  const deliveryRaw = useStore(selectDeliveryFee);
   const count = useStore(selectCartCount);
   const activePromo = useStore((s) => s.promo);
   const points = useStore((s) => s.loyaltyPoints);
   const redeemed = useStore((s) => s.redeemedPoints);
-  const pointsDisc = useStore(selectPointsDiscount);
+  const pointsDiscRaw = useStore(selectPointsDiscount);
+  const user = useStore((s) => s.user);
+  const isAuthed = !!user;
   const [code, setCode] = useState("");
   const [ptsInput, setPtsInput] = useState("");
   const [err, setErr] = useState<string | null>(null);
+
+  // Guests: hide delivery, promo, and points from the cart summary
+  const discount = isAuthed ? discountRaw : 0;
+  const tax = isAuthed ? taxRaw : +(subtotal * 0.05).toFixed(2);
+  const delivery = isAuthed ? deliveryRaw : 0;
+  const pointsDisc = isAuthed ? pointsDiscRaw : 0;
+  const total = isAuthed ? totalRaw : +(subtotal + tax).toFixed(2);
 
   if (!open) return null;
 
