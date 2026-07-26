@@ -120,14 +120,26 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function MaintenanceBanner() {
+  const { useAdmin } = require("@/lib/admin-store") as typeof import("@/lib/admin-store");
+  const enabled = useAdmin((s) => s.settings.maintenanceMode);
+  if (!enabled) return null;
+  return (
+    <div className="bg-amber-500 text-black text-center text-xs py-2 font-medium">
+      🛠️ We're doing a bit of maintenance — some features may be temporarily unavailable.
+    </div>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
+      <MaintenanceBanner />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-      
+
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );
