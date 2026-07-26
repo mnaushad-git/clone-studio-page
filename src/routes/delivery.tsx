@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useStore, addresses as addressStore, selectSubtotal, selectDiscount, selectTax, selectDeliveryFee, selectTotal, promo, RIYADH_AREAS } from "@/lib/store";
-import { useAdmin, getAdminState } from "@/lib/admin-store";
+import { getAdminState } from "@/lib/admin-store";
 import { getProduct } from "@/lib/products";
 
 const DAY_SLOTS: [number, number][] = [[8, 10], [10, 12], [12, 14], [14, 16], [16, 18], [18, 20]];
