@@ -391,7 +391,8 @@ export function selectPromoDiscount(s: State): number {
   return s.promo ? +(sub * (s.promo.percent / 100)).toFixed(2) : 0;
 }
 export function selectPointsDiscount(s: State): number {
-  return +((s.redeemedPoints ?? 0) / POINTS_REDEEM_RATE).toFixed(2);
+  const rate = getAdminState().loyalty.redeemRate || POINTS_REDEEM_RATE;
+  return +((s.redeemedPoints ?? 0) / rate).toFixed(2);
 }
 export function selectDiscount(s: State): number {
   return +(selectPromoDiscount(s) + selectPointsDiscount(s)).toFixed(2);
