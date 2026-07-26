@@ -304,12 +304,20 @@ function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { in
   const now = new Date();
   const quickDates = useMemo<Quick[]>(() => {
     const fmt = (d: Date) => d.toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long" });
+    const today = new Date(now);
     const t = new Date(now); t.setDate(t.getDate() + 1);
     const t2 = new Date(now); t2.setDate(t2.getDate() + 2);
-    return [
+
+    const slots: Quick[] = [];
+    // If any same-day slots remain, offer Today as a quick option
+    if (DAY_SLOTS.some(([s]) => s > now.getHours())) {
+      slots.push({ key: fmt(today), label: "Today", sub: today.toLocaleDateString("en-US", { day: "numeric", month: "long" }) });
+    }
+    slots.push(
       { key: fmt(t), label: "Tomorrow", sub: t.toLocaleDateString("en-US", { day: "numeric", month: "long" }) },
       { key: fmt(t2), label: t2.toLocaleDateString("en-US", { weekday: "long" }), sub: t2.toLocaleDateString("en-US", { day: "numeric", month: "long" }) },
-    ];
+    );
+    return slots;
   }, []);
 
   const [mode, setMode] = useState<"quick" | "pick">(initialDate && !quickDates.find((q) => q.key === initialDate) ? "pick" : "quick");
