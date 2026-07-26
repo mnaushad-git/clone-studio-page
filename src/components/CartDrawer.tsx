@@ -306,13 +306,24 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
 
             {/* Actions */}
             <div className="space-y-2">
-              <Link
-                to="/customize"
-                onClick={onClose}
-                className="block text-center bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 transition"
-              >
-                Checkout
-              </Link>
+              {isAuthed ? (
+                <Link
+                  to="/customize"
+                  onClick={onClose}
+                  className="block text-center bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 transition"
+                >
+                  Checkout
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  search={{ redirect: "/customize" } as never}
+                  onClick={onClose}
+                  className="block text-center bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 transition"
+                >
+                  Sign in to Checkout
+                </Link>
+              )}
               <button
                 onClick={onClose}
                 className="w-full text-center border border-primary text-primary rounded-md py-3 font-semibold hover:bg-primary/5 transition"
