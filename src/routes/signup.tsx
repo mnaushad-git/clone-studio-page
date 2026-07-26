@@ -52,9 +52,9 @@ function Field({ label, error, ...props }: { label: string; error?: string } & R
 
 function SignupPage() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirm: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", area: "", address: "", password: "", confirm: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({});
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [k]: e.target.value });
     if (errors[k]) setErrors({ ...errors, [k]: undefined });
   };
@@ -74,6 +74,13 @@ function SignupPage() {
     }
     setErrors({});
     auth.signIn({ name: form.name, email: form.email, phone: form.phone });
+    addressStore.add({
+      name: form.name,
+      phone: form.phone.startsWith("+966") ? form.phone : `+966 ${form.phone.replace(/^\+?/, "")}`,
+      area: form.area,
+      address: form.address,
+      isGift: false,
+    });
     toast.success("Account created! Welcome to Terrific Bites.");
     navigate({ to: "/account" });
   };
