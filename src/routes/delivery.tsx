@@ -4,7 +4,7 @@ import { Check, MapPin, Truck, Bike, Ticket, ChevronDown, ChevronLeft, ChevronRi
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { useStore, addresses as addressStore, selectSubtotal, selectDiscount, selectTax, selectDeliveryFee, selectTotal, promo } from "@/lib/store";
+import { useStore, addresses as addressStore, selectSubtotal, selectDiscount, selectTax, selectDeliveryFee, selectTotal, promo, RIYADH_AREAS } from "@/lib/store";
 import { getProduct } from "@/lib/products";
 
 const DAY_SLOTS: [number, number][] = [[8, 10], [10, 12], [12, 14], [14, 16], [16, 18], [18, 20]];
@@ -167,13 +167,11 @@ function DeliveryPage() {
                     </div>
                   </div>
 
-                  <Field label="Area" required>
+                  <Field label="Riyadh Area" required>
                     <div className="relative">
                       <select value={area} onChange={(e) => setArea(e.target.value)} className="w-full appearance-none border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary bg-white">
-                        <option value="">Select area</option>
-                        <option>Riyadh</option>
-                        <option>Jeddah</option>
-                        <option>Dammam</option>
+                        <option value="">Select a Riyadh area</option>
+                        {RIYADH_AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
                       </select>
                       <ChevronDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                     </div>

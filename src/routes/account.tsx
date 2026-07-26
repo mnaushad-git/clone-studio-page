@@ -2,13 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   UserRound, MapPin, ShoppingCart, FileText, Calendar, Heart, Wallet, Plus,
-  LogOut, Trash2, X,
-
+  LogOut, Trash2, X, ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { useStore, auth, addresses as addressStore, orders as orderStore } from "@/lib/store";
+import { useStore, auth, addresses as addressStore, orders as orderStore, RIYADH_AREAS } from "@/lib/store";
 import { OrderStatusTimeline } from "@/components/OrderStatusTimeline";
 
 export const Route = createFileRoute("/account")({
@@ -236,7 +235,13 @@ function AccountPage() {
             <div className="space-y-3">
               <input value={newAddr.name} onChange={(e) => setNewAddr({ ...newAddr, name: e.target.value })} placeholder="Name" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
               <input value={newAddr.phone} onChange={(e) => setNewAddr({ ...newAddr, phone: e.target.value })} placeholder="Phone" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
-              <input value={newAddr.area} onChange={(e) => setNewAddr({ ...newAddr, area: e.target.value })} placeholder="City / Area" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
+              <div className="relative">
+                <select value={newAddr.area} onChange={(e) => setNewAddr({ ...newAddr, area: e.target.value })} className="w-full appearance-none border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary bg-white">
+                  <option value="">Select a Riyadh area</option>
+                  {RIYADH_AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
+                </select>
+                <ChevronDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              </div>
               <input value={newAddr.address} onChange={(e) => setNewAddr({ ...newAddr, address: e.target.value })} placeholder="Street address" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
               <input value={newAddr.extra} onChange={(e) => setNewAddr({ ...newAddr, extra: e.target.value })} placeholder="Apt / floor / landmark (optional)" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
             </div>
