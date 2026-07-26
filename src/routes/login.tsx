@@ -24,6 +24,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { redirect } = Route.useSearch();
   const [mode, setMode] = useState<"phone" | "email" | "otp">("phone");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -34,7 +35,8 @@ function LoginPage() {
   const finish = (user: { phone?: string; email?: string }) => {
     auth.signIn({ ...user, name: user.email?.split("@")[0] });
     toast.success("Welcome back!");
-    navigate({ to: "/account" });
+    const dest = redirect && redirect.startsWith("/") ? redirect : "/account";
+    navigate({ to: dest });
   };
 
   const handleOtpChange = (i: number, v: string) => {
