@@ -83,7 +83,7 @@ function PaymentPage() {
     if (cartItems.length === 0) { toast.error("Your cart is empty"); return; }
     if (!selected) { toast.error("Please choose a payment method"); return; }
     let methodLabel = methods.find((m) => m.id === selected)?.label ?? "Payment";
-    if (selected === "credit") {
+    if (isCredit) {
       const parsed = cardSchema.safeParse(card);
       if (!parsed.success) {
         const fieldErrors: Partial<Record<keyof typeof card, string>> = {};
@@ -145,7 +145,7 @@ function PaymentPage() {
               })}
             </section>
 
-            {selected === "credit" && (
+            {isCredit && (
               <section className="bg-white rounded-2xl shadow-sm p-6 space-y-4">
                 <h2 className="font-semibold">Card details</h2>
                 <div>
