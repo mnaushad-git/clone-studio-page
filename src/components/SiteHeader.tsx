@@ -75,7 +75,7 @@ export function SiteHeader({ variant = "cream" }: { variant?: "cream" | "white" 
             </span>
           </div>
           <Link to="/" className="font-script text-2xl sm:text-3xl text-primary leading-none justify-self-center text-center whitespace-nowrap">
-            Terrific<br /><span className="ms-6">Bites</span>
+            {first}<br /><span className="ms-6">{rest}</span>
           </Link>
           <div className="flex items-center gap-3 sm:gap-5 text-sm justify-self-end">
 
