@@ -16,6 +16,7 @@ import { Route as ShopRouteImport } from './routes/shop'
 import { Route as PaymentRouteImport } from './routes/payment'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as GiftsRouteImport } from './routes/gifts'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ExtrasRouteImport } from './routes/extras'
 import { Route as DonutsRouteImport } from './routes/donuts'
 import { Route as DeliveryRouteImport } from './routes/delivery'
@@ -68,6 +69,11 @@ const LoginRoute = LoginRouteImport.update({
 const GiftsRoute = GiftsRouteImport.update({
   id: '/gifts',
   path: '/gifts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExtrasRoute = ExtrasRouteImport.update({
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/delivery': typeof DeliveryRoute
   '/donuts': typeof DonutsRoute
   '/extras': typeof ExtrasRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/gifts': typeof GiftsRoute
   '/login': typeof LoginRoute
   '/payment': typeof PaymentRoute
@@ -200,6 +207,7 @@ export interface FileRoutesByTo {
   '/delivery': typeof DeliveryRoute
   '/donuts': typeof DonutsRoute
   '/extras': typeof ExtrasRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/gifts': typeof GiftsRoute
   '/login': typeof LoginRoute
   '/payment': typeof PaymentRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/delivery': typeof DeliveryRoute
   '/donuts': typeof DonutsRoute
   '/extras': typeof ExtrasRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/gifts': typeof GiftsRoute
   '/login': typeof LoginRoute
   '/payment': typeof PaymentRoute
@@ -257,6 +266,7 @@ export interface FileRouteTypes {
     | '/delivery'
     | '/donuts'
     | '/extras'
+    | '/forgot-password'
     | '/gifts'
     | '/login'
     | '/payment'
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
     | '/delivery'
     | '/donuts'
     | '/extras'
+    | '/forgot-password'
     | '/gifts'
     | '/login'
     | '/payment'
@@ -311,6 +322,7 @@ export interface FileRouteTypes {
     | '/delivery'
     | '/donuts'
     | '/extras'
+    | '/forgot-password'
     | '/gifts'
     | '/login'
     | '/payment'
@@ -339,6 +351,7 @@ export interface RootRouteChildren {
   DeliveryRoute: typeof DeliveryRoute
   DonutsRoute: typeof DonutsRoute
   ExtrasRoute: typeof ExtrasRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   GiftsRoute: typeof GiftsRoute
   LoginRoute: typeof LoginRoute
   PaymentRoute: typeof PaymentRoute
@@ -404,6 +417,13 @@ declare module '@tanstack/react-router' {
       path: '/gifts'
       fullPath: '/gifts'
       preLoaderRoute: typeof GiftsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/extras': {
@@ -547,6 +567,7 @@ const rootRouteChildren: RootRouteChildren = {
   DeliveryRoute: DeliveryRoute,
   DonutsRoute: DonutsRoute,
   ExtrasRoute: ExtrasRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   GiftsRoute: GiftsRoute,
   LoginRoute: LoginRoute,
   PaymentRoute: PaymentRoute,
