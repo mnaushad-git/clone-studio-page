@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductReviews } from "@/components/ProductReviews";
 import { getProduct, products } from "@/lib/products";
+import { useAdmin } from "@/lib/admin-store";
 import {
   cart,
   wishlist,
