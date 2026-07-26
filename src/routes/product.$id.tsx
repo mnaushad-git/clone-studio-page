@@ -119,8 +119,8 @@ function ProductPage() {
     gifts: [],
     extras: [],
   };
-  const sizes = product.sizes ?? sizeOverridesById[product.id] ?? defaultSizesByCategory[product.category];
-  const flavors = product.flavors ?? (defaultFlavorsByCategory[product.category]?.length ? defaultFlavorsByCategory[product.category] : undefined);
+  const sizes = override?.sizes ?? baseProduct.sizes ?? sizeOverridesById[baseProduct.id] ?? defaultSizesByCategory[baseProduct.category];
+  const flavors = override?.flavors ?? baseProduct.flavors ?? (defaultFlavorsByCategory[baseProduct.category]?.length ? defaultFlavorsByCategory[baseProduct.category] : undefined);
   const selectedSize = sizes?.[sizeIdx];
   const selectedFlavor = flavors?.[flavorIdx];
   const unitPrice = product.price + (selectedSize?.delta ?? 0);
