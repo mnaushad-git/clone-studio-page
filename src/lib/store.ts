@@ -430,6 +430,12 @@ export function selectAverageRating(id: string) {
 export function selectHasPurchased(productId: string) {
   return (s: State) => s.orders.some((o) => o.items.some((it) => it.productId === productId));
 }
+export function selectPointsRedeemRate(): number {
+  return getAdminState().loyalty.redeemRate || POINTS_REDEEM_RATE;
+}
+export function selectMinOrder(): number {
+  return getAdminState().settings.minOrder ?? 0;
+}
 
 // ---------- Auth ----------
 export const auth = {
