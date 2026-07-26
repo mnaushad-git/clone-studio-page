@@ -3,13 +3,17 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import illustration from "@/assets/signup-illustration.jpg";
-import { auth } from "@/lib/store";
+import { auth, addresses as addressStore } from "@/lib/store";
+
+const AREAS = ["Riyadh", "Jeddah", "Dammam"] as const;
 
 const signupSchema = z
   .object({
     name: z.string().trim().min(1, "Name is required").max(100),
     email: z.string().trim().email("Enter a valid email").max(255),
     phone: z.string().trim().min(6, "Phone is required").max(20),
+    area: z.string().trim().min(1, "Area is required"),
+    address: z.string().trim().min(3, "Address is required").max(200),
     password: z.string().min(8, "Password must be at least 8 characters").max(100),
     confirm: z.string().min(1, "Please confirm your password"),
   })
