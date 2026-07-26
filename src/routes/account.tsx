@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   UserRound, MapPin, ShoppingCart, FileText, Calendar, Heart, Wallet, Plus,
-  LogOut, Trash2, X, ChevronDown,
+  LogOut, Trash2, X, ChevronDown, Pencil, AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -46,7 +46,9 @@ function AccountPage() {
   const [active, setActive] = useState<MenuKey>("personal");
   const [profile, setProfile] = useState({ name: "", email: "", phone: "", birthDate: "" });
   const [showAddr, setShowAddr] = useState(false);
-  const [newAddr, setNewAddr] = useState({ name: "", phone: "", area: "", address: "", extra: "" });
+  const [editId, setEditId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [addrForm, setAddrForm] = useState({ name: "", phone: "", area: "", address: "", extra: "" });
 
   useEffect(() => {
     if (user) setProfile({ name: user.name ?? "", email: user.email ?? "", phone: user.phone ?? "", birthDate: user.birthDate ?? "" });
@@ -63,12 +65,39 @@ function AccountPage() {
     toast.success("Profile saved");
   };
 
-  const addAddress = () => {
-    if (!newAddr.name || !newAddr.phone || !newAddr.address) return toast.error("Please complete address");
-    addressStore.add(newAddr);
-    setNewAddr({ name: "", phone: "", area: "", address: "", extra: "" });
+  const saveAddress = () => {
+    if (!addrForm.name || !addrForm.phone || !addrForm.address) return toast.error("Please complete address");
+    if (editId) {
+      addressStore.update(editId, addrForm);
+      toast.success("Address updated");
+    } else {
+      addressStore.add(addrForm);
+      toast.success("Address added");
+    }
+    setAddrForm({ name: "", phone: "", area: "", address: "", extra: "" });
+    setEditId(null);
     setShowAddr(false);
-    toast.success("Address added");
+  };
+
+  const openAdd = () => {
+    setEditId(null);
+    setAddrForm({ name: "", phone: "", area: "", address: "", extra: "" });
+    setShowAddr(true);
+  };
+
+  const openEdit = (id: string) => {
+    const a = addresses.find((x) => x.id === id);
+    if (!a) return;
+    setEditId(id);
+    setAddrForm({ name: a.name, phone: a.phone, area: a.area, address: a.address, extra: a.extra ?? "" });
+    setShowAddr(true);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteId) return;
+    addressStore.remove(deleteId);
+    setDeleteId(null);
+    toast.success("Address removed");
   };
 
   return (
@@ -130,20 +159,25 @@ function AccountPage() {
                 <div className="space-y-3">
                   {addresses.map((a) => (
                     <div key={a.id} className="border border-border rounded-lg p-4 flex items-start justify-between gap-4">
-                      <div>
+                      <div className="flex-1 min-w-0">
                         <p className="font-medium">{a.name}</p>
                         <p className="text-xs text-muted-foreground">{a.phone}</p>
                         <p className="text-xs text-muted-foreground">{a.area}{a.address ? ` — ${a.address}` : ""}</p>
                         {a.extra && <p className="text-xs text-muted-foreground">{a.extra}</p>}
                       </div>
-                      <button onClick={() => { addressStore.remove(a.id); toast.success("Address removed"); }} className="text-destructive hover:opacity-70" aria-label="Delete">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => openEdit(a.id)} className="p-1.5 text-foreground hover:text-primary hover:bg-secondary rounded-md transition" aria-label="Edit">
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => setDeleteId(a.id)} className="p-1.5 text-destructive hover:bg-destructive/10 rounded-md transition" aria-label="Delete">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
                 <button
-                  onClick={() => setShowAddr(true)}
+                  onClick={openAdd}
                   className="mt-4 w-full border border-border rounded-lg py-5 flex items-center justify-center gap-2 text-sm text-foreground hover:border-primary hover:text-primary transition"
                 >
                   <Plus className="h-5 w-5" /> Add Address
@@ -231,21 +265,38 @@ function AccountPage() {
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
             <button onClick={() => setShowAddr(false)} className="absolute top-4 right-4"><X className="h-5 w-5" /></button>
-            <h3 className="font-semibold mb-4">New Address</h3>
+            <h3 className="font-semibold mb-4">{editId ? "Edit Address" : "New Address"}</h3>
             <div className="space-y-3">
-              <input value={newAddr.name} onChange={(e) => setNewAddr({ ...newAddr, name: e.target.value })} placeholder="Name" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
-              <input value={newAddr.phone} onChange={(e) => setNewAddr({ ...newAddr, phone: e.target.value })} placeholder="Phone" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
+              <input value={addrForm.name} onChange={(e) => setAddrForm({ ...addrForm, name: e.target.value })} placeholder="Name" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
+              <input value={addrForm.phone} onChange={(e) => setAddrForm({ ...addrForm, phone: e.target.value })} placeholder="Phone" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
               <div className="relative">
-                <select value={newAddr.area} onChange={(e) => setNewAddr({ ...newAddr, area: e.target.value })} className="w-full appearance-none border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary bg-white">
+                <select value={addrForm.area} onChange={(e) => setAddrForm({ ...addrForm, area: e.target.value })} className="w-full appearance-none border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary bg-white">
                   <option value="">Select a Riyadh area</option>
                   {RIYADH_AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
                 </select>
                 <ChevronDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               </div>
-              <input value={newAddr.address} onChange={(e) => setNewAddr({ ...newAddr, address: e.target.value })} placeholder="Street address" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
-              <input value={newAddr.extra} onChange={(e) => setNewAddr({ ...newAddr, extra: e.target.value })} placeholder="Apt / floor / landmark (optional)" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
+              <input value={addrForm.address} onChange={(e) => setAddrForm({ ...addrForm, address: e.target.value })} placeholder="Street address" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
+              <input value={addrForm.extra} onChange={(e) => setAddrForm({ ...addrForm, extra: e.target.value })} placeholder="Apt / floor / landmark (optional)" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
             </div>
-            <button onClick={addAddress} className="mt-4 w-full bg-primary text-primary-foreground rounded-md py-3 text-sm">Save Address</button>
+            <button onClick={saveAddress} className="mt-4 w-full bg-primary text-primary-foreground rounded-md py-3 text-sm">{editId ? "Update Address" : "Save Address"}</button>
+          </div>
+        </div>
+      )}
+
+      {deleteId && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center relative">
+            <button onClick={() => setDeleteId(null)} className="absolute top-4 right-4"><X className="h-5 w-5" /></button>
+            <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+              <AlertTriangle className="h-6 w-6 text-destructive" />
+            </div>
+            <h3 className="font-semibold mb-2">Delete this address?</h3>
+            <p className="text-sm text-muted-foreground mb-6">This action cannot be undone. The address will be permanently removed from your saved addresses.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteId(null)} className="flex-1 border border-border rounded-md py-2.5 text-sm hover:bg-secondary transition">Cancel</button>
+              <button onClick={confirmDelete} className="flex-1 bg-destructive text-destructive-foreground rounded-md py-2.5 text-sm hover:opacity-90 transition">Delete</button>
+            </div>
           </div>
         </div>
       )}
