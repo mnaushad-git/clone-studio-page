@@ -39,14 +39,17 @@ function DeliveryPage() {
   const navigate = useNavigate();
   const cartItems = useStore((s) => s.cart);
   const currentPromo = useStore((s) => s.promo);
+  const user = useStore((s) => s.user);
+  const savedAddresses = useStore((s) => s.addresses);
   const subtotal = useStore(selectSubtotal);
   const discount = useStore(selectDiscount);
   const tax = useStore(selectTax);
   const deliveryFee = useStore(selectDeliveryFee);
   const total = useStore(selectTotal);
 
+  const defaultSlot = useMemo(() => nextSlot(), []);
+
   const [gift, setGift] = useState(false);
-  const [secret, setSecret] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [area, setArea] = useState("");
@@ -58,6 +61,20 @@ function DeliveryPage() {
   const [pickedDate, setPickedDate] = useState<string>("");
   const [pickedTime, setPickedTime] = useState<string>("");
 
+  // When gift toggle is off, prefill from user profile + last saved (non-gift) address
+  useEffect(() => {
+    if (gift) return;
+    const lastSelf = [...savedAddresses].reverse().find((a) => !a.isGift);
+    if (user?.name) setName(user.name);
+    else if (lastSelf?.name) setName(lastSelf.name);
+    if (user?.phone) setPhone(user.phone.replace(/^\+966\s?/, ""));
+    else if (lastSelf?.phone) setPhone(lastSelf.phone.replace(/^\+966\s?/, ""));
+    if (lastSelf?.area) setArea(lastSelf.area);
+    if (lastSelf?.address) setAddress(lastSelf.address);
+    if (lastSelf?.extra) setExtra(lastSelf.extra);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gift]);
+
   const applyPromo = () => {
     if (!promoInput.trim()) return;
     if (promo.apply(promoInput)) toast.success("Promo code applied");
@@ -68,20 +85,19 @@ function DeliveryPage() {
     if (!name.trim()) return toast.error("Recipient name is required");
     if (!phone.trim()) return toast.error("Recipient phone is required");
     if (!gift && (!area || !address.trim())) return toast.error("Please add a delivery address");
-    if (gift && timeSlot === "another" && (!pickedDate || !pickedTime)) return toast.error("Please pick a delivery date and time");
+    if (timeSlot === "another" && (!pickedDate || !pickedTime)) return toast.error("Please pick a delivery date and time");
 
-    const deliveryDate = gift ? (timeSlot === "tomorrow" ? "Tomorrow" : pickedDate) : undefined;
-    const deliveryTime = gift ? (timeSlot === "tomorrow" ? "10:00am - 2:00pm" : pickedTime) : undefined;
+    const deliveryDate = timeSlot === "tomorrow" ? defaultSlot.day : pickedDate;
+    const deliveryTime = timeSlot === "tomorrow" ? defaultSlot.label : pickedTime;
 
     addressStore.add({
       name,
-      phone: `+966 ${phone}`,
+      phone: phone.startsWith("+966") ? phone : `+966 ${phone}`,
       area: gift ? "Gift" : area,
       address: gift ? `${deliveryDate} · ${deliveryTime}` : address,
       extra: extra || undefined,
       isGift: gift,
-      identitySecret: secret,
-      timeSlot: gift ? timeSlot : undefined,
+      timeSlot,
       deliveryDate,
       deliveryTime,
     });
