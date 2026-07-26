@@ -216,49 +216,51 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               </div>
             </div>
 
-            {/* Promo code */}
-            <div className="border border-border rounded-lg p-4 space-y-2">
-              <label className="text-sm font-semibold text-primary flex items-center gap-1.5">
-                <Tag className="h-4 w-4" /> Promo code
-              </label>
-              {activePromo ? (
-                <div className="flex items-center justify-between text-sm">
-                  <span>
-                    <span className="font-semibold">{activePromo.code}</span>{" "}
-                    <span className="text-muted-foreground">applied (−{activePromo.percent}%)</span>
-                  </span>
-                  <button
-                    onClick={() => { promo.clear(); setErr(null); }}
-                    className="text-xs text-primary underline hover:no-underline"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="flex gap-2">
-                    <input
-                      value={code}
-                      onChange={(e) => { setCode(e.target.value); setErr(null); }}
-                      onKeyDown={(e) => { if (e.key === "Enter") applyPromo(); }}
-                      placeholder="Enter code (e.g. WELCOME10)"
-                      maxLength={20}
-                      className="flex-1 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    />
+            {/* Promo code (logged-in only) */}
+            {isAuthed && (
+              <div className="border border-border rounded-lg p-4 space-y-2">
+                <label className="text-sm font-semibold text-primary flex items-center gap-1.5">
+                  <Tag className="h-4 w-4" /> Promo code
+                </label>
+                {activePromo ? (
+                  <div className="flex items-center justify-between text-sm">
+                    <span>
+                      <span className="font-semibold">{activePromo.code}</span>{" "}
+                      <span className="text-muted-foreground">applied (−{activePromo.percent}%)</span>
+                    </span>
                     <button
-                      onClick={applyPromo}
-                      className="bg-primary text-primary-foreground rounded-md px-4 text-sm font-semibold hover:opacity-90 transition"
+                      onClick={() => { promo.clear(); setErr(null); }}
+                      className="text-xs text-primary underline hover:no-underline"
                     >
-                      Apply
+                      Remove
                     </button>
                   </div>
-                  {err && <p className="text-xs text-destructive">{err}</p>}
-                </>
-              )}
-            </div>
+                ) : (
+                  <>
+                    <div className="flex gap-2">
+                      <input
+                        value={code}
+                        onChange={(e) => { setCode(e.target.value); setErr(null); }}
+                        onKeyDown={(e) => { if (e.key === "Enter") applyPromo(); }}
+                        placeholder="Enter code (e.g. WELCOME10)"
+                        maxLength={20}
+                        className="flex-1 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      />
+                      <button
+                        onClick={applyPromo}
+                        className="bg-primary text-primary-foreground rounded-md px-4 text-sm font-semibold hover:opacity-90 transition"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                    {err && <p className="text-xs text-destructive">{err}</p>}
+                  </>
+                )}
+              </div>
+            )}
 
-            {/* Loyalty points */}
-            {points > 0 && (
+            {/* Loyalty points (logged-in only) */}
+            {isAuthed && points > 0 && (
               <div className="border border-border rounded-lg p-4 space-y-2">
                 <label className="text-sm font-semibold text-primary flex items-center gap-1.5">
                   <Wallet className="h-4 w-4" /> Redeem Points
@@ -266,7 +268,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                 <p className="text-xs text-muted-foreground">Balance: {points} pts (20 pts = SAR 1)</p>
                 {redeemed > 0 ? (
                   <div className="flex items-center justify-between text-sm">
-                    <span>Using <span className="font-semibold">{redeemed}</span> pts (−${pointsDisc.toFixed(2)})</span>
+                    <span>Using <span className="font-semibold">{redeemed}</span> pts (−SAR {pointsDisc.toFixed(2)})</span>
                     <button onClick={() => loyalty.clearRedeem()} className="text-xs text-primary underline hover:no-underline">Remove</button>
                   </div>
                 ) : (
@@ -289,6 +291,16 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                     >Apply</button>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Sign-in prompt for guests */}
+            {!isAuthed && (
+              <div className="border border-dashed border-primary/40 bg-primary/5 rounded-lg p-4 text-sm text-foreground/80">
+                <p>
+                  <Link to="/login" search={{ redirect: "/customize" } as never} onClick={onClose} className="font-semibold text-primary underline underline-offset-2">Sign in</Link>{" "}
+                  to unlock delivery options, promo codes, and reward points.
+                </p>
               </div>
             )}
 
