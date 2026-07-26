@@ -339,7 +339,7 @@ function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { in
   const [time, setTime] = useState<string>(initialTime);
   const [calMonth, setCalMonth] = useState<Date>(new Date(now.getFullYear(), now.getMonth(), 1));
 
-  const timeSlots = SLOT_LABELS;
+  const timeSlots = getSlotLabels();
   const todayKey = new Date(now).toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long" });
   const isTodaySelected = date === todayKey;
   const currentSlotIdx = DAY_SLOTS.findIndex(([s]) => s > now.getHours());
