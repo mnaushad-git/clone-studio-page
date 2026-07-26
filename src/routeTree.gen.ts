@@ -25,6 +25,7 @@ import { Route as CupcakesRouteImport } from './routes/cupcakes'
 import { Route as CorporateRouteImport } from './routes/corporate'
 import { Route as ChocolatesRouteImport } from './routes/chocolates'
 import { Route as CakesRouteImport } from './routes/cakes'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
@@ -35,6 +36,7 @@ import { Route as RecipientsSlugRouteImport } from './routes/recipients.$slug'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as MomentsSlugRouteImport } from './routes/moments.$slug'
 import { Route as ConfirmAddressTokenRouteImport } from './routes/confirm-address.$token'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -116,6 +118,11 @@ const CakesRoute = CakesRouteImport.update({
   path: '/cakes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AccountRoute = AccountRouteImport.update({
   id: '/account',
   path: '/account',
@@ -166,11 +173,17 @@ const ConfirmAddressTokenRoute = ConfirmAddressTokenRouteImport.update({
   path: '/confirm-address/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/admin': typeof AdminRouteWithChildren
   '/cakes': typeof CakesRoute
   '/chocolates': typeof ChocolatesRoute
   '/corporate': typeof CorporateRoute
@@ -187,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/login': typeof AdminLoginRoute
   '/confirm-address/$token': typeof ConfirmAddressTokenRoute
   '/moments/$slug': typeof MomentsSlugRoute
   '/product/$id': typeof ProductIdRoute
@@ -199,6 +213,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/admin': typeof AdminRouteWithChildren
   '/cakes': typeof CakesRoute
   '/chocolates': typeof ChocolatesRoute
   '/corporate': typeof CorporateRoute
@@ -215,6 +230,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/login': typeof AdminLoginRoute
   '/confirm-address/$token': typeof ConfirmAddressTokenRoute
   '/moments/$slug': typeof MomentsSlugRoute
   '/product/$id': typeof ProductIdRoute
@@ -228,6 +244,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/admin': typeof AdminRouteWithChildren
   '/cakes': typeof CakesRoute
   '/chocolates': typeof ChocolatesRoute
   '/corporate': typeof CorporateRoute
@@ -244,6 +261,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/login': typeof AdminLoginRoute
   '/confirm-address/$token': typeof ConfirmAddressTokenRoute
   '/moments/$slug': typeof MomentsSlugRoute
   '/product/$id': typeof ProductIdRoute
@@ -258,6 +276,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/account'
+    | '/admin'
     | '/cakes'
     | '/chocolates'
     | '/corporate'
@@ -274,6 +293,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/success'
     | '/wishlist'
+    | '/admin/login'
     | '/confirm-address/$token'
     | '/moments/$slug'
     | '/product/$id'
@@ -286,6 +306,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/account'
+    | '/admin'
     | '/cakes'
     | '/chocolates'
     | '/corporate'
@@ -302,6 +323,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/success'
     | '/wishlist'
+    | '/admin/login'
     | '/confirm-address/$token'
     | '/moments/$slug'
     | '/product/$id'
@@ -314,6 +336,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/account'
+    | '/admin'
     | '/cakes'
     | '/chocolates'
     | '/corporate'
@@ -330,6 +353,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/success'
     | '/wishlist'
+    | '/admin/login'
     | '/confirm-address/$token'
     | '/moments/$slug'
     | '/product/$id'
@@ -343,6 +367,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
+  AdminRoute: typeof AdminRouteWithChildren
   CakesRoute: typeof CakesRoute
   ChocolatesRoute: typeof ChocolatesRoute
   CorporateRoute: typeof CorporateRoute
@@ -482,6 +507,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CakesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/account': {
       id: '/account'
       path: '/account'
@@ -552,13 +584,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConfirmAddressTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminLoginRoute: typeof AdminLoginRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminLoginRoute: AdminLoginRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
+  AdminRoute: AdminRouteWithChildren,
   CakesRoute: CakesRoute,
   ChocolatesRoute: ChocolatesRoute,
   CorporateRoute: CorporateRoute,
