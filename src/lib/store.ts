@@ -19,6 +19,7 @@ export type Address = {
   address: string;
   extra?: string;
   isGift?: boolean;
+  isDefault?: boolean;
   identitySecret?: boolean;
   timeSlot?: "tomorrow" | "another";
   deliveryDate?: string;
