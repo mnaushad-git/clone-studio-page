@@ -153,12 +153,7 @@ function DeliveryPage() {
                 </div>
               </div>
 
-              <label className="flex items-center justify-between border border-border rounded-md px-4 py-3 cursor-pointer">
-                <span className="text-sm">Keep my identity secret</span>
-                <input type="checkbox" checked={secret} onChange={(e) => setSecret(e.target.checked)} className="h-4 w-4 accent-primary" />
-              </label>
-
-              {!gift ? (
+              {!gift && (
                 <>
                   <div className="relative rounded-lg overflow-hidden border border-border h-56 bg-secondary flex items-center justify-center">
                     <div className="text-center">
@@ -172,7 +167,7 @@ function DeliveryPage() {
                     </div>
                   </div>
 
-                  <Field label="Recipient Area" required>
+                  <Field label="Area" required>
                     <div className="relative">
                       <select value={area} onChange={(e) => setArea(e.target.value)} className="w-full appearance-none border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary bg-white">
                         <option value="">Select area</option>
@@ -184,7 +179,7 @@ function DeliveryPage() {
                     </div>
                   </Field>
 
-                  <Field label="Recipient Address" required>
+                  <Field label="Address" required>
                     <input value={address} onChange={(e) => setAddress(e.target.value)} className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary" />
                   </Field>
 
@@ -192,24 +187,24 @@ function DeliveryPage() {
                     <input value={extra} onChange={(e) => setExtra(e.target.value)} placeholder="Apartment, floor, landmark (optional)" className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary placeholder:text-muted-foreground" />
                   </Field>
                 </>
-              ) : (
-                <div className="mt-2">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Bike className="h-5 w-5 text-primary" />
-                    <h3 className="font-semibold">Delivery time</h3>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <button onClick={() => setTimeSlot("tomorrow")} className={`rounded-xl border p-5 text-center transition ${timeSlot === "tomorrow" ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
-                      <p className="font-semibold">Tomorrow</p>
-                      <p className="text-xs text-muted-foreground mt-1">10:00am – 2:00pm</p>
-                    </button>
-                    <button onClick={() => { setTimeSlot("another"); setTimeModalOpen(true); }} className={`rounded-xl border p-5 text-center transition ${timeSlot === "another" ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
-                      <p className="font-semibold">Another time</p>
-                      <p className="text-xs text-muted-foreground mt-1">{timeSlot === "another" && pickedDate && pickedTime ? `${pickedDate} · ${pickedTime}` : "Choose date & time"}</p>
-                    </button>
-                  </div>
-                </div>
               )}
+
+              <div className="mt-2">
+                <div className="flex items-center gap-2 mb-3">
+                  <Bike className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Delivery time</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <button onClick={() => setTimeSlot("tomorrow")} className={`rounded-xl border p-5 text-center transition ${timeSlot === "tomorrow" ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
+                    <p className="font-semibold">{defaultSlot.day}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{defaultSlot.label}</p>
+                  </button>
+                  <button onClick={() => { setTimeSlot("another"); setTimeModalOpen(true); }} className={`rounded-xl border p-5 text-center transition ${timeSlot === "another" ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
+                    <p className="font-semibold">Another time</p>
+                    <p className="text-xs text-muted-foreground mt-1">{timeSlot === "another" && pickedDate && pickedTime ? `${pickedDate} · ${pickedTime}` : "Choose date & time"}</p>
+                  </button>
+                </div>
+              </div>
             </div>
           </section>
 
