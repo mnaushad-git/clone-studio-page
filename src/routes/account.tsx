@@ -265,21 +265,38 @@ function AccountPage() {
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
             <button onClick={() => setShowAddr(false)} className="absolute top-4 right-4"><X className="h-5 w-5" /></button>
-            <h3 className="font-semibold mb-4">New Address</h3>
+            <h3 className="font-semibold mb-4">{editId ? "Edit Address" : "New Address"}</h3>
             <div className="space-y-3">
-              <input value={newAddr.name} onChange={(e) => setNewAddr({ ...newAddr, name: e.target.value })} placeholder="Name" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
-              <input value={newAddr.phone} onChange={(e) => setNewAddr({ ...newAddr, phone: e.target.value })} placeholder="Phone" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
+              <input value={addrForm.name} onChange={(e) => setAddrForm({ ...addrForm, name: e.target.value })} placeholder="Name" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
+              <input value={addrForm.phone} onChange={(e) => setAddrForm({ ...addrForm, phone: e.target.value })} placeholder="Phone" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
               <div className="relative">
-                <select value={newAddr.area} onChange={(e) => setNewAddr({ ...newAddr, area: e.target.value })} className="w-full appearance-none border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary bg-white">
+                <select value={addrForm.area} onChange={(e) => setAddrForm({ ...addrForm, area: e.target.value })} className="w-full appearance-none border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary bg-white">
                   <option value="">Select a Riyadh area</option>
                   {RIYADH_AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
                 </select>
                 <ChevronDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               </div>
-              <input value={newAddr.address} onChange={(e) => setNewAddr({ ...newAddr, address: e.target.value })} placeholder="Street address" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
-              <input value={newAddr.extra} onChange={(e) => setNewAddr({ ...newAddr, extra: e.target.value })} placeholder="Apt / floor / landmark (optional)" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
+              <input value={addrForm.address} onChange={(e) => setAddrForm({ ...addrForm, address: e.target.value })} placeholder="Street address" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
+              <input value={addrForm.extra} onChange={(e) => setAddrForm({ ...addrForm, extra: e.target.value })} placeholder="Apt / floor / landmark (optional)" className="w-full border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary" />
             </div>
-            <button onClick={addAddress} className="mt-4 w-full bg-primary text-primary-foreground rounded-md py-3 text-sm">Save Address</button>
+            <button onClick={saveAddress} className="mt-4 w-full bg-primary text-primary-foreground rounded-md py-3 text-sm">{editId ? "Update Address" : "Save Address"}</button>
+          </div>
+        </div>
+      )}
+
+      {deleteId && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center relative">
+            <button onClick={() => setDeleteId(null)} className="absolute top-4 right-4"><X className="h-5 w-5" /></button>
+            <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+              <AlertTriangle className="h-6 w-6 text-destructive" />
+            </div>
+            <h3 className="font-semibold mb-2">Delete this address?</h3>
+            <p className="text-sm text-muted-foreground mb-6">This action cannot be undone. The address will be permanently removed from your saved addresses.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setDeleteId(null)} className="flex-1 border border-border rounded-md py-2.5 text-sm hover:bg-secondary transition">Cancel</button>
+              <button onClick={confirmDelete} className="flex-1 bg-destructive text-destructive-foreground rounded-md py-2.5 text-sm hover:opacity-90 transition">Delete</button>
+            </div>
           </div>
         </div>
       )}
