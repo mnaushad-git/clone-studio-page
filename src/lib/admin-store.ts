@@ -252,7 +252,8 @@ function emit() { persist(); listeners.forEach((l) => l()); }
 function subscribe(fn: () => void) { listeners.add(fn); return () => listeners.delete(fn); }
 
 export function useAdmin<T>(selector: (s: AdminState) => T): T {
-  return useSyncExternalStore(subscribe, () => selector(state), () => selector(initial));
+  const snap = useSyncExternalStore(subscribe, () => state, () => initial);
+  return selector(snap);
 }
 
 export function getAdminState(): AdminState { return state; }
