@@ -98,6 +98,7 @@ function DeliveryPage() {
       address: gift ? `${deliveryDate} · ${deliveryTime}` : address,
       extra: extra || undefined,
       isGift: gift,
+      identitySecret: gift ? identitySecret : undefined,
       timeSlot,
       deliveryDate,
       deliveryTime,
