@@ -53,10 +53,10 @@ function AdminLayout() {
   if (pathname === "/admin/login") return <Outlet />;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-stone-50 flex">
       {/* Sidebar */}
-      <aside className={`${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-64 bg-slate-900 text-slate-100 flex flex-col transition-transform`}>
-        <div className="h-16 px-5 flex items-center justify-between border-b border-slate-800">
+      <aside className={`${open ? "transtone-x-0" : "-transtone-x-full"} lg:transtone-x-0 fixed lg:static inset-y-0 left-0 z-40 w-64 bg-stone-900 text-stone-100 flex flex-col transition-transform`}>
+        <div className="h-16 px-5 flex items-center justify-between border-b border-stone-800">
           <Link to="/admin" className="font-display text-lg tracking-wide">Terrific · Admin</Link>
           <button className="lg:hidden" onClick={() => setOpen(false)}><X className="h-5 w-5" /></button>
         </div>
@@ -69,7 +69,7 @@ function AdminLayout() {
                 key={item.to}
                 to={item.to}
                 onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 px-5 py-2.5 text-sm transition-colors ${active ? "bg-slate-800 text-white border-l-2 border-amber-400" : "text-slate-300 hover:bg-slate-800 hover:text-white"}`}
+                className={`flex items-center gap-3 px-5 py-2.5 text-sm transition-colors ${active ? "bg-stone-800 text-white border-l-2 border-amber-400" : "text-stone-300 hover:bg-stone-800 hover:text-white"}`}
               >
                 <Icon className="h-4 w-4" />
                 <span>{item.label}</span>
@@ -77,16 +77,16 @@ function AdminLayout() {
             );
           })}
         </nav>
-        <div className="p-4 border-t border-slate-800 text-xs text-slate-400">
+        <div className="p-4 border-t border-stone-800 text-xs text-stone-400">
           <div className="mb-2">
-            <div className="text-slate-200 font-medium">{session?.email ?? "—"}</div>
+            <div className="text-stone-200 font-medium">{session?.email ?? "—"}</div>
             <div className="capitalize">{session?.role ?? "guest"}</div>
           </div>
           <div className="flex items-center gap-2">
-            <Link to="/" className="flex-1 flex items-center justify-center gap-1 rounded bg-slate-800 hover:bg-slate-700 py-1.5"><Home className="h-3 w-3" /> Store</Link>
+            <Link to="/" className="flex-1 flex items-center justify-center gap-1 rounded bg-stone-800 hover:bg-stone-700 py-1.5"><Home className="h-3 w-3" /> Store</Link>
             <button
               onClick={() => { adminAuth.signOut(); navigate({ to: "/admin/login" }); }}
-              className="flex-1 flex items-center justify-center gap-1 rounded bg-slate-800 hover:bg-slate-700 py-1.5"
+              className="flex-1 flex items-center justify-center gap-1 rounded bg-stone-800 hover:bg-stone-700 py-1.5"
             ><LogOut className="h-3 w-3" /> Sign out</button>
           </div>
         </div>
@@ -97,28 +97,28 @@ function AdminLayout() {
         <header className="h-16 bg-white border-b flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30">
           <div className="flex items-center gap-3">
             <button className="lg:hidden" onClick={() => setOpen(true)}><Menu className="h-5 w-5" /></button>
-            <h1 className="font-display text-lg text-slate-800">
+            <h1 className="font-display text-lg text-stone-800">
               {NAV.find((n) => (n.to === "/admin" ? pathname === "/admin" : pathname.startsWith(n.to)))?.label ?? "Admin"}
             </h1>
           </div>
           <div className="relative">
-            <button onClick={() => setNotifOpen((v) => !v)} className="relative p-2 rounded-full hover:bg-slate-100">
-              <Bell className="h-5 w-5 text-slate-700" />
+            <button onClick={() => setNotifOpen((v) => !v)} className="relative p-2 rounded-full hover:bg-stone-100">
+              <Bell className="h-5 w-5 text-stone-700" />
               {unread > 0 && <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />}
             </button>
             {notifOpen && (
               <div className="absolute right-0 mt-2 w-80 bg-white border rounded-lg shadow-lg overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-3 border-b">
                   <span className="font-medium text-sm">Notifications</span>
-                  <button onClick={() => notificationStore.markAllRead()} className="text-xs text-slate-500 hover:text-slate-800">Mark all read</button>
+                  <button onClick={() => notificationStore.markAllRead()} className="text-xs text-stone-500 hover:text-stone-800">Mark all read</button>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
-                  {notifications.length === 0 && <div className="px-4 py-6 text-sm text-slate-500 text-center">No notifications</div>}
+                  {notifications.length === 0 && <div className="px-4 py-6 text-sm text-stone-500 text-center">No notifications</div>}
                   {notifications.map((n) => (
-                    <button key={n.id} onClick={() => notificationStore.markRead(n.id)} className={`w-full text-left px-4 py-3 border-b last:border-b-0 hover:bg-slate-50 ${!n.read ? "bg-amber-50/50" : ""}`}>
-                      <div className="text-sm font-medium text-slate-800">{n.title}</div>
-                      <div className="text-xs text-slate-600 mt-0.5">{n.body}</div>
-                      <div className="text-[10px] text-slate-400 mt-1">{new Date(n.at).toLocaleString()}</div>
+                    <button key={n.id} onClick={() => notificationStore.markRead(n.id)} className={`w-full text-left px-4 py-3 border-b last:border-b-0 hover:bg-stone-50 ${!n.read ? "bg-amber-50/50" : ""}`}>
+                      <div className="text-sm font-medium text-stone-800">{n.title}</div>
+                      <div className="text-xs text-stone-600 mt-0.5">{n.body}</div>
+                      <div className="text-[10px] text-stone-400 mt-1">{new Date(n.at).toLocaleString()}</div>
                     </button>
                   ))}
                 </div>

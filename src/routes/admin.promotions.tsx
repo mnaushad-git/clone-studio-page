@@ -29,18 +29,18 @@ function PromosPage() {
     >
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="text-left text-xs uppercase text-slate-500 border-b">
+          <thead className="text-left text-xs uppercase text-stone-500 border-b">
             <tr><th className="py-2">Code</th><th>Type</th><th>Value</th><th>Min subtotal</th><th>Used / Limit</th><th>Window</th><th>Active</th><th></th></tr>
           </thead>
           <tbody>
             {promos.map((p) => (
-              <tr key={p.id} className="border-b last:border-0 hover:bg-slate-50">
+              <tr key={p.id} className="border-b last:border-0 hover:bg-stone-50">
                 <td className="py-2.5 font-mono font-medium">{p.code}</td>
                 <td><Badge>{p.type}</Badge></td>
                 <td>{p.type === "percent" ? `${p.value}%` : `SAR ${p.value}`}</td>
                 <td>{p.minSubtotal ? `SAR ${p.minSubtotal}` : "—"}</td>
                 <td>{p.used} / {p.usageLimit ?? "∞"}</td>
-                <td className="text-xs text-slate-500">{p.startsAt ? `${p.startsAt} → ${p.endsAt ?? "…"}` : "Always"}</td>
+                <td className="text-xs text-stone-500">{p.startsAt ? `${p.startsAt} → ${p.endsAt ?? "…"}` : "Always"}</td>
                 <td><Toggle checked={p.active} onChange={(v) => promoStore.update(p.id, { active: v })} /></td>
                 <td className="flex gap-1 py-2">
                   <Button variant="ghost" onClick={() => { setEditId(p.id); setForm({ code: p.code, type: p.type, value: p.value, minSubtotal: p.minSubtotal, usageLimit: p.usageLimit, startsAt: p.startsAt, endsAt: p.endsAt, active: p.active }); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>

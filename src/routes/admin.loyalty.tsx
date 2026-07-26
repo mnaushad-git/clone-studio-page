@@ -21,7 +21,7 @@ function LoyaltyPage() {
         </div>
       </Card>
       <Card title="How it works">
-        <ul className="text-sm text-slate-600 space-y-2 list-disc pl-5">
+        <ul className="text-sm text-stone-600 space-y-2 list-disc pl-5">
           <li>Customers earn <strong>{l.pointsPerSar}</strong> point per SAR spent.</li>
           <li><strong>{l.redeemRate}</strong> points = SAR 1 at checkout.</li>
           <li>New accounts receive <strong>{l.signupBonus}</strong> welcome points.</li>

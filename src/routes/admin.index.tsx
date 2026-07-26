@@ -44,7 +44,7 @@ function Dashboard() {
                 <div className="w-full bg-amber-100 rounded-t" style={{ height: `${(v / maxBucket) * 100}%`, minHeight: 4 }}>
                   <div className="w-full h-full bg-gradient-to-t from-amber-500 to-amber-300 rounded-t" />
                 </div>
-                <div className="text-[10px] text-slate-500">Day {i + 1}</div>
+                <div className="text-[10px] text-stone-500">Day {i + 1}</div>
               </div>
             ))}
           </div>
@@ -52,21 +52,21 @@ function Dashboard() {
 
         <Card title="Quick stats">
           <ul className="space-y-3 text-sm">
-            <li className="flex items-center justify-between"><span className="flex items-center gap-2 text-slate-600"><ShoppingBag className="h-4 w-4" /> Catalog products</span><span className="font-medium">{products.length}</span></li>
-            <li className="flex items-center justify-between"><span className="flex items-center gap-2 text-slate-600"><Users className="h-4 w-4" /> Staff members</span><span className="font-medium">{staff.filter((s) => s.active).length}</span></li>
-            <li className="flex items-center justify-between"><span className="flex items-center gap-2 text-slate-600"><Star className="h-4 w-4" /> Reviews</span><span className="font-medium">{reviews.length}</span></li>
-            <li className="flex items-center justify-between"><span className="flex items-center gap-2 text-slate-600"><TrendingUp className="h-4 w-4" /> Registered customers</span><span className="font-medium">{users ? 1 : 0}</span></li>
+            <li className="flex items-center justify-between"><span className="flex items-center gap-2 text-stone-600"><ShoppingBag className="h-4 w-4" /> Catalog products</span><span className="font-medium">{products.length}</span></li>
+            <li className="flex items-center justify-between"><span className="flex items-center gap-2 text-stone-600"><Users className="h-4 w-4" /> Staff members</span><span className="font-medium">{staff.filter((s) => s.active).length}</span></li>
+            <li className="flex items-center justify-between"><span className="flex items-center gap-2 text-stone-600"><Star className="h-4 w-4" /> Reviews</span><span className="font-medium">{reviews.length}</span></li>
+            <li className="flex items-center justify-between"><span className="flex items-center gap-2 text-stone-600"><TrendingUp className="h-4 w-4" /> Registered customers</span><span className="font-medium">{users ? 1 : 0}</span></li>
           </ul>
         </Card>
       </div>
 
       <Card title="Recent orders">
         {orders.length === 0 ? (
-          <div className="text-sm text-slate-500 py-6 text-center">No orders yet. Place a demo order from the storefront to see it here.</div>
+          <div className="text-sm text-stone-500 py-6 text-center">No orders yet. Place a demo order from the storefront to see it here.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-left text-xs uppercase text-slate-500 border-b">
+              <thead className="text-left text-xs uppercase text-stone-500 border-b">
                 <tr><th className="py-2">Order</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th></tr>
               </thead>
               <tbody>
@@ -74,7 +74,7 @@ function Dashboard() {
                   <tr key={o.id} className="border-b last:border-0">
                     <td className="py-2.5 font-mono text-xs">{o.id}</td>
                     <td>{o.address?.name ?? "—"}</td>
-                    <td className="text-slate-500">{new Date(o.createdAt).toLocaleDateString()}</td>
+                    <td className="text-stone-500">{new Date(o.createdAt).toLocaleDateString()}</td>
                     <td>SAR {o.total.toFixed(2)}</td>
                     <td>
                       <Badge tone={o.status === "Delivered" ? "success" : o.status === "Paid" ? "info" : "warn"}>{o.status}</Badge>

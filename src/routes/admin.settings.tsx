@@ -53,7 +53,7 @@ function SettingsPage() {
             <div key={l.code} className="flex items-center gap-3 border rounded-lg px-3 py-2">
               <div className="flex-1">
                 <div className="font-medium">{l.label}</div>
-                <div className="text-xs text-slate-500">{l.code}</div>
+                <div className="text-xs text-stone-500">{l.code}</div>
               </div>
               <Toggle checked={l.enabled} onChange={(v) => { const langs = [...s.languages]; langs[i] = { ...l, enabled: v }; set("languages", langs); }} />
               <label className="text-xs flex items-center gap-1">
@@ -83,7 +83,7 @@ function SettingsPage() {
             <div key={p.id} className="flex items-center gap-3 py-3">
               <div className="flex-1">
                 <div className="font-medium">{p.label}</div>
-                {p.fee ? <div className="text-xs text-slate-500">Fee SAR {p.fee}</div> : null}
+                {p.fee ? <div className="text-xs text-stone-500">Fee SAR {p.fee}</div> : null}
               </div>
               <Toggle checked={p.active} onChange={(v) => paymentStore.update(p.id, { active: v })} />
               <Button variant="ghost" onClick={() => { if (confirm("Delete this method?")) paymentStore.remove(p.id); }}><Trash2 className="h-4 w-4 text-red-500" /></Button>

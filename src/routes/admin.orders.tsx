@@ -36,17 +36,17 @@ function OrdersPage() {
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase text-slate-500 border-b">
+            <thead className="text-left text-xs uppercase text-stone-500 border-b">
               <tr><th className="py-2">Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Placed</th><th>Status</th><th></th></tr>
             </thead>
             <tbody>
               {filtered.map((o) => (
-                <tr key={o.id} className="border-b last:border-0 hover:bg-slate-50">
+                <tr key={o.id} className="border-b last:border-0 hover:bg-stone-50">
                   <td className="py-2.5 font-mono text-xs">{o.id}</td>
-                  <td>{o.address?.name ?? "—"}<div className="text-xs text-slate-500">{o.address?.phone ?? ""}</div></td>
+                  <td>{o.address?.name ?? "—"}<div className="text-xs text-stone-500">{o.address?.phone ?? ""}</div></td>
                   <td>{o.items.reduce((n, i) => n + i.qty, 0)}</td>
                   <td>SAR {o.total.toFixed(2)}</td>
-                  <td className="text-slate-500">{new Date(o.createdAt).toLocaleString()}</td>
+                  <td className="text-stone-500">{new Date(o.createdAt).toLocaleString()}</td>
                   <td>
                     <Select value={o.status} onChange={(e) => ordersApi.setStatus(o.id, e.target.value as any)} className="w-32">
                       {ORDER_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -64,30 +64,30 @@ function OrdersPage() {
         {view && (
           <div className="space-y-4 text-sm">
             <div className="grid grid-cols-2 gap-3">
-              <div><div className="text-xs text-slate-500">Customer</div><div className="font-medium">{view.address?.name}</div></div>
-              <div><div className="text-xs text-slate-500">Phone</div><div>{view.address?.phone}</div></div>
-              <div><div className="text-xs text-slate-500">Area</div><div>{view.address?.area}</div></div>
-              <div><div className="text-xs text-slate-500">Address</div><div>{view.address?.address}</div></div>
-              <div><div className="text-xs text-slate-500">Payment</div><div>{view.method}</div></div>
-              <div><div className="text-xs text-slate-500">Status</div><Badge tone={view.status === "Delivered" ? "success" : "info"}>{view.status}</Badge></div>
+              <div><div className="text-xs text-stone-500">Customer</div><div className="font-medium">{view.address?.name}</div></div>
+              <div><div className="text-xs text-stone-500">Phone</div><div>{view.address?.phone}</div></div>
+              <div><div className="text-xs text-stone-500">Area</div><div>{view.address?.area}</div></div>
+              <div><div className="text-xs text-stone-500">Address</div><div>{view.address?.address}</div></div>
+              <div><div className="text-xs text-stone-500">Payment</div><div>{view.method}</div></div>
+              <div><div className="text-xs text-stone-500">Status</div><Badge tone={view.status === "Delivered" ? "success" : "info"}>{view.status}</Badge></div>
             </div>
             <div>
-              <div className="text-xs text-slate-500 mb-1">Items</div>
+              <div className="text-xs text-stone-500 mb-1">Items</div>
               <div className="border rounded-lg divide-y">
                 {view.items.map((it, i) => (
                   <div key={i} className="flex items-center justify-between px-3 py-2">
-                    <div><div className="font-medium">{it.name}</div><div className="text-xs text-slate-500">{[it.size, it.flavor].filter(Boolean).join(" · ")} × {it.qty}</div></div>
+                    <div><div className="font-medium">{it.name}</div><div className="text-xs text-stone-500">{[it.size, it.flavor].filter(Boolean).join(" · ")} × {it.qty}</div></div>
                     <div>SAR {(it.qty * it.unitPrice).toFixed(2)}</div>
                   </div>
                 ))}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="flex justify-between"><span className="text-slate-500">Subtotal</span><span>SAR {view.subtotal.toFixed(2)}</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">Discount</span><span>- SAR {view.discount.toFixed(2)}</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">Delivery</span><span>SAR {view.deliveryFee.toFixed(2)}</span></div>
-              <div className="flex justify-between"><span className="text-slate-500">Tax</span><span>SAR {view.tax.toFixed(2)}</span></div>
-              <div className="flex justify-between col-span-2 font-medium text-slate-900 border-t pt-2"><span>Total</span><span>SAR {view.total.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span className="text-stone-500">Subtotal</span><span>SAR {view.subtotal.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span className="text-stone-500">Discount</span><span>- SAR {view.discount.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span className="text-stone-500">Delivery</span><span>SAR {view.deliveryFee.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span className="text-stone-500">Tax</span><span>SAR {view.tax.toFixed(2)}</span></div>
+              <div className="flex justify-between col-span-2 font-medium text-stone-900 border-t pt-2"><span>Total</span><span>SAR {view.total.toFixed(2)}</span></div>
             </div>
           </div>
         )}

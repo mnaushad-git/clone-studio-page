@@ -38,12 +38,12 @@ function CategoriesPage() {
         {cats.map((c) => (
           <div key={c.id} className="flex items-center gap-3 py-3">
             <div className="flex flex-col gap-0.5">
-              <button className="text-slate-400 hover:text-slate-800" onClick={() => move(c.id, -1)}><ArrowUp className="h-3 w-3" /></button>
-              <button className="text-slate-400 hover:text-slate-800" onClick={() => move(c.id, 1)}><ArrowDown className="h-3 w-3" /></button>
+              <button className="text-stone-400 hover:text-stone-800" onClick={() => move(c.id, -1)}><ArrowUp className="h-3 w-3" /></button>
+              <button className="text-stone-400 hover:text-stone-800" onClick={() => move(c.id, 1)}><ArrowDown className="h-3 w-3" /></button>
             </div>
             <div className="flex-1">
-              <div className="font-medium text-slate-800">{c.label}</div>
-              <div className="text-xs text-slate-500">/{c.slug}</div>
+              <div className="font-medium text-stone-800">{c.label}</div>
+              <div className="text-xs text-stone-500">/{c.slug}</div>
             </div>
             <Toggle checked={c.visible} onChange={(v) => categoryStore.update(c.id, { visible: v })} label="Visible" />
             <Button variant="ghost" onClick={() => { setEditId(c.id); setForm({ label: c.label, slug: c.slug, order: c.order, visible: c.visible }); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
