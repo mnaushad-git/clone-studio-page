@@ -51,8 +51,16 @@ function AdminLayout() {
   const [open, setOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
 
+  // Enforce login on client (SSR guard skips beforeLoad on hydration)
+  useEffect(() => {
+    if (!session && pathname !== "/admin/login") {
+      navigate({ to: "/admin/login", replace: true });
+    }
+  }, [session, pathname, navigate]);
+
   // Login page: render without chrome
   if (pathname === "/admin/login") return <Outlet />;
+  if (!session) return null;
 
   const themeStyle = {
     "--primary": theme.primary,
