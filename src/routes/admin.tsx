@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, Link, useRouterState, useNavigate, redirect } 
 import { useState } from "react";
 import {
   LayoutDashboard, Package, ShoppingBag, Users, Tags, Ticket, Truck, Image as ImageIcon,
-  Star, Gift, Settings, UserCog, BarChart3, Bell, LogOut, Menu, X, Home,
+  Star, Gift, Settings, UserCog, BarChart3, Bell, LogOut, Menu, X, Home, Palette,
 } from "lucide-react";
 import { useAdmin, adminAuth, notificationStore } from "@/lib/admin-store";
 
@@ -37,6 +37,7 @@ const NAV: NavItem[] = [
   { to: "/admin/loyalty", label: "Loyalty", icon: Gift },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/admin/staff", label: "Staff & Roles", icon: UserCog },
+  { to: "/admin/theme", label: "Theme", icon: Palette },
   { to: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
@@ -45,6 +46,7 @@ function AdminLayout() {
   const navigate = useNavigate();
   const session = useAdmin((s) => s.adminSession);
   const notifications = useAdmin((s) => s.notifications);
+  const theme = useAdmin((s) => s.theme);
   const unread = notifications.filter((n) => !n.read).length;
   const [open, setOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -52,8 +54,16 @@ function AdminLayout() {
   // Login page: render without chrome
   if (pathname === "/admin/login") return <Outlet />;
 
+  const themeStyle = {
+    "--primary": theme.primary,
+    "--primary-foreground": theme.primaryForeground,
+    "--accent": theme.accent,
+    "--cream": theme.background,
+    "--ring": theme.primary,
+  } as React.CSSProperties;
+
   return (
-    <div className="min-h-screen bg-cream flex">
+    <div className="min-h-screen bg-cream flex" style={themeStyle}>
       {/* Sidebar */}
       <aside className={`${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-64 bg-primary text-primary-foreground flex flex-col transition-transform`}>
         <div className="h-16 px-5 flex items-center justify-between border-b border-white/10">
@@ -69,7 +79,8 @@ function AdminLayout() {
                 key={item.to}
                 to={item.to}
                 onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 px-5 py-2.5 text-sm transition-colors ${active ? "bg-white/10 text-white border-l-2 border-amber-300" : "text-primary-foreground/70 hover:bg-white/5 hover:text-white"}`}
+                className={`flex items-center gap-3 px-5 py-2.5 text-sm transition-colors ${active ? "bg-white/10 text-white border-l-2" : "text-primary-foreground/70 hover:bg-white/5 hover:text-white border-l-2 border-transparent"}`}
+                style={active ? { borderLeftColor: theme.sidebarActive } : undefined}
               >
                 <Icon className="h-4 w-4" />
                 <span>{item.label}</span>

@@ -126,6 +126,30 @@ export type AdminNotification = {
   read: boolean;
 };
 
+export type AdminTheme = {
+  primary: string;
+  primaryForeground: string;
+  accent: string;
+  background: string;
+  sidebarActive: string;
+};
+
+export const DEFAULT_ADMIN_THEME: AdminTheme = {
+  primary: "#3d2817",
+  primaryForeground: "#faf7f2",
+  accent: "#f59e0b",
+  background: "#f5efe4",
+  sidebarActive: "#fcd34d",
+};
+
+export const ADMIN_THEME_PRESETS: { name: string; theme: AdminTheme }[] = [
+  { name: "Terrific Brown", theme: DEFAULT_ADMIN_THEME },
+  { name: "Midnight", theme: { primary: "#1e293b", primaryForeground: "#f8fafc", accent: "#38bdf8", background: "#f1f5f9", sidebarActive: "#38bdf8" } },
+  { name: "Emerald", theme: { primary: "#064e3b", primaryForeground: "#ecfdf5", accent: "#10b981", background: "#f0fdf4", sidebarActive: "#34d399" } },
+  { name: "Rose", theme: { primary: "#881337", primaryForeground: "#fff1f2", accent: "#f43f5e", background: "#fff1f2", sidebarActive: "#fda4af" } },
+  { name: "Indigo", theme: { primary: "#312e81", primaryForeground: "#eef2ff", accent: "#818cf8", background: "#eef2ff", sidebarActive: "#a5b4fc" } },
+];
+
 type AdminState = {
   staff: StaffMember[];
   promos: PromoCode[];
@@ -136,6 +160,7 @@ type AdminState = {
   paymentMethods: PaymentMethod[];
   loyalty: LoyaltyConfig;
   settings: SiteSettings;
+  theme: AdminTheme;
   productOverrides: Record<string, ProductOverride>;
   homepageSections: HomepageSection[];
   notifications: AdminNotification[];
@@ -228,6 +253,7 @@ const initial: AdminState = {
     { id: "n3", title: "New review", body: "5★ review on Chocolate Truffle", at: Date.now() - 1000 * 60 * 120, read: true },
   ],
   adminSession: null,
+  theme: DEFAULT_ADMIN_THEME,
 };
 
 function load(): AdminState {
@@ -236,7 +262,7 @@ function load(): AdminState {
     const raw = localStorage.getItem(KEY);
     if (!raw) return initial;
     const parsed = JSON.parse(raw);
-    return { ...initial, ...parsed, settings: { ...initial.settings, ...(parsed.settings ?? {}) }, loyalty: { ...initial.loyalty, ...(parsed.loyalty ?? {}) } };
+    return { ...initial, ...parsed, settings: { ...initial.settings, ...(parsed.settings ?? {}) }, loyalty: { ...initial.loyalty, ...(parsed.loyalty ?? {}) }, theme: { ...initial.theme, ...(parsed.theme ?? {}) } };
   } catch {
     return initial;
   }
@@ -345,4 +371,10 @@ export const notificationStore = {
   markRead(id: string) { update({ notifications: state.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)) }); },
   markAllRead() { update({ notifications: state.notifications.map((n) => ({ ...n, read: true })) }); },
   clear() { update({ notifications: [] }); },
+};
+
+export const themeStore = {
+  update(patch: Partial<AdminTheme>) { update({ theme: { ...state.theme, ...patch } }); },
+  set(theme: AdminTheme) { update({ theme }); },
+  reset() { update({ theme: DEFAULT_ADMIN_THEME }); },
 };
