@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useStore, addresses as addressStore, selectSubtotal, selectDiscount, selectTax, selectDeliveryFee, selectTotal, promo, RIYADH_AREAS } from "@/lib/store";
+import { useAdmin, getAdminState } from "@/lib/admin-store";
 import { getProduct } from "@/lib/products";
 
 const DAY_SLOTS: [number, number][] = [[8, 10], [10, 12], [12, 14], [14, 16], [16, 18], [18, 20]];
@@ -13,12 +14,25 @@ const fmtHour = (h: number) => {
   const hh = h % 12 === 0 ? 12 : h % 12;
   return `${hh}:00${period}`;
 };
-export const SLOT_LABELS = DAY_SLOTS.map(([s, e]) => `${fmtHour(s)} - ${fmtHour(e)}`);
+function toMin(s: string) { const [h, m] = s.split(":").map(Number); return (h || 0) * 60 + (m || 0); }
+function fmtLabel(from: string, to: string) {
+  const h1 = parseInt(from.split(":")[0] || "0", 10);
+  const h2 = parseInt(to.split(":")[0] || "0", 10);
+  return `${fmtHour(h1)} - ${fmtHour(h2)}`;
+}
+function slotSource(): { label: string; startMin: number }[] {
+  const admin = getAdminState().slots.filter((s) => s.active);
+  if (admin.length) return admin.map((s) => ({ label: s.label || fmtLabel(s.from, s.to), startMin: toMin(s.from) }));
+  return DAY_SLOTS.map(([s, e]) => ({ label: `${fmtHour(s)} - ${fmtHour(e)}`, startMin: s * 60 }));
+}
+export function getSlotLabels(): string[] { return slotSource().map((s) => s.label); }
+export const SLOT_LABELS = getSlotLabels();
 function nextSlot(now = new Date()): { day: "Today" | "Tomorrow"; label: string } {
-  const h = now.getHours();
-  const idx = DAY_SLOTS.findIndex(([s]) => s > h);
-  if (idx >= 0) return { day: "Today", label: SLOT_LABELS[idx] };
-  return { day: "Tomorrow", label: SLOT_LABELS[0] };
+  const src = slotSource();
+  const mins = now.getHours() * 60 + now.getMinutes();
+  const idx = src.findIndex((s) => s.startMin > mins);
+  if (idx >= 0) return { day: "Today", label: src[idx].label };
+  return { day: "Tomorrow", label: src[0]?.label ?? "" };
 }
 
 export const Route = createFileRoute("/delivery")({
