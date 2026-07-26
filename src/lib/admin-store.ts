@@ -262,7 +262,7 @@ function load(): AdminState {
     const raw = localStorage.getItem(KEY);
     if (!raw) return initial;
     const parsed = JSON.parse(raw);
-    return { ...initial, ...parsed, settings: { ...initial.settings, ...(parsed.settings ?? {}) }, loyalty: { ...initial.loyalty, ...(parsed.loyalty ?? {}) } };
+    return { ...initial, ...parsed, settings: { ...initial.settings, ...(parsed.settings ?? {}) }, loyalty: { ...initial.loyalty, ...(parsed.loyalty ?? {}) }, theme: { ...initial.theme, ...(parsed.theme ?? {}) } };
   } catch {
     return initial;
   }
