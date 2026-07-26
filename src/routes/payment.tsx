@@ -95,7 +95,7 @@ function PaymentPage() {
         toast.error("Please fix the highlighted fields");
         return;
       }
-      methodLabel = `Credit Card •••• ${card.number.replace(/\s/g, "").slice(-4)}`;
+      methodLabel = `${selectedLabel} •••• ${card.number.replace(/\s/g, "").slice(-4)}`;
     }
     setLoading(true);
     try {
