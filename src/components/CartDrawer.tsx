@@ -16,8 +16,6 @@ import {
 } from "@/lib/store";
 import { getProduct, products } from "@/lib/products";
 
-const FREE_DELIVERY_THRESHOLD = 200;
-
 export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const items = useStore((s) => s.cart);
   const subtotal = useStore(selectSubtotal);
@@ -52,9 +50,6 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
     if (!ok) setErr("Invalid promo code");
     else setCode("");
   }
-
-  const remaining = Math.max(0, FREE_DELIVERY_THRESHOLD - subtotal);
-  const progress = Math.min(100, (subtotal / FREE_DELIVERY_THRESHOLD) * 100);
 
   // Recommendations: products not currently in cart
   const inCartIds = new Set(items.map((i) => i.productId));
@@ -127,30 +122,6 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                 Thank you for your selection. Review your order below and proceed to checkout when ready.
               </p>
             </div>
-
-            {/* Free delivery tracker (logged-in only) */}
-            {isAuthed && (
-              <div className="border border-border rounded-lg p-4">
-                <div className="flex items-center gap-3">
-                  <Truck className="h-6 w-6 text-primary shrink-0" />
-                  <p className="text-sm flex-1">
-                    {remaining > 0 ? (
-                      <>Only <span className="font-semibold">SAR {remaining.toFixed(2)}</span> to Go for Free Delivery!</>
-                    ) : (
-                      <span className="font-semibold text-primary">You've unlocked Free Delivery!</span>
-                    )}
-                  </p>
-                </div>
-                <div className="mt-3 flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
-                  </div>
-                  <span className="text-[11px] font-semibold text-muted-foreground">
-                    SAR {subtotal.toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            )}
 
             {/* Order Summary */}
             <div className="border border-border rounded-lg overflow-hidden">

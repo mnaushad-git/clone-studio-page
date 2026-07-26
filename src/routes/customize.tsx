@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  Check, MessageSquare, Minus, Plus, Ticket, Bike, MapPin, Truck, X, Link2, PenLine,
+  Check, MessageSquare, Minus, Plus, Ticket, MapPin, Truck, X, Link2, PenLine,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -67,9 +67,6 @@ function CustomizePage() {
 
   const giftCardSelected = selectedCard !== null;
   const activeCard = GIFT_CARDS.find((c) => c.id === selectedCard) ?? GIFT_CARDS[0];
-
-  const remainingForFree = Math.max(0, 200 - (subtotal - discount));
-  const progress = Math.min(100, ((subtotal - discount) / 200) * 100);
 
   const applyPromo = () => {
     if (!promoInput.trim()) return;
@@ -158,25 +155,6 @@ function CustomizePage() {
           </div>
 
           <aside className="space-y-4">
-            <div className="bg-white rounded-2xl shadow-sm p-5">
-              <div className="flex items-center gap-3">
-                <Bike className="h-8 w-8 text-primary shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">
-                    {remainingForFree > 0
-                      ? `Only SAR ${remainingForFree.toFixed(2)} to Go for Free Delivery!`
-                      : "You've unlocked free delivery! 🎉"}
-                  </p>
-                </div>
-              </div>
-              <div className="mt-3 flex items-center gap-3">
-                <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden">
-                  <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
-                </div>
-                <span className="text-xs text-muted-foreground">SAR 200</span>
-              </div>
-            </div>
-
             {cartItems.length === 0 ? (
               <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
                 <p className="text-sm text-muted-foreground">Your cart is empty.</p>

@@ -307,7 +307,7 @@ export function selectDiscount(s: State): number {
 }
 export function selectDeliveryFee(s: State): number {
   const sub = selectSubtotal(s) - selectDiscount(s);
-  return sub === 0 || sub >= 200 ? 0 : 15;
+  return sub === 0 ? 0 : 15; // Flat SAR 15 delivery fee for Riyadh (distance-based logic later)
 }
 export function selectTax(s: State): number {
   return +(Math.max(0, selectSubtotal(s) - selectDiscount(s)) * 0.05).toFixed(2);
