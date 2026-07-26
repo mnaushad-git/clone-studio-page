@@ -33,7 +33,7 @@ function LoginPage() {
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const finish = (user: { phone?: string; email?: string }) => {
-    auth.signIn({ ...user, name: user.email?.split("@")[0] });
+    auth.signIn(user);
     toast.success("Welcome back!");
     const dest = redirect && redirect.startsWith("/") ? redirect : "/account";
     navigate({ to: dest });
