@@ -338,7 +338,8 @@ export function selectHasPurchased(productId: string) {
 // ---------- Auth ----------
 export const auth = {
   signIn(user: User) {
-    state = { ...state, user: { ...state.user, ...user } };
+    const clean = Object.fromEntries(Object.entries(user).filter(([, v]) => v !== undefined)) as Partial<User>;
+    state = { ...state, user: { ...(state.user ?? {}), ...clean } };
     emit();
   },
   signOut() {
@@ -346,7 +347,8 @@ export const auth = {
     emit();
   },
   updateProfile(patch: Partial<User>) {
-    state = { ...state, user: { ...(state.user ?? {}), ...patch } };
+    const clean = Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== undefined)) as Partial<User>;
+    state = { ...state, user: { ...(state.user ?? {}), ...clean } };
     emit();
   },
 };
