@@ -128,7 +128,7 @@ function AccountPage() {
               })}
               <li className="pt-2 border-t border-border mt-2">
                 <button
-                  onClick={() => { auth.signOut(); toast.success("Signed out"); navigate({ to: "/" }); }}
+                  onClick={() => { navigate({ to: "/", replace: true }); auth.signOut(); toast.success("Signed out"); }}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-destructive hover:bg-destructive/10"
                 >
                   <LogOut className="h-5 w-5" /> Sign Out
