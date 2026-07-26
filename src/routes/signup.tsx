@@ -1,8 +1,19 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
 import illustration from "@/assets/signup-illustration.jpg";
 import { auth } from "@/lib/store";
+
+const signupSchema = z
+  .object({
+    name: z.string().trim().min(1, "Name is required").max(100),
+    email: z.string().trim().email("Enter a valid email").max(255),
+    phone: z.string().trim().min(6, "Phone is required").max(20),
+    password: z.string().min(8, "Password must be at least 8 characters").max(100),
+    confirm: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((d) => d.password === d.confirm, { path: ["confirm"], message: "Passwords don't match" });
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
