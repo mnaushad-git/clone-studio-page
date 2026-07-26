@@ -19,6 +19,7 @@ export type Address = {
   address: string;
   extra?: string;
   isGift?: boolean;
+  isDefault?: boolean;
   identitySecret?: boolean;
   timeSlot?: "tomorrow" | "another";
   deliveryDate?: string;
@@ -434,18 +435,35 @@ export const auth = {
 export const addresses = {
   add(a: Omit<Address, "id">) {
     const id = "addr-" + Math.random().toString(36).slice(2, 8);
-    state = { ...state, addresses: [...state.addresses, { ...a, id }] };
+    const shouldBeDefault = a.isDefault || state.addresses.filter((x) => !x.isGift).length === 0;
+    const next: Address = { ...a, id, isDefault: shouldBeDefault && !a.isGift };
+    let list = [...state.addresses, next];
+    if (next.isDefault) list = list.map((x) => (x.id === id ? x : { ...x, isDefault: false }));
+    state = { ...state, addresses: list };
     emit();
     return id;
   },
   remove(id: string) {
-    state = { ...state, addresses: state.addresses.filter((a) => a.id !== id) };
+    const wasDefault = state.addresses.find((a) => a.id === id)?.isDefault;
+    let list = state.addresses.filter((a) => a.id !== id);
+    if (wasDefault) {
+      const firstSelf = list.find((a) => !a.isGift);
+      if (firstSelf) list = list.map((a) => (a.id === firstSelf.id ? { ...a, isDefault: true } : a));
+    }
+    state = { ...state, addresses: list };
     emit();
   },
   update(id: string, patch: Partial<Address>) {
     state = {
       ...state,
       addresses: state.addresses.map((a) => (a.id === id ? { ...a, ...patch } : a)),
+    };
+    emit();
+  },
+  setDefault(id: string) {
+    state = {
+      ...state,
+      addresses: state.addresses.map((a) => ({ ...a, isDefault: a.id === id })),
     };
     emit();
   },

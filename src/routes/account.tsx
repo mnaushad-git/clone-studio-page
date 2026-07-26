@@ -158,12 +158,20 @@ function AccountPage() {
                 </div>
                 <div className="space-y-3">
                   {addresses.map((a) => (
-                    <div key={a.id} className="border border-border rounded-lg p-4 flex items-start justify-between gap-4">
+                    <div key={a.id} className={`border rounded-lg p-4 flex items-start justify-between gap-4 ${a.isDefault ? "border-primary bg-primary/5" : "border-border"}`}>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium">{a.name}</p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-medium">{a.name}</p>
+                          {a.isDefault && <span className="text-[10px] uppercase tracking-wider bg-primary text-primary-foreground px-2 py-0.5 rounded-full">Default</span>}
+                        </div>
                         <p className="text-xs text-muted-foreground">{a.phone}</p>
                         <p className="text-xs text-muted-foreground">{a.area}{a.address ? ` — ${a.address}` : ""}</p>
                         {a.extra && <p className="text-xs text-muted-foreground">{a.extra}</p>}
+                        {!a.isDefault && !a.isGift && (
+                          <button onClick={() => { addressStore.setDefault(a.id); toast.success("Default address updated"); }} className="mt-2 text-xs text-primary hover:underline">
+                            Set as default
+                          </button>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <button onClick={() => openEdit(a.id)} className="p-1.5 text-foreground hover:text-primary hover:bg-secondary rounded-md transition" aria-label="Edit">

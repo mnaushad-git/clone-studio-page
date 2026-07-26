@@ -64,7 +64,7 @@ function DeliveryPage() {
   // When gift toggle is off, prefill from user profile + last saved (non-gift) address
   useEffect(() => {
     if (gift) return;
-    const lastSelf = [...savedAddresses].reverse().find((a) => !a.isGift);
+    const lastSelf = savedAddresses.find((a) => !a.isGift && a.isDefault) ?? [...savedAddresses].reverse().find((a) => !a.isGift);
     if (user?.name) setName(user.name);
     else if (lastSelf?.name) setName(lastSelf.name);
     if (user?.phone) setPhone(user.phone.replace(/^\+966\s?/, ""));
