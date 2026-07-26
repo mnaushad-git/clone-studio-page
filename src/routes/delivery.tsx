@@ -304,12 +304,20 @@ function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { in
   const now = new Date();
   const quickDates = useMemo<Quick[]>(() => {
     const fmt = (d: Date) => d.toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long" });
+    const today = new Date(now);
     const t = new Date(now); t.setDate(t.getDate() + 1);
     const t2 = new Date(now); t2.setDate(t2.getDate() + 2);
-    return [
+
+    const slots: Quick[] = [];
+    // If any same-day slots remain, offer Today as a quick option
+    if (DAY_SLOTS.some(([s]) => s > now.getHours())) {
+      slots.push({ key: fmt(today), label: "Today", sub: today.toLocaleDateString("en-US", { day: "numeric", month: "long" }) });
+    }
+    slots.push(
       { key: fmt(t), label: "Tomorrow", sub: t.toLocaleDateString("en-US", { day: "numeric", month: "long" }) },
       { key: fmt(t2), label: t2.toLocaleDateString("en-US", { weekday: "long" }), sub: t2.toLocaleDateString("en-US", { day: "numeric", month: "long" }) },
-    ];
+    );
+    return slots;
   }, []);
 
   const [mode, setMode] = useState<"quick" | "pick">(initialDate && !quickDates.find((q) => q.key === initialDate) ? "pick" : "quick");
@@ -318,6 +326,9 @@ function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { in
   const [calMonth, setCalMonth] = useState<Date>(new Date(now.getFullYear(), now.getMonth(), 1));
 
   const timeSlots = SLOT_LABELS;
+  const todayKey = new Date(now).toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long" });
+  const isTodaySelected = date === todayKey;
+  const currentSlotIdx = DAY_SLOTS.findIndex(([s]) => s > now.getHours());
 
   const monthLabel = calMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   const firstDow = new Date(calMonth.getFullYear(), calMonth.getMonth(), 1).getDay();
@@ -397,12 +408,15 @@ function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { in
         <div className="mt-6">
           <p className="text-sm mb-3">Select a Delivery time <span className="text-primary">*</span></p>
           <div className="grid grid-cols-2 gap-3">
-            {timeSlots.map((slot) => (
-              <button key={slot} onClick={() => setTime(slot)} className={`flex items-center justify-between rounded-lg border px-4 py-3 text-sm transition ${time === slot ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
-                <span>{slot}</span>
-                <span className="text-xs text-muted-foreground">EGP 130</span>
-              </button>
-            ))}
+            {timeSlots.map((slot, idx) => {
+              const isPastSlot = isTodaySelected && idx < currentSlotIdx;
+              return (
+                <button key={slot} onClick={() => !isPastSlot && setTime(slot)} disabled={isPastSlot} className={`flex items-center justify-between rounded-lg border px-4 py-3 text-sm transition ${time === slot ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"} ${isPastSlot ? "opacity-50 cursor-not-allowed" : ""}`}>
+                  <span>{slot}</span>
+                  <span className="text-xs text-muted-foreground">SAR 130</span>
+                </button>
+              );
+            })}
             <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3 text-sm opacity-60">
               <span>Express Delivery</span>
               <span className="text-xs text-primary">Not Available</span>
