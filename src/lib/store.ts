@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { getProduct } from "./products";
+import { getAdminState } from "./admin-store";
 
 export type CartItem = {
   lineId: string;
