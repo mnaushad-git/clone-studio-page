@@ -164,7 +164,7 @@ function CustomizePage() {
                 <div className="flex-1">
                   <p className="text-sm font-medium">
                     {remainingForFree > 0
-                      ? `Only $${remainingForFree.toFixed(2)} to Go for Free Delivery!`
+                      ? `Only SAR ${remainingForFree.toFixed(2)} to Go for Free Delivery!`
                       : "You've unlocked free delivery! 🎉"}
                   </p>
                 </div>
