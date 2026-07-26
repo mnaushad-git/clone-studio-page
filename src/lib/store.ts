@@ -123,7 +123,7 @@ const initial: State = {
   wishlist: [],
   reviews: seededReviews,
   recentlyViewed: [],
-  location: null,
+  location: { country: "Saudi Arabia", countryCode: "SA", city: "Riyadh", slug: "sa-riyadh", currency: "SAR", sameDayCutoffHour: 15 },
   loyaltyPoints: 0,
   loyaltyHistory: [],
   recipientConfirmations: [],
