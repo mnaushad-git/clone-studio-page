@@ -176,7 +176,7 @@ function ProductEditor({
           <div className="font-medium text-sm">Size options</div>
           <div className="flex gap-2">
             <Button variant="ghost" onClick={resetSizes}><RotateCcw className="h-3 w-3 mr-1" />Use defaults</Button>
-            <Button variant="secondary" onClick={addSize}><Plus className="h-3 w-3 mr-1" />Add size</Button>
+            <Button variant="outline" onClick={addSize}><Plus className="h-3 w-3 mr-1" />Add size</Button>
           </div>
         </div>
         {sizes.length === 0 ? (
@@ -200,7 +200,7 @@ function ProductEditor({
           <div className="font-medium text-sm">Flavor options</div>
           <div className="flex gap-2">
             <Button variant="ghost" onClick={resetFlavors}><RotateCcw className="h-3 w-3 mr-1" />Use defaults</Button>
-            <Button variant="secondary" onClick={addFlavor}><Plus className="h-3 w-3 mr-1" />Add flavor</Button>
+            <Button variant="outline" onClick={addFlavor}><Plus className="h-3 w-3 mr-1" />Add flavor</Button>
           </div>
         </div>
         {flavors.length === 0 ? (
