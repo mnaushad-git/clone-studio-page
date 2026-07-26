@@ -64,13 +64,19 @@ function PaymentPage() {
   const tax = useStore(selectTax);
   const deliveryFee = useStore(selectDeliveryFee);
   const total = useStore(selectTotal);
+  const adminMethods = useAdmin((s) => s.paymentMethods);
+  const methods = adminMethods
+    .filter((m) => m.active)
+    .map((m) => ({ id: m.id, label: m.label, type: methodType(m.label) }));
 
   const lastAddress = addressList[addressList.length - 1] ?? null;
 
-  const [selected, setSelected] = useState("apple");
+  const [selected, setSelected] = useState(methods[0]?.id ?? "");
   const [card, setCard] = useState({ name: "", number: "", expiry: "", cvc: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof card, string>>>({});
   const [loading, setLoading] = useState(false);
+  const selectedLabel = methods.find((m) => m.id === selected)?.label ?? "";
+  const isCredit = /credit|card|mada/i.test(selectedLabel);
 
   const handleConfirm = async () => {
     setErrors({});
