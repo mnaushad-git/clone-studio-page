@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "@tanstack/react-router";
 import { MapPin, X, Check } from "lucide-react";
 import { CITIES, FLAGS } from "@/lib/location";
 import { location, useStore } from "@/lib/store";
@@ -6,13 +7,15 @@ import { location, useStore } from "@/lib/store";
 export function LocationSelector() {
   const current = useStore((s) => s.location);
   const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const isHome = router.state.location.pathname === "/";
 
   useEffect(() => {
-    if (!current) {
+    if (!current && !isHome) {
       const t = setTimeout(() => setOpen(true), 800);
       return () => clearTimeout(t);
     }
-  }, [current]);
+  }, [current, isHome]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
