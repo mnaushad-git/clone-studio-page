@@ -267,7 +267,7 @@ function ProductPage() {
           </div>
           <button onClick={buyNow} className="mt-3 w-full bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90">Buy Now</button>
 
-          {product.category === "cakes" && (
+          {(override?.allowInscription ?? baseProduct.category === "cakes") && (
             <div className="mt-6">
               <div className="flex items-center justify-between border-b border-border pb-2 text-sm text-muted-foreground">
                 <input value={inscription} onChange={(e) => setInscription(e.target.value.slice(0, 22))} placeholder="Add Custom Inscription" className="bg-transparent outline-none flex-1" />
