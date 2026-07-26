@@ -253,6 +253,7 @@ const initial: AdminState = {
     { id: "n3", title: "New review", body: "5★ review on Chocolate Truffle", at: Date.now() - 1000 * 60 * 120, read: true },
   ],
   adminSession: null,
+  theme: DEFAULT_ADMIN_THEME,
 };
 
 function load(): AdminState {
