@@ -318,11 +318,23 @@ export const cart = {
 };
 
 export const promo = {
-  apply(code: string): boolean {
+  apply(code: string): { ok: boolean; error?: string } | boolean {
     const c = code.trim().toUpperCase();
-    const percent = PROMOS[c];
-    if (!percent) return false;
-    state = { ...state, promo: { code: c, percent } };
+    if (!c) return false;
+    const admin = getAdminState();
+    const found = admin.promos.find((p) => p.code.toUpperCase() === c && p.active);
+    if (found) {
+      const sub = selectSubtotal(state);
+      if (found.minSubtotal && sub < found.minSubtotal) return false;
+      if (found.usageLimit && found.used >= found.usageLimit) return false;
+      const percent = found.type === "percent" ? found.value : +(((found.value / Math.max(1, sub)) * 100).toFixed(2));
+      state = { ...state, promo: { code: c, percent } };
+      emit();
+      return true;
+    }
+    const legacy = PROMOS[c];
+    if (!legacy) return false;
+    state = { ...state, promo: { code: c, percent: legacy } };
     emit();
     return true;
   },
