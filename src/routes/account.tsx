@@ -46,7 +46,9 @@ function AccountPage() {
   const [active, setActive] = useState<MenuKey>("personal");
   const [profile, setProfile] = useState({ name: "", email: "", phone: "", birthDate: "" });
   const [showAddr, setShowAddr] = useState(false);
-  const [newAddr, setNewAddr] = useState({ name: "", phone: "", area: "", address: "", extra: "" });
+  const [editId, setEditId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [addrForm, setAddrForm] = useState({ name: "", phone: "", area: "", address: "", extra: "" });
 
   useEffect(() => {
     if (user) setProfile({ name: user.name ?? "", email: user.email ?? "", phone: user.phone ?? "", birthDate: user.birthDate ?? "" });
