@@ -26,18 +26,18 @@ function StaffPage() {
     >
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="text-left text-xs uppercase text-slate-500 border-b">
+          <thead className="text-left text-xs uppercase text-stone-500 border-b">
             <tr><th className="py-2">Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Active</th><th>Joined</th><th></th></tr>
           </thead>
           <tbody>
             {staff.map((m) => (
-              <tr key={m.id} className="border-b last:border-0 hover:bg-slate-50">
+              <tr key={m.id} className="border-b last:border-0 hover:bg-stone-50">
                 <td className="py-2.5 font-medium">{m.name}</td>
                 <td>{m.email}</td>
-                <td className="text-slate-500">{m.phone ?? "—"}</td>
+                <td className="text-stone-500">{m.phone ?? "—"}</td>
                 <td><Badge tone={m.role === "owner" ? "warn" : m.role === "admin" ? "info" : "default"}>{m.role}</Badge></td>
                 <td><Toggle checked={m.active} onChange={(v) => staffStore.update(m.id, { active: v })} /></td>
-                <td className="text-slate-500 text-xs">{new Date(m.createdAt).toLocaleDateString()}</td>
+                <td className="text-stone-500 text-xs">{new Date(m.createdAt).toLocaleDateString()}</td>
                 <td className="flex gap-1 py-2">
                   <Button variant="ghost" onClick={() => { setEditId(m.id); setForm({ name: m.name, email: m.email, phone: m.phone ?? "", role: m.role, active: m.active }); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
                   {m.role !== "owner" && <Button variant="ghost" onClick={() => { if (confirm("Remove this staff member?")) staffStore.remove(m.id); }}><Trash2 className="h-4 w-4 text-red-500" /></Button>}

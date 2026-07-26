@@ -27,7 +27,7 @@ function DeliveryPage() {
             <div key={z.id} className="flex items-center gap-3 py-3">
               <div className="flex-1">
                 <div className="font-medium">{z.name}</div>
-                <div className="text-xs text-slate-500">SAR {z.fee} · ~{z.etaMinutes} min ETA</div>
+                <div className="text-xs text-stone-500">SAR {z.fee} · ~{z.etaMinutes} min ETA</div>
               </div>
               <Toggle checked={z.active} onChange={(v) => zoneStore.update(z.id, { active: v })} />
               <Button variant="ghost" onClick={() => { setZEdit(z.id); setZForm({ name: z.name, fee: z.fee, etaMinutes: z.etaMinutes, active: z.active }); setZOpen(true); }}><Pencil className="h-4 w-4" /></Button>
@@ -54,7 +54,7 @@ function DeliveryPage() {
             <div key={s.id} className="flex items-center gap-3 py-3">
               <div className="flex-1">
                 <div className="font-medium">{s.label}</div>
-                <div className="text-xs text-slate-500">{s.from} – {s.to} · capacity {s.capacity}</div>
+                <div className="text-xs text-stone-500">{s.from} – {s.to} · capacity {s.capacity}</div>
               </div>
               <Toggle checked={s.active} onChange={(v) => slotStore.update(s.id, { active: v })} />
               <Button variant="ghost" onClick={() => { setSEdit(s.id); setSForm({ label: s.label, from: s.from, to: s.to, capacity: s.capacity, active: s.active }); setSOpen(true); }}><Pencil className="h-4 w-4" /></Button>

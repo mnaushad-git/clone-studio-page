@@ -46,14 +46,14 @@ function AnalyticsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card title="Top products by revenue">
-          {topProducts.length === 0 ? <div className="text-sm text-slate-500 py-4 text-center">No sales yet</div> : (
+          {topProducts.length === 0 ? <div className="text-sm text-stone-500 py-4 text-center">No sales yet</div> : (
             <div className="space-y-3">
               {topProducts.map(([id, r]) => {
                 const max = topProducts[0][1].revenue;
                 return (
                   <div key={id}>
-                    <div className="flex justify-between text-sm mb-1"><span className="font-medium">{r.name}</span><span className="text-slate-500">SAR {r.revenue.toFixed(2)} · {r.qty} sold</span></div>
-                    <div className="h-2 rounded bg-slate-100 overflow-hidden"><div className="h-full bg-amber-500" style={{ width: `${(r.revenue / max) * 100}%` }} /></div>
+                    <div className="flex justify-between text-sm mb-1"><span className="font-medium">{r.name}</span><span className="text-stone-500">SAR {r.revenue.toFixed(2)} · {r.qty} sold</span></div>
+                    <div className="h-2 rounded bg-stone-100 overflow-hidden"><div className="h-full bg-amber-500" style={{ width: `${(r.revenue / max) * 100}%` }} /></div>
                   </div>
                 );
               })}
@@ -62,12 +62,12 @@ function AnalyticsPage() {
         </Card>
 
         <Card title="Revenue by category">
-          {catTotal === 0 ? <div className="text-sm text-slate-500 py-4 text-center">No sales yet</div> : (
+          {catTotal === 0 ? <div className="text-sm text-stone-500 py-4 text-center">No sales yet</div> : (
             <div className="space-y-3">
               {[...byCat.entries()].sort((a, b) => b[1] - a[1]).map(([cat, val]) => (
                 <div key={cat}>
-                  <div className="flex justify-between text-sm mb-1"><span className="font-medium">{CATEGORY_LABEL[cat]}</span><span className="text-slate-500">{((val / catTotal) * 100).toFixed(0)}% · SAR {val.toFixed(2)}</span></div>
-                  <div className="h-2 rounded bg-slate-100 overflow-hidden"><div className="h-full bg-slate-800" style={{ width: `${(val / catTotal) * 100}%` }} /></div>
+                  <div className="flex justify-between text-sm mb-1"><span className="font-medium">{CATEGORY_LABEL[cat]}</span><span className="text-stone-500">{((val / catTotal) * 100).toFixed(0)}% · SAR {val.toFixed(2)}</span></div>
+                  <div className="h-2 rounded bg-stone-100 overflow-hidden"><div className="h-full bg-stone-800" style={{ width: `${(val / catTotal) * 100}%` }} /></div>
                 </div>
               ))}
             </div>
@@ -79,8 +79,8 @@ function AnalyticsPage() {
         <div className="flex items-end gap-1 h-32">
           {hours.map((v, i) => (
             <div key={i} className="flex-1 flex flex-col items-center gap-1">
-              <div className="w-full bg-slate-800 rounded-t" style={{ height: `${(v / maxHour) * 100}%`, minHeight: 2 }} />
-              <div className="text-[9px] text-slate-400">{i}</div>
+              <div className="w-full bg-stone-800 rounded-t" style={{ height: `${(v / maxHour) * 100}%`, minHeight: 2 }} />
+              <div className="text-[9px] text-stone-400">{i}</div>
             </div>
           ))}
         </div>

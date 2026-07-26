@@ -37,7 +37,7 @@ function ProductsPage() {
     >
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="text-left text-xs uppercase text-slate-500 border-b">
+          <thead className="text-left text-xs uppercase text-stone-500 border-b">
             <tr><th className="py-2">Product</th><th>Category</th><th>Price (SAR)</th><th>Stock</th><th>Featured</th><th>Visible</th><th></th></tr>
           </thead>
           <tbody>
@@ -45,13 +45,13 @@ function ProductsPage() {
               const o = overrides[p.id];
               const price = o?.priceOverride ?? p.price;
               return (
-                <tr key={p.id} className="border-b last:border-0 hover:bg-slate-50">
+                <tr key={p.id} className="border-b last:border-0 hover:bg-stone-50">
                   <td className="py-2">
                     <div className="flex items-center gap-3">
                       <img src={p.image} alt={p.name} className="h-10 w-10 rounded object-cover" />
                       <div>
                         <div className="font-medium">{p.name}</div>
-                        <div className="text-xs text-slate-500">{p.id}</div>
+                        <div className="text-xs text-stone-500">{p.id}</div>
                       </div>
                     </div>
                   </td>
@@ -80,7 +80,7 @@ function ProductsPage() {
               <img src={editingProduct.image} alt="" className="h-16 w-16 rounded object-cover" />
               <div>
                 <div className="font-medium">{editingProduct.name}</div>
-                <div className="text-xs text-slate-500">{CATEGORY_LABEL[editingProduct.category as Category]} · base SAR {editingProduct.price.toFixed(2)}</div>
+                <div className="text-xs text-stone-500">{CATEGORY_LABEL[editingProduct.category as Category]} · base SAR {editingProduct.price.toFixed(2)}</div>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -98,7 +98,7 @@ function ProductsPage() {
               <Toggle checked={editingOverride?.visible ?? true} onChange={(v) => productOverrideStore.set(editingProduct.id, { visible: v })} label="Visible on storefront" />
               <Toggle checked={editingOverride?.featured ?? false} onChange={(v) => productOverrideStore.set(editingProduct.id, { featured: v })} label="Featured on homepage" />
             </div>
-            {editingProduct.description && <div className="text-xs text-slate-500 bg-slate-50 border rounded-lg p-3">{editingProduct.description}</div>}
+            {editingProduct.description && <div className="text-xs text-stone-500 bg-stone-50 border rounded-lg p-3">{editingProduct.description}</div>}
           </div>
         )}
       </Modal>

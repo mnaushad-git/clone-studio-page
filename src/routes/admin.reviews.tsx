@@ -29,8 +29,8 @@ function ReviewsPage() {
                     {r.verified && <Badge tone="success">Verified</Badge>}
                   </div>
                   {r.title && <div className="text-sm font-medium mt-1">{r.title}</div>}
-                  <div className="text-sm text-slate-600 mt-1">{r.body}</div>
-                  <div className="text-xs text-slate-400 mt-2">{r.author} · {new Date(r.createdAt).toLocaleDateString()}</div>
+                  <div className="text-sm text-stone-600 mt-1">{r.body}</div>
+                  <div className="text-xs text-stone-400 mt-2">{r.author} · {new Date(r.createdAt).toLocaleDateString()}</div>
                 </div>
                 <Button variant="ghost" onClick={() => { if (confirm("Delete this review?")) reviewsApi.remove(r.id); }}><Trash2 className="h-4 w-4 text-red-500" /></Button>
               </div>

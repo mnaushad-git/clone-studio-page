@@ -32,7 +32,7 @@ function ContentPage() {
         <div className="space-y-3">
           {banners.map((b) => (
             <div key={b.id} className="border rounded-lg p-3 flex gap-3">
-              <div className="h-16 w-24 rounded bg-slate-100 flex items-center justify-center text-slate-400 text-xs">
+              <div className="h-16 w-24 rounded bg-stone-100 flex items-center justify-center text-stone-400 text-xs">
                 {b.image ? <img src={b.image} className="h-full w-full object-cover rounded" alt="" /> : "No image"}
               </div>
               <div className="flex-1">
@@ -40,8 +40,8 @@ function ContentPage() {
                   <div className="font-medium">{b.title}</div>
                   <Badge tone="info">{b.position}</Badge>
                 </div>
-                <div className="text-xs text-slate-500">{b.subtitle}</div>
-                {b.ctaLabel && <div className="text-xs text-slate-500 mt-1">CTA: {b.ctaLabel} → {b.ctaLink}</div>}
+                <div className="text-xs text-stone-500">{b.subtitle}</div>
+                {b.ctaLabel && <div className="text-xs text-stone-500 mt-1">CTA: {b.ctaLabel} → {b.ctaLink}</div>}
               </div>
               <div className="flex flex-col items-end gap-2">
                 <Toggle checked={b.active} onChange={(v) => bannerStore.update(b.id, { active: v })} />
@@ -70,15 +70,15 @@ function ContentPage() {
       </Card>
 
       <Card title="Homepage sections">
-        <div className="text-xs text-slate-500 mb-3">Toggle visibility and reorder the homepage.</div>
+        <div className="text-xs text-stone-500 mb-3">Toggle visibility and reorder the homepage.</div>
         <div className="divide-y">
           {sections.map((s) => (
             <div key={s.id} className="flex items-center gap-3 py-3">
               <div className="flex flex-col gap-0.5">
-                <button className="text-slate-400 hover:text-slate-800" onClick={() => moveSection(s.id, -1)}><ArrowUp className="h-3 w-3" /></button>
-                <button className="text-slate-400 hover:text-slate-800" onClick={() => moveSection(s.id, 1)}><ArrowDown className="h-3 w-3" /></button>
+                <button className="text-stone-400 hover:text-stone-800" onClick={() => moveSection(s.id, -1)}><ArrowUp className="h-3 w-3" /></button>
+                <button className="text-stone-400 hover:text-stone-800" onClick={() => moveSection(s.id, 1)}><ArrowDown className="h-3 w-3" /></button>
               </div>
-              <div className="flex-1 font-medium text-slate-800">{s.label}</div>
+              <div className="flex-1 font-medium text-stone-800">{s.label}</div>
               <Toggle checked={s.visible} onChange={(v) => homepageStore.update(s.id, { visible: v })} />
             </div>
           ))}

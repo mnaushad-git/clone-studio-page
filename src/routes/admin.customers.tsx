@@ -32,15 +32,15 @@ function CustomersPage() {
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="text-left text-xs uppercase text-slate-500 border-b">
+            <thead className="text-left text-xs uppercase text-stone-500 border-b">
               <tr><th className="py-2">Name</th><th>Email</th><th>Phone</th><th>Orders</th><th>Spent</th><th>Addresses</th><th>Type</th></tr>
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.key} className="border-b last:border-0 hover:bg-slate-50">
+                <tr key={r.key} className="border-b last:border-0 hover:bg-stone-50">
                   <td className="py-2.5 font-medium">{r.name}</td>
-                  <td className="text-slate-600">{r.email ?? "—"}</td>
-                  <td className="text-slate-600">{r.phone ?? "—"}</td>
+                  <td className="text-stone-600">{r.email ?? "—"}</td>
+                  <td className="text-stone-600">{r.phone ?? "—"}</td>
                   <td>{r.orders}</td>
                   <td>SAR {r.spent.toFixed(2)}</td>
                   <td>{r.source === "account" ? addresses.length : "—"}</td>
