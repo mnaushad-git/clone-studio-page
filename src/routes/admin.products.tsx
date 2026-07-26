@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { products, CATEGORY_LABEL, type Category } from "@/lib/products";
-import { useAdmin, productOverrideStore } from "@/lib/admin-store";
+import { useAdmin, productOverrideStore, type ProductSizeOption } from "@/lib/admin-store";
 import { Card, Badge, Button, Input, Select, Toggle, Modal, Field } from "@/components/admin/ui";
-import { Pencil } from "lucide-react";
+import { Pencil, Plus, Trash2, RotateCcw } from "lucide-react";
 
 export const Route = createFileRoute("/admin/products")({ component: ProductsPage });
 
