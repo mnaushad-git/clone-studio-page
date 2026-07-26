@@ -21,18 +21,27 @@ const FREE_DELIVERY_THRESHOLD = 200;
 export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const items = useStore((s) => s.cart);
   const subtotal = useStore(selectSubtotal);
-  const discount = useStore(selectDiscount);
-  const tax = useStore(selectTax);
-  const total = useStore(selectTotal);
-  const delivery = useStore(selectDeliveryFee);
+  const discountRaw = useStore(selectDiscount);
+  const taxRaw = useStore(selectTax);
+  const totalRaw = useStore(selectTotal);
+  const deliveryRaw = useStore(selectDeliveryFee);
   const count = useStore(selectCartCount);
   const activePromo = useStore((s) => s.promo);
   const points = useStore((s) => s.loyaltyPoints);
   const redeemed = useStore((s) => s.redeemedPoints);
-  const pointsDisc = useStore(selectPointsDiscount);
+  const pointsDiscRaw = useStore(selectPointsDiscount);
+  const user = useStore((s) => s.user);
+  const isAuthed = !!user;
   const [code, setCode] = useState("");
   const [ptsInput, setPtsInput] = useState("");
   const [err, setErr] = useState<string | null>(null);
+
+  // Guests: hide delivery, promo, and points from the cart summary
+  const discount = isAuthed ? discountRaw : 0;
+  const tax = isAuthed ? taxRaw : +(subtotal * 0.05).toFixed(2);
+  const delivery = isAuthed ? deliveryRaw : 0;
+  const pointsDisc = isAuthed ? pointsDiscRaw : 0;
+  const total = isAuthed ? totalRaw : +(subtotal + tax).toFixed(2);
 
   if (!open) return null;
 
@@ -119,27 +128,29 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               </p>
             </div>
 
-            {/* Free delivery tracker */}
-            <div className="border border-border rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <Truck className="h-6 w-6 text-primary shrink-0" />
-                <p className="text-sm flex-1">
-                  {remaining > 0 ? (
-                    <>Only <span className="font-semibold">SAR {remaining.toFixed(2)}</span> to Go for Free Delivery!</>
-                  ) : (
-                    <span className="font-semibold text-primary">You've unlocked Free Delivery!</span>
-                  )}
-                </p>
-              </div>
-              <div className="mt-3 flex items-center gap-2">
-                <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden">
-                  <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
+            {/* Free delivery tracker (logged-in only) */}
+            {isAuthed && (
+              <div className="border border-border rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <Truck className="h-6 w-6 text-primary shrink-0" />
+                  <p className="text-sm flex-1">
+                    {remaining > 0 ? (
+                      <>Only <span className="font-semibold">SAR {remaining.toFixed(2)}</span> to Go for Free Delivery!</>
+                    ) : (
+                      <span className="font-semibold text-primary">You've unlocked Free Delivery!</span>
+                    )}
+                  </p>
                 </div>
-                <span className="text-[11px] font-semibold text-muted-foreground">
-                  ${subtotal.toFixed(2)}
-                </span>
+                <div className="mt-3 flex items-center gap-2">
+                  <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden">
+                    <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${progress}%` }} />
+                  </div>
+                  <span className="text-[11px] font-semibold text-muted-foreground">
+                    SAR {subtotal.toFixed(2)}
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Order Summary */}
             <div className="border border-border rounded-lg overflow-hidden">
@@ -160,36 +171,38 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                   );
                 })}
               </div>
-              <div className="px-4 py-3 border-t border-border text-sm space-y-1.5">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground flex items-center gap-1.5">
-                    <Truck className="h-4 w-4" /> Delivery
-                  </span>
-                  <span>{delivery === 0 ? "Free" : `SAR ${delivery.toFixed(2)}`}</span>
+              {isAuthed && (
+                <div className="px-4 py-3 border-t border-border text-sm space-y-1.5">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground flex items-center gap-1.5">
+                      <Truck className="h-4 w-4" /> Delivery
+                    </span>
+                    <span>{delivery === 0 ? "Free" : `SAR ${delivery.toFixed(2)}`}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground flex items-center gap-1.5">
+                      <MapPin className="h-4 w-4" /> Deliver to <span className="text-foreground font-medium">your address</span>
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground flex items-center gap-1.5">
-                    <MapPin className="h-4 w-4" /> Deliver to <span className="text-foreground font-medium">your address</span>
-                  </span>
-                </div>
-              </div>
+              )}
               <div className="px-4 py-3 border-t border-border text-sm space-y-1.5">
                 <div className="flex justify-between">
                   <span>Amount</span>
                   <span>SAR {subtotal.toFixed(2)}</span>
                 </div>
-                {discount > 0 && (
+                {isAuthed && discount > 0 && (
                   <div className="flex justify-between text-primary">
                     <span className="flex items-center gap-1.5">
                       <Tag className="h-4 w-4" /> Discount ({activePromo?.code} −{activePromo?.percent}%)
                     </span>
-                    <span>−${discount.toFixed(2)}</span>
+                    <span>−SAR {discount.toFixed(2)}</span>
                   </div>
                 )}
-                {pointsDisc > 0 && (
+                {isAuthed && pointsDisc > 0 && (
                   <div className="flex justify-between text-primary">
                     <span className="flex items-center gap-1.5"><Wallet className="h-4 w-4" /> Points ({redeemed} pts)</span>
-                    <span>−${pointsDisc.toFixed(2)}</span>
+                    <span>−SAR {pointsDisc.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
@@ -203,49 +216,51 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               </div>
             </div>
 
-            {/* Promo code */}
-            <div className="border border-border rounded-lg p-4 space-y-2">
-              <label className="text-sm font-semibold text-primary flex items-center gap-1.5">
-                <Tag className="h-4 w-4" /> Promo code
-              </label>
-              {activePromo ? (
-                <div className="flex items-center justify-between text-sm">
-                  <span>
-                    <span className="font-semibold">{activePromo.code}</span>{" "}
-                    <span className="text-muted-foreground">applied (−{activePromo.percent}%)</span>
-                  </span>
-                  <button
-                    onClick={() => { promo.clear(); setErr(null); }}
-                    className="text-xs text-primary underline hover:no-underline"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="flex gap-2">
-                    <input
-                      value={code}
-                      onChange={(e) => { setCode(e.target.value); setErr(null); }}
-                      onKeyDown={(e) => { if (e.key === "Enter") applyPromo(); }}
-                      placeholder="Enter code (e.g. WELCOME10)"
-                      maxLength={20}
-                      className="flex-1 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    />
+            {/* Promo code (logged-in only) */}
+            {isAuthed && (
+              <div className="border border-border rounded-lg p-4 space-y-2">
+                <label className="text-sm font-semibold text-primary flex items-center gap-1.5">
+                  <Tag className="h-4 w-4" /> Promo code
+                </label>
+                {activePromo ? (
+                  <div className="flex items-center justify-between text-sm">
+                    <span>
+                      <span className="font-semibold">{activePromo.code}</span>{" "}
+                      <span className="text-muted-foreground">applied (−{activePromo.percent}%)</span>
+                    </span>
                     <button
-                      onClick={applyPromo}
-                      className="bg-primary text-primary-foreground rounded-md px-4 text-sm font-semibold hover:opacity-90 transition"
+                      onClick={() => { promo.clear(); setErr(null); }}
+                      className="text-xs text-primary underline hover:no-underline"
                     >
-                      Apply
+                      Remove
                     </button>
                   </div>
-                  {err && <p className="text-xs text-destructive">{err}</p>}
-                </>
-              )}
-            </div>
+                ) : (
+                  <>
+                    <div className="flex gap-2">
+                      <input
+                        value={code}
+                        onChange={(e) => { setCode(e.target.value); setErr(null); }}
+                        onKeyDown={(e) => { if (e.key === "Enter") applyPromo(); }}
+                        placeholder="Enter code (e.g. WELCOME10)"
+                        maxLength={20}
+                        className="flex-1 border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      />
+                      <button
+                        onClick={applyPromo}
+                        className="bg-primary text-primary-foreground rounded-md px-4 text-sm font-semibold hover:opacity-90 transition"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                    {err && <p className="text-xs text-destructive">{err}</p>}
+                  </>
+                )}
+              </div>
+            )}
 
-            {/* Loyalty points */}
-            {points > 0 && (
+            {/* Loyalty points (logged-in only) */}
+            {isAuthed && points > 0 && (
               <div className="border border-border rounded-lg p-4 space-y-2">
                 <label className="text-sm font-semibold text-primary flex items-center gap-1.5">
                   <Wallet className="h-4 w-4" /> Redeem Points
@@ -253,7 +268,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                 <p className="text-xs text-muted-foreground">Balance: {points} pts (20 pts = SAR 1)</p>
                 {redeemed > 0 ? (
                   <div className="flex items-center justify-between text-sm">
-                    <span>Using <span className="font-semibold">{redeemed}</span> pts (−${pointsDisc.toFixed(2)})</span>
+                    <span>Using <span className="font-semibold">{redeemed}</span> pts (−SAR {pointsDisc.toFixed(2)})</span>
                     <button onClick={() => loyalty.clearRedeem()} className="text-xs text-primary underline hover:no-underline">Remove</button>
                   </div>
                 ) : (
@@ -279,15 +294,36 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
               </div>
             )}
 
+            {/* Sign-in prompt for guests */}
+            {!isAuthed && (
+              <div className="border border-dashed border-primary/40 bg-primary/5 rounded-lg p-4 text-sm text-foreground/80">
+                <p>
+                  <Link to="/login" search={{ redirect: "/customize" } as never} onClick={onClose} className="font-semibold text-primary underline underline-offset-2">Sign in</Link>{" "}
+                  to unlock delivery options, promo codes, and reward points.
+                </p>
+              </div>
+            )}
+
             {/* Actions */}
             <div className="space-y-2">
-              <Link
-                to="/customize"
-                onClick={onClose}
-                className="block text-center bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 transition"
-              >
-                Checkout
-              </Link>
+              {isAuthed ? (
+                <Link
+                  to="/customize"
+                  onClick={onClose}
+                  className="block text-center bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 transition"
+                >
+                  Checkout
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  search={{ redirect: "/customize" } as never}
+                  onClick={onClose}
+                  className="block text-center bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 transition"
+                >
+                  Sign in to Checkout
+                </Link>
+              )}
               <button
                 onClick={onClose}
                 className="w-full text-center border border-primary text-primary rounded-md py-3 font-semibold hover:bg-primary/5 transition"
