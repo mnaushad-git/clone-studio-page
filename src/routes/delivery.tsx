@@ -1,11 +1,25 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Check, MapPin, Truck, Bike, Ticket, ChevronDown, ChevronLeft, ChevronRight, X, CalendarPlus } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useStore, addresses as addressStore, selectSubtotal, selectDiscount, selectTax, selectDeliveryFee, selectTotal, promo } from "@/lib/store";
 import { getProduct } from "@/lib/products";
+
+const DAY_SLOTS: [number, number][] = [[8, 10], [10, 12], [12, 14], [14, 16], [16, 18], [18, 20]];
+const fmtHour = (h: number) => {
+  const period = h >= 12 && h < 24 ? "pm" : "am";
+  const hh = h % 12 === 0 ? 12 : h % 12;
+  return `${hh}:00${period}`;
+};
+export const SLOT_LABELS = DAY_SLOTS.map(([s, e]) => `${fmtHour(s)} - ${fmtHour(e)}`);
+function nextSlot(now = new Date()): { day: "Today" | "Tomorrow"; label: string } {
+  const h = now.getHours();
+  const idx = DAY_SLOTS.findIndex(([s]) => s > h);
+  if (idx >= 0) return { day: "Today", label: SLOT_LABELS[idx] };
+  return { day: "Tomorrow", label: SLOT_LABELS[0] };
+}
 
 export const Route = createFileRoute("/delivery")({
   component: DeliveryPage,
@@ -25,14 +39,17 @@ function DeliveryPage() {
   const navigate = useNavigate();
   const cartItems = useStore((s) => s.cart);
   const currentPromo = useStore((s) => s.promo);
+  const user = useStore((s) => s.user);
+  const savedAddresses = useStore((s) => s.addresses);
   const subtotal = useStore(selectSubtotal);
   const discount = useStore(selectDiscount);
   const tax = useStore(selectTax);
   const deliveryFee = useStore(selectDeliveryFee);
   const total = useStore(selectTotal);
 
+  const defaultSlot = useMemo(() => nextSlot(), []);
+
   const [gift, setGift] = useState(false);
-  const [secret, setSecret] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [area, setArea] = useState("");
@@ -44,6 +61,20 @@ function DeliveryPage() {
   const [pickedDate, setPickedDate] = useState<string>("");
   const [pickedTime, setPickedTime] = useState<string>("");
 
+  // When gift toggle is off, prefill from user profile + last saved (non-gift) address
+  useEffect(() => {
+    if (gift) return;
+    const lastSelf = [...savedAddresses].reverse().find((a) => !a.isGift);
+    if (user?.name) setName(user.name);
+    else if (lastSelf?.name) setName(lastSelf.name);
+    if (user?.phone) setPhone(user.phone.replace(/^\+966\s?/, ""));
+    else if (lastSelf?.phone) setPhone(lastSelf.phone.replace(/^\+966\s?/, ""));
+    if (lastSelf?.area) setArea(lastSelf.area);
+    if (lastSelf?.address) setAddress(lastSelf.address);
+    if (lastSelf?.extra) setExtra(lastSelf.extra);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gift]);
+
   const applyPromo = () => {
     if (!promoInput.trim()) return;
     if (promo.apply(promoInput)) toast.success("Promo code applied");
@@ -54,20 +85,19 @@ function DeliveryPage() {
     if (!name.trim()) return toast.error("Recipient name is required");
     if (!phone.trim()) return toast.error("Recipient phone is required");
     if (!gift && (!area || !address.trim())) return toast.error("Please add a delivery address");
-    if (gift && timeSlot === "another" && (!pickedDate || !pickedTime)) return toast.error("Please pick a delivery date and time");
+    if (timeSlot === "another" && (!pickedDate || !pickedTime)) return toast.error("Please pick a delivery date and time");
 
-    const deliveryDate = gift ? (timeSlot === "tomorrow" ? "Tomorrow" : pickedDate) : undefined;
-    const deliveryTime = gift ? (timeSlot === "tomorrow" ? "10:00am - 2:00pm" : pickedTime) : undefined;
+    const deliveryDate = timeSlot === "tomorrow" ? defaultSlot.day : pickedDate;
+    const deliveryTime = timeSlot === "tomorrow" ? defaultSlot.label : pickedTime;
 
     addressStore.add({
       name,
-      phone: `+966 ${phone}`,
+      phone: phone.startsWith("+966") ? phone : `+966 ${phone}`,
       area: gift ? "Gift" : area,
       address: gift ? `${deliveryDate} · ${deliveryTime}` : address,
       extra: extra || undefined,
       isGift: gift,
-      identitySecret: secret,
-      timeSlot: gift ? timeSlot : undefined,
+      timeSlot,
       deliveryDate,
       deliveryTime,
     });
@@ -123,12 +153,7 @@ function DeliveryPage() {
                 </div>
               </div>
 
-              <label className="flex items-center justify-between border border-border rounded-md px-4 py-3 cursor-pointer">
-                <span className="text-sm">Keep my identity secret</span>
-                <input type="checkbox" checked={secret} onChange={(e) => setSecret(e.target.checked)} className="h-4 w-4 accent-primary" />
-              </label>
-
-              {!gift ? (
+              {!gift && (
                 <>
                   <div className="relative rounded-lg overflow-hidden border border-border h-56 bg-secondary flex items-center justify-center">
                     <div className="text-center">
@@ -142,7 +167,7 @@ function DeliveryPage() {
                     </div>
                   </div>
 
-                  <Field label="Recipient Area" required>
+                  <Field label="Area" required>
                     <div className="relative">
                       <select value={area} onChange={(e) => setArea(e.target.value)} className="w-full appearance-none border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary bg-white">
                         <option value="">Select area</option>
@@ -154,7 +179,7 @@ function DeliveryPage() {
                     </div>
                   </Field>
 
-                  <Field label="Recipient Address" required>
+                  <Field label="Address" required>
                     <input value={address} onChange={(e) => setAddress(e.target.value)} className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary" />
                   </Field>
 
@@ -162,24 +187,24 @@ function DeliveryPage() {
                     <input value={extra} onChange={(e) => setExtra(e.target.value)} placeholder="Apartment, floor, landmark (optional)" className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary placeholder:text-muted-foreground" />
                   </Field>
                 </>
-              ) : (
-                <div className="mt-2">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Bike className="h-5 w-5 text-primary" />
-                    <h3 className="font-semibold">Delivery time</h3>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <button onClick={() => setTimeSlot("tomorrow")} className={`rounded-xl border p-5 text-center transition ${timeSlot === "tomorrow" ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
-                      <p className="font-semibold">Tomorrow</p>
-                      <p className="text-xs text-muted-foreground mt-1">10:00am – 2:00pm</p>
-                    </button>
-                    <button onClick={() => { setTimeSlot("another"); setTimeModalOpen(true); }} className={`rounded-xl border p-5 text-center transition ${timeSlot === "another" ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
-                      <p className="font-semibold">Another time</p>
-                      <p className="text-xs text-muted-foreground mt-1">{timeSlot === "another" && pickedDate && pickedTime ? `${pickedDate} · ${pickedTime}` : "Choose date & time"}</p>
-                    </button>
-                  </div>
-                </div>
               )}
+
+              <div className="mt-2">
+                <div className="flex items-center gap-2 mb-3">
+                  <Bike className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">Delivery time</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <button onClick={() => setTimeSlot("tomorrow")} className={`rounded-xl border p-5 text-center transition ${timeSlot === "tomorrow" ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
+                    <p className="font-semibold">{defaultSlot.day}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{defaultSlot.label}</p>
+                  </button>
+                  <button onClick={() => { setTimeSlot("another"); setTimeModalOpen(true); }} className={`rounded-xl border p-5 text-center transition ${timeSlot === "another" ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
+                    <p className="font-semibold">Another time</p>
+                    <p className="text-xs text-muted-foreground mt-1">{timeSlot === "another" && pickedDate && pickedTime ? `${pickedDate} · ${pickedTime}` : "Choose date & time"}</p>
+                  </button>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -292,7 +317,7 @@ function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { in
   const [time, setTime] = useState<string>(initialTime);
   const [calMonth, setCalMonth] = useState<Date>(new Date(now.getFullYear(), now.getMonth(), 1));
 
-  const timeSlots = ["10:00am - 2:00pm", "2:00pm - 6:00pm", "6:00pm - 9:00pm", "9:00am - 12:00pm", "12:00pm - 3:00pm"];
+  const timeSlots = SLOT_LABELS;
 
   const monthLabel = calMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   const firstDow = new Date(calMonth.getFullYear(), calMonth.getMonth(), 1).getDay();
