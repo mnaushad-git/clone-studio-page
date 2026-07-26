@@ -102,6 +102,8 @@ export type SiteSettings = {
   guestCheckout: boolean;
 };
 
+export type ProductSizeOption = { label: string; sub?: string; delta?: number };
+
 export type ProductOverride = {
   id: string; // productId
   priceOverride?: number;
@@ -109,6 +111,14 @@ export type ProductOverride = {
   visible: boolean;
   featured: boolean;
   badge?: string;
+  nameOverride?: string;
+  descriptionOverride?: string;
+  imageOverride?: string;
+  sizes?: ProductSizeOption[];
+  flavors?: string[];
+  allowInscription?: boolean;
+  maxQty?: number;
+  tags?: string[];
 };
 
 export type HomepageSection = {

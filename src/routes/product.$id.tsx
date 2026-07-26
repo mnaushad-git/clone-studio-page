@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductReviews } from "@/components/ProductReviews";
 import { getProduct, products } from "@/lib/products";
+import { useAdmin } from "@/lib/admin-store";
 import {
   cart,
   wishlist,
@@ -40,15 +41,23 @@ export const Route = createFileRoute("/product/$id")({
 const tabs = ["Description", "Storage Instructions", "Ingredients", "Allergens"];
 
 function ProductPage() {
-  const { product } = Route.useLoaderData();
+  const { product: baseProduct } = Route.useLoaderData();
   const navigate = useNavigate();
+  const override = useAdmin((s) => s.productOverrides[baseProduct.id]);
+  const product = {
+    ...baseProduct,
+    name: override?.nameOverride || baseProduct.name,
+    description: override?.descriptionOverride ?? baseProduct.description,
+    image: override?.imageOverride || baseProduct.image,
+    price: override?.priceOverride ?? baseProduct.price,
+  };
   const fallbackThumbs = [
     product.image,
     ...products
-      .filter((p) => p.category === product.category && p.id !== product.id)
+      .filter((p) => p.category === baseProduct.category && p.id !== product.id)
       .map((p) => p.image),
   ].slice(0, 4);
-  const thumbs = product.thumbs ?? (fallbackThumbs.length > 1 ? fallbackThumbs : [product.image]);
+  const thumbs = baseProduct.thumbs ?? (fallbackThumbs.length > 1 ? fallbackThumbs : [product.image]);
   const [active, setActive] = useState(0);
   const [sizeIdx, setSizeIdx] = useState(0);
   const [flavorIdx, setFlavorIdx] = useState(0);
@@ -110,8 +119,8 @@ function ProductPage() {
     gifts: [],
     extras: [],
   };
-  const sizes = product.sizes ?? sizeOverridesById[product.id] ?? defaultSizesByCategory[product.category];
-  const flavors = product.flavors ?? (defaultFlavorsByCategory[product.category]?.length ? defaultFlavorsByCategory[product.category] : undefined);
+  const sizes = override?.sizes ?? baseProduct.sizes ?? sizeOverridesById[baseProduct.id] ?? defaultSizesByCategory[baseProduct.category];
+  const flavors = override?.flavors ?? baseProduct.flavors ?? (defaultFlavorsByCategory[baseProduct.category]?.length ? defaultFlavorsByCategory[baseProduct.category] : undefined);
   const selectedSize = sizes?.[sizeIdx];
   const selectedFlavor = flavors?.[flavorIdx];
   const unitPrice = product.price + (selectedSize?.delta ?? 0);
@@ -258,7 +267,7 @@ function ProductPage() {
           </div>
           <button onClick={buyNow} className="mt-3 w-full bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90">Buy Now</button>
 
-          {product.category === "cakes" && (
+          {(override?.allowInscription ?? baseProduct.category === "cakes") && (
             <div className="mt-6">
               <div className="flex items-center justify-between border-b border-border pb-2 text-sm text-muted-foreground">
                 <input value={inscription} onChange={(e) => setInscription(e.target.value.slice(0, 22))} placeholder="Add Custom Inscription" className="bg-transparent outline-none flex-1" />

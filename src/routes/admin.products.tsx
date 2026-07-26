@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { products, CATEGORY_LABEL, type Category } from "@/lib/products";
-import { useAdmin, productOverrideStore } from "@/lib/admin-store";
+import { useAdmin, productOverrideStore, type ProductSizeOption } from "@/lib/admin-store";
 import { Card, Badge, Button, Input, Select, Toggle, Modal, Field } from "@/components/admin/ui";
-import { Pencil } from "lucide-react";
+import { Pencil, Plus, Trash2, RotateCcw } from "lucide-react";
 
 export const Route = createFileRoute("/admin/products")({ component: ProductsPage });
 
@@ -75,33 +75,153 @@ function ProductsPage() {
         footer={<Button onClick={() => setEditing(null)}>Done</Button>}
       >
         {editingProduct && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <img src={editingProduct.image} alt="" className="h-16 w-16 rounded object-cover" />
-              <div>
-                <div className="font-medium">{editingProduct.name}</div>
-                <div className="text-xs text-stone-500">{CATEGORY_LABEL[editingProduct.category as Category]} · base SAR {editingProduct.price.toFixed(2)}</div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Price override (SAR)" hint="Leave blank to keep base price">
-                <Input type="number" step="0.01" defaultValue={editingOverride?.priceOverride ?? ""} onBlur={(e) => productOverrideStore.set(editingProduct.id, { priceOverride: e.target.value ? Number(e.target.value) : undefined })} />
-              </Field>
-              <Field label="Stock quantity">
-                <Input type="number" defaultValue={editingOverride?.stock ?? ""} onBlur={(e) => productOverrideStore.set(editingProduct.id, { stock: e.target.value ? Number(e.target.value) : undefined })} />
-              </Field>
-              <Field label="Badge label" hint="e.g. New, Bestseller, Limited">
-                <Input defaultValue={editingOverride?.badge ?? ""} onBlur={(e) => productOverrideStore.set(editingProduct.id, { badge: e.target.value || undefined })} />
-              </Field>
-            </div>
-            <div className="flex items-center gap-6">
-              <Toggle checked={editingOverride?.visible ?? true} onChange={(v) => productOverrideStore.set(editingProduct.id, { visible: v })} label="Visible on storefront" />
-              <Toggle checked={editingOverride?.featured ?? false} onChange={(v) => productOverrideStore.set(editingProduct.id, { featured: v })} label="Featured on homepage" />
-            </div>
-            {editingProduct.description && <div className="text-xs text-stone-500 bg-stone-50 border rounded-lg p-3">{editingProduct.description}</div>}
-          </div>
+          <ProductEditor
+            productId={editingProduct.id}
+            baseName={editingProduct.name}
+            baseCategory={editingProduct.category as Category}
+            baseImage={editingProduct.image}
+            basePrice={editingProduct.price}
+            baseDescription={editingProduct.description}
+            override={editingOverride}
+          />
         )}
       </Modal>
     </Card>
+  );
+}
+
+function ProductEditor({
+  productId,
+  baseName,
+  baseCategory,
+  baseImage,
+  basePrice,
+  baseDescription,
+  override,
+}: {
+  productId: string;
+  baseName: string;
+  baseCategory: Category;
+  baseImage: string;
+  basePrice: number;
+  baseDescription?: string;
+  override: ReturnType<typeof useAdmin<Record<string, any>>> extends any ? any : never;
+}) {
+  const set = (patch: Record<string, unknown>) => productOverrideStore.set(productId, patch);
+  const sizes: ProductSizeOption[] = override?.sizes ?? [];
+  const flavors: string[] = override?.flavors ?? [];
+
+  const updateSize = (i: number, patch: Partial<ProductSizeOption>) => {
+    const next = sizes.map((s, idx) => (idx === i ? { ...s, ...patch } : s));
+    set({ sizes: next });
+  };
+  const addSize = () => set({ sizes: [...sizes, { label: "NEW SIZE", delta: 0 }] });
+  const removeSize = (i: number) => set({ sizes: sizes.filter((_, idx) => idx !== i) });
+  const resetSizes = () => set({ sizes: undefined });
+
+  const updateFlavor = (i: number, v: string) => set({ flavors: flavors.map((f, idx) => (idx === i ? v : f)) });
+  const addFlavor = () => set({ flavors: [...flavors, "New Flavor"] });
+  const removeFlavor = (i: number) => set({ flavors: flavors.filter((_, idx) => idx !== i) });
+  const resetFlavors = () => set({ flavors: undefined });
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center gap-3">
+        <img src={override?.imageOverride || baseImage} alt="" className="h-16 w-16 rounded object-cover" />
+        <div>
+          <div className="font-medium">{override?.nameOverride || baseName}</div>
+          <div className="text-xs text-stone-500">{CATEGORY_LABEL[baseCategory]} · base SAR {basePrice.toFixed(2)}</div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Display name override">
+          <Input defaultValue={override?.nameOverride ?? ""} placeholder={baseName} onBlur={(e) => set({ nameOverride: e.target.value || undefined })} />
+        </Field>
+        <Field label="Image URL override" hint="Public URL to replace product image">
+          <Input defaultValue={override?.imageOverride ?? ""} placeholder="https://…" onBlur={(e) => set({ imageOverride: e.target.value || undefined })} />
+        </Field>
+        <Field label="Price override (SAR)" hint="Leave blank to keep base price">
+          <Input type="number" step="0.01" defaultValue={override?.priceOverride ?? ""} onBlur={(e) => set({ priceOverride: e.target.value ? Number(e.target.value) : undefined })} />
+        </Field>
+        <Field label="Stock quantity">
+          <Input type="number" defaultValue={override?.stock ?? ""} onBlur={(e) => set({ stock: e.target.value ? Number(e.target.value) : undefined })} />
+        </Field>
+        <Field label="Max qty per order">
+          <Input type="number" defaultValue={override?.maxQty ?? ""} onBlur={(e) => set({ maxQty: e.target.value ? Number(e.target.value) : undefined })} />
+        </Field>
+        <Field label="Badge label" hint="e.g. New, Bestseller, Limited">
+          <Input defaultValue={override?.badge ?? ""} onBlur={(e) => set({ badge: e.target.value || undefined })} />
+        </Field>
+      </div>
+
+      <Field label="Description override" hint="Shown on the product page">
+        <textarea
+          defaultValue={override?.descriptionOverride ?? ""}
+          placeholder={baseDescription ?? "Product description"}
+          onBlur={(e) => set({ descriptionOverride: e.target.value || undefined })}
+          className="w-full min-h-[70px] px-3 py-2 rounded-lg border border-stone-300 focus:border-stone-900 focus:outline-none text-sm"
+        />
+      </Field>
+
+      <Field label="Tags (comma-separated)" hint="Used for filters and recommendations">
+        <Input
+          defaultValue={(override?.tags ?? []).join(", ")}
+          onBlur={(e) => set({ tags: e.target.value ? e.target.value.split(",").map((t) => t.trim()).filter(Boolean) : undefined })}
+        />
+      </Field>
+
+      <div className="border rounded-lg p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="font-medium text-sm">Size options</div>
+          <div className="flex gap-2">
+            <Button variant="ghost" onClick={resetSizes}><RotateCcw className="h-3 w-3 mr-1" />Use defaults</Button>
+            <Button variant="outline" onClick={addSize}><Plus className="h-3 w-3 mr-1" />Add size</Button>
+          </div>
+        </div>
+        {sizes.length === 0 ? (
+          <div className="text-xs text-stone-500">Using category defaults. Click "Add size" to customize.</div>
+        ) : (
+          <div className="space-y-2">
+            {sizes.map((s, i) => (
+              <div key={i} className="grid grid-cols-[1fr_1fr_110px_auto] gap-2 items-center">
+                <Input defaultValue={s.label} placeholder="LABEL" onBlur={(e) => updateSize(i, { label: e.target.value })} />
+                <Input defaultValue={s.sub ?? ""} placeholder="Subtext (optional)" onBlur={(e) => updateSize(i, { sub: e.target.value || undefined })} />
+                <Input type="number" step="0.01" defaultValue={s.delta ?? 0} placeholder="Δ price" onBlur={(e) => updateSize(i, { delta: Number(e.target.value) || 0 })} />
+                <Button variant="ghost" onClick={() => removeSize(i)}><Trash2 className="h-3 w-3" /></Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="border rounded-lg p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="font-medium text-sm">Flavor options</div>
+          <div className="flex gap-2">
+            <Button variant="ghost" onClick={resetFlavors}><RotateCcw className="h-3 w-3 mr-1" />Use defaults</Button>
+            <Button variant="outline" onClick={addFlavor}><Plus className="h-3 w-3 mr-1" />Add flavor</Button>
+          </div>
+        </div>
+        {flavors.length === 0 ? (
+          <div className="text-xs text-stone-500">Using category defaults. Click "Add flavor" to customize.</div>
+        ) : (
+          <div className="space-y-2">
+            {flavors.map((f, i) => (
+              <div key={i} className="flex gap-2 items-center">
+                <Input defaultValue={f} onBlur={(e) => updateFlavor(i, e.target.value)} />
+                <Button variant="ghost" onClick={() => removeFlavor(i)}><Trash2 className="h-3 w-3" /></Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-6 border-t pt-4">
+        <Toggle checked={override?.visible ?? true} onChange={(v) => set({ visible: v })} label="Visible on storefront" />
+        <Toggle checked={override?.featured ?? false} onChange={(v) => set({ featured: v })} label="Featured on homepage" />
+        <Toggle checked={override?.allowInscription ?? baseCategory === "cakes"} onChange={(v) => set({ allowInscription: v })} label="Allow inscription" />
+      </div>
+    </div>
   );
 }
