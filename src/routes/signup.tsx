@@ -30,11 +30,18 @@ export const Route = createFileRoute("/signup")({
   }),
 });
 
-function Field({ label, ...props }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+function Field({ label, error, ...props }: { label: string; error?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div>
-      <label className="block text-sm font-medium mb-2">{label}</label>
-      <input {...props} className="w-full border border-border rounded-md px-4 py-3 text-sm focus:outline-none focus:border-primary bg-white" />
+      <label className="block text-sm font-medium mb-2">
+        {label} <span className="text-destructive">*</span>
+      </label>
+      <input
+        {...props}
+        aria-invalid={!!error}
+        className={`w-full border rounded-md px-4 py-3 text-sm focus:outline-none bg-white ${error ? "border-destructive focus:border-destructive" : "border-border focus:border-primary"}`}
+      />
+      {error && <p className="text-xs text-destructive mt-1">{error}</p>}
     </div>
   );
 }
@@ -42,12 +49,26 @@ function Field({ label, ...props }: { label: string } & React.InputHTMLAttribute
 function SignupPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirm: "" });
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value });
+  const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({});
+  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [k]: e.target.value });
+    if (errors[k]) setErrors({ ...errors, [k]: undefined });
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.email.trim() || !form.password) return toast.error("Please fill in the required fields");
-    if (form.password !== form.confirm) return toast.error("Passwords don't match");
+    const result = signupSchema.safeParse(form);
+    if (!result.success) {
+      const fieldErrors: Partial<Record<keyof typeof form, string>> = {};
+      for (const issue of result.error.issues) {
+        const key = issue.path[0] as keyof typeof form;
+        if (key && !fieldErrors[key]) fieldErrors[key] = issue.message;
+      }
+      setErrors(fieldErrors);
+      toast.error("Please fix the errors and try again");
+      return;
+    }
+    setErrors({});
     auth.signIn({ name: form.name, email: form.email, phone: form.phone });
     toast.success("Account created! Welcome to Terrific Bites.");
     navigate({ to: "/account" });
