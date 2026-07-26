@@ -107,7 +107,7 @@ function SignupPage() {
 
             <div>
               <label className="block text-sm font-medium mb-2">
-                Area <span className="text-destructive">*</span>
+                Riyadh Area <span className="text-destructive">*</span>
               </label>
               <select
                 value={form.area}
@@ -115,8 +115,8 @@ function SignupPage() {
                 aria-invalid={!!errors.area}
                 className={`w-full border rounded-md px-4 py-3 text-sm focus:outline-none bg-white ${errors.area ? "border-destructive focus:border-destructive" : "border-border focus:border-primary"}`}
               >
-                <option value="">Select area</option>
-                {AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
+                <option value="">Select a Riyadh area</option>
+                {RIYADH_AREAS.map((area) => <option key={area} value={area}>{area}</option>)}
               </select>
               {errors.area && <p className="text-xs text-destructive mt-1">{errors.area}</p>}
             </div>
