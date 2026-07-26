@@ -408,12 +408,15 @@ function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { in
         <div className="mt-6">
           <p className="text-sm mb-3">Select a Delivery time <span className="text-primary">*</span></p>
           <div className="grid grid-cols-2 gap-3">
-            {timeSlots.map((slot) => (
-              <button key={slot} onClick={() => setTime(slot)} className={`flex items-center justify-between rounded-lg border px-4 py-3 text-sm transition ${time === slot ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
-                <span>{slot}</span>
-                <span className="text-xs text-muted-foreground">EGP 130</span>
-              </button>
-            ))}
+            {timeSlots.map((slot, idx) => {
+              const isPastSlot = isTodaySelected && idx < currentSlotIdx;
+              return (
+                <button key={slot} onClick={() => !isPastSlot && setTime(slot)} disabled={isPastSlot} className={`flex items-center justify-between rounded-lg border px-4 py-3 text-sm transition ${time === slot ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"} ${isPastSlot ? "opacity-50 cursor-not-allowed" : ""}`}>
+                  <span>{slot}</span>
+                  <span className="text-xs text-muted-foreground">SAR 130</span>
+                </button>
+              );
+            })}
             <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3 text-sm opacity-60">
               <span>Express Delivery</span>
               <span className="text-xs text-primary">Not Available</span>
