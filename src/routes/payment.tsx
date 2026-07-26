@@ -218,7 +218,7 @@ function PaymentPage() {
             <button type="button" onClick={handleConfirm} disabled={loading || cartItems.length === 0}
               className="w-full bg-primary text-primary-foreground rounded-md py-4 font-semibold hover:opacity-90 transition inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
               {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Processing…</>
-                : <><Lock className="h-4 w-4" /> Confirm payment · ${total.toFixed(2)}</>}
+                : <><Lock className="h-4 w-4" /> Confirm payment · SAR {total.toFixed(2)}</>}
             </button>
           </aside>
         </div>

@@ -188,7 +188,7 @@ function DeliveryPage() {
               <div className="flex items-center gap-3">
                 <Bike className="h-8 w-8 text-primary shrink-0" />
                 <p className="text-sm font-medium flex-1">
-                  {subtotal - discount >= 200 ? "You've unlocked free delivery! 🎉" : `Only $${(200 - (subtotal - discount)).toFixed(2)} to Go for Free Delivery!`}
+                  {subtotal - discount >= 200 ? "You've unlocked free delivery! 🎉" : `Only SAR ${(200 - (subtotal - discount)).toFixed(2)} to Go for Free Delivery!`}
                 </p>
               </div>
               <div className="mt-3 flex items-center gap-3">
