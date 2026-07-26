@@ -40,15 +40,23 @@ export const Route = createFileRoute("/product/$id")({
 const tabs = ["Description", "Storage Instructions", "Ingredients", "Allergens"];
 
 function ProductPage() {
-  const { product } = Route.useLoaderData();
+  const { product: baseProduct } = Route.useLoaderData();
   const navigate = useNavigate();
+  const override = useAdmin((s) => s.productOverrides[baseProduct.id]);
+  const product = {
+    ...baseProduct,
+    name: override?.nameOverride || baseProduct.name,
+    description: override?.descriptionOverride ?? baseProduct.description,
+    image: override?.imageOverride || baseProduct.image,
+    price: override?.priceOverride ?? baseProduct.price,
+  };
   const fallbackThumbs = [
     product.image,
     ...products
-      .filter((p) => p.category === product.category && p.id !== product.id)
+      .filter((p) => p.category === baseProduct.category && p.id !== product.id)
       .map((p) => p.image),
   ].slice(0, 4);
-  const thumbs = product.thumbs ?? (fallbackThumbs.length > 1 ? fallbackThumbs : [product.image]);
+  const thumbs = baseProduct.thumbs ?? (fallbackThumbs.length > 1 ? fallbackThumbs : [product.image]);
   const [active, setActive] = useState(0);
   const [sizeIdx, setSizeIdx] = useState(0);
   const [flavorIdx, setFlavorIdx] = useState(0);
