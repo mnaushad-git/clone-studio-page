@@ -25,16 +25,31 @@ import { Route as CupcakesRouteImport } from './routes/cupcakes'
 import { Route as CorporateRouteImport } from './routes/corporate'
 import { Route as ChocolatesRouteImport } from './routes/chocolates'
 import { Route as CakesRouteImport } from './routes/cakes'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RecipientsIndexRouteImport } from './routes/recipients.index'
 import { Route as MomentsIndexRouteImport } from './routes/moments.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TrackIdRouteImport } from './routes/track.$id'
 import { Route as RecipientsSlugRouteImport } from './routes/recipients.$slug'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as MomentsSlugRouteImport } from './routes/moments.$slug'
 import { Route as ConfirmAddressTokenRouteImport } from './routes/confirm-address.$token'
+import { Route as AdminStaffRouteImport } from './routes/admin.staff'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
+import { Route as AdminPromotionsRouteImport } from './routes/admin.promotions'
+import { Route as AdminProductsRouteImport } from './routes/admin.products'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminLoyaltyRouteImport } from './routes/admin.loyalty'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
+import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as AdminContentRouteImport } from './routes/admin.content'
+import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 
 const WishlistRoute = WishlistRouteImport.update({
   id: '/wishlist',
@@ -116,6 +131,11 @@ const CakesRoute = CakesRouteImport.update({
   path: '/cakes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AccountRoute = AccountRouteImport.update({
   id: '/account',
   path: '/account',
@@ -140,6 +160,11 @@ const MomentsIndexRoute = MomentsIndexRouteImport.update({
   id: '/moments/',
   path: '/moments/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const TrackIdRoute = TrackIdRouteImport.update({
   id: '/track/$id',
@@ -166,11 +191,77 @@ const ConfirmAddressTokenRoute = ConfirmAddressTokenRouteImport.update({
   path: '/confirm-address/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminStaffRoute = AdminStaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReviewsRoute = AdminReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPromotionsRoute = AdminPromotionsRouteImport.update({
+  id: '/promotions',
+  path: '/promotions',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProductsRoute = AdminProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoyaltyRoute = AdminLoyaltyRouteImport.update({
+  id: '/loyalty',
+  path: '/loyalty',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDeliveryRoute = AdminDeliveryRouteImport.update({
+  id: '/delivery',
+  path: '/delivery',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCustomersRoute = AdminCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminContentRoute = AdminContentRouteImport.update({
+  id: '/content',
+  path: '/content',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/admin': typeof AdminRouteWithChildren
   '/cakes': typeof CakesRoute
   '/chocolates': typeof ChocolatesRoute
   '/corporate': typeof CorporateRoute
@@ -187,11 +278,25 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/content': typeof AdminContentRoute
+  '/admin/customers': typeof AdminCustomersRoute
+  '/admin/delivery': typeof AdminDeliveryRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/loyalty': typeof AdminLoyaltyRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/promotions': typeof AdminPromotionsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/staff': typeof AdminStaffRoute
   '/confirm-address/$token': typeof ConfirmAddressTokenRoute
   '/moments/$slug': typeof MomentsSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/recipients/$slug': typeof RecipientsSlugRoute
   '/track/$id': typeof TrackIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/moments/': typeof MomentsIndexRoute
   '/recipients/': typeof RecipientsIndexRoute
 }
@@ -215,11 +320,25 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/content': typeof AdminContentRoute
+  '/admin/customers': typeof AdminCustomersRoute
+  '/admin/delivery': typeof AdminDeliveryRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/loyalty': typeof AdminLoyaltyRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/promotions': typeof AdminPromotionsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/staff': typeof AdminStaffRoute
   '/confirm-address/$token': typeof ConfirmAddressTokenRoute
   '/moments/$slug': typeof MomentsSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/recipients/$slug': typeof RecipientsSlugRoute
   '/track/$id': typeof TrackIdRoute
+  '/admin': typeof AdminIndexRoute
   '/moments': typeof MomentsIndexRoute
   '/recipients': typeof RecipientsIndexRoute
 }
@@ -228,6 +347,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/admin': typeof AdminRouteWithChildren
   '/cakes': typeof CakesRoute
   '/chocolates': typeof ChocolatesRoute
   '/corporate': typeof CorporateRoute
@@ -244,11 +364,25 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/success': typeof SuccessRoute
   '/wishlist': typeof WishlistRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/content': typeof AdminContentRoute
+  '/admin/customers': typeof AdminCustomersRoute
+  '/admin/delivery': typeof AdminDeliveryRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/loyalty': typeof AdminLoyaltyRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/promotions': typeof AdminPromotionsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/staff': typeof AdminStaffRoute
   '/confirm-address/$token': typeof ConfirmAddressTokenRoute
   '/moments/$slug': typeof MomentsSlugRoute
   '/product/$id': typeof ProductIdRoute
   '/recipients/$slug': typeof RecipientsSlugRoute
   '/track/$id': typeof TrackIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/moments/': typeof MomentsIndexRoute
   '/recipients/': typeof RecipientsIndexRoute
 }
@@ -258,6 +392,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/account'
+    | '/admin'
     | '/cakes'
     | '/chocolates'
     | '/corporate'
@@ -274,11 +409,25 @@ export interface FileRouteTypes {
     | '/signup'
     | '/success'
     | '/wishlist'
+    | '/admin/analytics'
+    | '/admin/categories'
+    | '/admin/content'
+    | '/admin/customers'
+    | '/admin/delivery'
+    | '/admin/login'
+    | '/admin/loyalty'
+    | '/admin/orders'
+    | '/admin/products'
+    | '/admin/promotions'
+    | '/admin/reviews'
+    | '/admin/settings'
+    | '/admin/staff'
     | '/confirm-address/$token'
     | '/moments/$slug'
     | '/product/$id'
     | '/recipients/$slug'
     | '/track/$id'
+    | '/admin/'
     | '/moments/'
     | '/recipients/'
   fileRoutesByTo: FileRoutesByTo
@@ -302,11 +451,25 @@ export interface FileRouteTypes {
     | '/signup'
     | '/success'
     | '/wishlist'
+    | '/admin/analytics'
+    | '/admin/categories'
+    | '/admin/content'
+    | '/admin/customers'
+    | '/admin/delivery'
+    | '/admin/login'
+    | '/admin/loyalty'
+    | '/admin/orders'
+    | '/admin/products'
+    | '/admin/promotions'
+    | '/admin/reviews'
+    | '/admin/settings'
+    | '/admin/staff'
     | '/confirm-address/$token'
     | '/moments/$slug'
     | '/product/$id'
     | '/recipients/$slug'
     | '/track/$id'
+    | '/admin'
     | '/moments'
     | '/recipients'
   id:
@@ -314,6 +477,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/account'
+    | '/admin'
     | '/cakes'
     | '/chocolates'
     | '/corporate'
@@ -330,11 +494,25 @@ export interface FileRouteTypes {
     | '/signup'
     | '/success'
     | '/wishlist'
+    | '/admin/analytics'
+    | '/admin/categories'
+    | '/admin/content'
+    | '/admin/customers'
+    | '/admin/delivery'
+    | '/admin/login'
+    | '/admin/loyalty'
+    | '/admin/orders'
+    | '/admin/products'
+    | '/admin/promotions'
+    | '/admin/reviews'
+    | '/admin/settings'
+    | '/admin/staff'
     | '/confirm-address/$token'
     | '/moments/$slug'
     | '/product/$id'
     | '/recipients/$slug'
     | '/track/$id'
+    | '/admin/'
     | '/moments/'
     | '/recipients/'
   fileRoutesById: FileRoutesById
@@ -343,6 +521,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
+  AdminRoute: typeof AdminRouteWithChildren
   CakesRoute: typeof CakesRoute
   ChocolatesRoute: typeof ChocolatesRoute
   CorporateRoute: typeof CorporateRoute
@@ -482,6 +661,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CakesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/account': {
       id: '/account'
       path: '/account'
@@ -516,6 +702,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/moments/'
       preLoaderRoute: typeof MomentsIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/track/$id': {
       id: '/track/$id'
@@ -552,13 +745,141 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConfirmAddressTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/staff': {
+      id: '/admin/staff'
+      path: '/staff'
+      fullPath: '/admin/staff'
+      preLoaderRoute: typeof AdminStaffRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/reviews': {
+      id: '/admin/reviews'
+      path: '/reviews'
+      fullPath: '/admin/reviews'
+      preLoaderRoute: typeof AdminReviewsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/promotions': {
+      id: '/admin/promotions'
+      path: '/promotions'
+      fullPath: '/admin/promotions'
+      preLoaderRoute: typeof AdminPromotionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/products': {
+      id: '/admin/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/loyalty': {
+      id: '/admin/loyalty'
+      path: '/loyalty'
+      fullPath: '/admin/loyalty'
+      preLoaderRoute: typeof AdminLoyaltyRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/delivery': {
+      id: '/admin/delivery'
+      path: '/delivery'
+      fullPath: '/admin/delivery'
+      preLoaderRoute: typeof AdminDeliveryRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/customers': {
+      id: '/admin/customers'
+      path: '/customers'
+      fullPath: '/admin/customers'
+      preLoaderRoute: typeof AdminCustomersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/content': {
+      id: '/admin/content'
+      path: '/content'
+      fullPath: '/admin/content'
+      preLoaderRoute: typeof AdminContentRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/categories': {
+      id: '/admin/categories'
+      path: '/categories'
+      fullPath: '/admin/categories'
+      preLoaderRoute: typeof AdminCategoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminCategoriesRoute: typeof AdminCategoriesRoute
+  AdminContentRoute: typeof AdminContentRoute
+  AdminCustomersRoute: typeof AdminCustomersRoute
+  AdminDeliveryRoute: typeof AdminDeliveryRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminLoyaltyRoute: typeof AdminLoyaltyRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminProductsRoute: typeof AdminProductsRoute
+  AdminPromotionsRoute: typeof AdminPromotionsRoute
+  AdminReviewsRoute: typeof AdminReviewsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminStaffRoute: typeof AdminStaffRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminCategoriesRoute: AdminCategoriesRoute,
+  AdminContentRoute: AdminContentRoute,
+  AdminCustomersRoute: AdminCustomersRoute,
+  AdminDeliveryRoute: AdminDeliveryRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  AdminLoyaltyRoute: AdminLoyaltyRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
+  AdminProductsRoute: AdminProductsRoute,
+  AdminPromotionsRoute: AdminPromotionsRoute,
+  AdminReviewsRoute: AdminReviewsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminStaffRoute: AdminStaffRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
+  AdminRoute: AdminRouteWithChildren,
   CakesRoute: CakesRoute,
   ChocolatesRoute: ChocolatesRoute,
   CorporateRoute: CorporateRoute,

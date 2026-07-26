@@ -507,6 +507,11 @@ export const reviews = {
     emit();
     return r;
   },
+  remove(id: string) {
+    state = { ...state, reviews: state.reviews.filter((r) => r.id !== id) };
+    emit();
+  },
+
 };
 
 // ---------- Recently Viewed ----------
