@@ -69,8 +69,44 @@ function ProductPage() {
     setInscription("");
   }, [product.id]);
 
-  const selectedSize = product.sizes?.[sizeIdx];
-  const selectedFlavor = product.flavors?.[flavorIdx];
+  const defaultSizesByCategory: Record<string, { label: string; sub?: string; delta?: number }[]> = {
+    cupcakes: [
+      { label: "PACK OF 6", sub: "Assorted", delta: 0 },
+      { label: "PACK OF 12", sub: "Assorted", delta: product.price * 0.9 },
+    ],
+    chocolates: [
+      { label: "SMALL BOX", sub: "8 Pieces", delta: 0 },
+      { label: "LARGE BOX", sub: "16 Pieces", delta: product.price * 0.8 },
+    ],
+    donuts: [
+      { label: "SINGLE", sub: "1 Piece", delta: 0 },
+      { label: "PACK OF 6", sub: "Assorted", delta: product.price * 4 },
+    ],
+    gifts: [
+      { label: "STANDARD", sub: "Gift Box", delta: 0 },
+      { label: "DELUXE", sub: "Premium Box", delta: 15 },
+    ],
+    extras: [
+      { label: "SINGLE", sub: "1 Piece", delta: 0 },
+      { label: "PACK", sub: "4 Pieces", delta: product.price * 3 },
+    ],
+    cakes: [
+      { label: "6 INCH", sub: "3 Layers", delta: 0 },
+      { label: "9 INCH", sub: "3 Layers", delta: 80 },
+    ],
+  };
+  const defaultFlavorsByCategory: Record<string, string[]> = {
+    cupcakes: ["Vanilla", "Chocolate"],
+    chocolates: ["Milk", "Dark"],
+    donuts: ["Glazed", "Chocolate"],
+    cakes: ["Vanilla", "Chocolate"],
+    gifts: [],
+    extras: [],
+  };
+  const sizes = product.sizes ?? defaultSizesByCategory[product.category];
+  const flavors = product.flavors ?? (defaultFlavorsByCategory[product.category]?.length ? defaultFlavorsByCategory[product.category] : undefined);
+  const selectedSize = sizes?.[sizeIdx];
+  const selectedFlavor = flavors?.[flavorIdx];
   const unitPrice = product.price + (selectedSize?.delta ?? 0);
 
   const addToCart = () => {
