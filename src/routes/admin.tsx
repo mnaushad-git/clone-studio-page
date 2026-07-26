@@ -55,7 +55,7 @@ function AdminLayout() {
   return (
     <div className="min-h-screen bg-stone-50 flex">
       {/* Sidebar */}
-      <aside className={`${open ? "transtone-x-0" : "-transtone-x-full"} lg:transtone-x-0 fixed lg:static inset-y-0 left-0 z-40 w-64 bg-stone-900 text-stone-100 flex flex-col transition-transform`}>
+      <aside className={`${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-64 bg-stone-900 text-stone-100 flex flex-col transition-transform`}>
         <div className="h-16 px-5 flex items-center justify-between border-b border-stone-800">
           <Link to="/admin" className="font-display text-lg tracking-wide">Terrific · Admin</Link>
           <button className="lg:hidden" onClick={() => setOpen(false)}><X className="h-5 w-5" /></button>

@@ -62,7 +62,7 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
   return (
     <label className="inline-flex items-center gap-2 cursor-pointer">
       <span className={`relative inline-block w-9 h-5 rounded-full transition-colors ${checked ? "bg-emerald-500" : "bg-stone-300"}`}>
-        <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${checked ? "transtone-x-4" : "transtone-x-0.5"}`} />
+        <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${checked ? "translate-x-4" : "translate-x-0.5"}`} />
         <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="sr-only" />
       </span>
       {label && <span className="text-sm text-stone-700">{label}</span>}
