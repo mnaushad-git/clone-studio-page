@@ -31,13 +31,18 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   const pointsDiscRaw = useStore(selectPointsDiscount);
   const user = useStore((s) => s.user);
   const isAuthed = !!user;
+  const settings = useAdmin((s) => s.settings);
+  const loyaltyCfg = useAdmin((s) => s.loyalty);
+  const taxRate = (settings.taxRate ?? 5) / 100;
+  const minOrder = settings.minOrder ?? 0;
+  const belowMin = minOrder > 0 && subtotal < minOrder;
   const [code, setCode] = useState("");
   const [ptsInput, setPtsInput] = useState("");
   const [err, setErr] = useState<string | null>(null);
 
   // Guests: hide delivery, promo, and points from the cart summary
   const discount = isAuthed ? discountRaw : 0;
-  const tax = isAuthed ? taxRaw : +(subtotal * 0.05).toFixed(2);
+  const tax = isAuthed ? taxRaw : +(subtotal * taxRate).toFixed(2);
   const delivery = isAuthed ? deliveryRaw : 0;
   const pointsDisc = isAuthed ? pointsDiscRaw : 0;
   const total = isAuthed ? totalRaw : +(subtotal + tax).toFixed(2);
