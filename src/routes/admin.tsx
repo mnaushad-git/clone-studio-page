@@ -46,6 +46,7 @@ function AdminLayout() {
   const navigate = useNavigate();
   const session = useAdmin((s) => s.adminSession);
   const notifications = useAdmin((s) => s.notifications);
+  const theme = useAdmin((s) => s.theme);
   const unread = notifications.filter((n) => !n.read).length;
   const [open, setOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -53,8 +54,16 @@ function AdminLayout() {
   // Login page: render without chrome
   if (pathname === "/admin/login") return <Outlet />;
 
+  const themeStyle = {
+    "--primary": theme.primary,
+    "--primary-foreground": theme.primaryForeground,
+    "--accent": theme.accent,
+    "--cream": theme.background,
+    "--ring": theme.primary,
+  } as React.CSSProperties;
+
   return (
-    <div className="min-h-screen bg-cream flex">
+    <div className="min-h-screen bg-cream flex" style={themeStyle}>
       {/* Sidebar */}
       <aside className={`${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-64 bg-primary text-primary-foreground flex flex-col transition-transform`}>
         <div className="h-16 px-5 flex items-center justify-between border-b border-white/10">
