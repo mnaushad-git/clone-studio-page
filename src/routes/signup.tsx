@@ -3,13 +3,17 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import illustration from "@/assets/signup-illustration.jpg";
-import { auth } from "@/lib/store";
+import { auth, addresses as addressStore } from "@/lib/store";
+
+const AREAS = ["Riyadh", "Jeddah", "Dammam"] as const;
 
 const signupSchema = z
   .object({
     name: z.string().trim().min(1, "Name is required").max(100),
     email: z.string().trim().email("Enter a valid email").max(255),
     phone: z.string().trim().min(6, "Phone is required").max(20),
+    area: z.string().trim().min(1, "Area is required"),
+    address: z.string().trim().min(3, "Address is required").max(200),
     password: z.string().min(8, "Password must be at least 8 characters").max(100),
     confirm: z.string().min(1, "Please confirm your password"),
   })
@@ -48,9 +52,9 @@ function Field({ label, error, ...props }: { label: string; error?: string } & R
 
 function SignupPage() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirm: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", area: "", address: "", password: "", confirm: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({});
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [k]: e.target.value });
     if (errors[k]) setErrors({ ...errors, [k]: undefined });
   };
@@ -70,6 +74,13 @@ function SignupPage() {
     }
     setErrors({});
     auth.signIn({ name: form.name, email: form.email, phone: form.phone });
+    addressStore.add({
+      name: form.name,
+      phone: form.phone.startsWith("+966") ? form.phone : `+966 ${form.phone.replace(/^\+?/, "")}`,
+      area: form.area,
+      address: form.address,
+      isGift: false,
+    });
     toast.success("Account created! Welcome to Terrific Bites.");
     navigate({ to: "/account" });
   };
@@ -95,8 +106,27 @@ function SignupPage() {
             <Field label="Name" placeholder="Enter your name" required value={form.name} error={errors.name} onChange={set("name")} />
             <Field label="Email" type="email" placeholder="you@example.com" required value={form.email} error={errors.email} onChange={set("email")} />
             <Field label="Phone" type="tel" placeholder="+888 2148956" required value={form.phone} error={errors.phone} onChange={set("phone")} />
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Area <span className="text-destructive">*</span>
+              </label>
+              <select
+                value={form.area}
+                onChange={set("area")}
+                aria-invalid={!!errors.area}
+                className={`w-full border rounded-md px-4 py-3 text-sm focus:outline-none bg-white ${errors.area ? "border-destructive focus:border-destructive" : "border-border focus:border-primary"}`}
+              >
+                <option value="">Select area</option>
+                {AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
+              </select>
+              {errors.area && <p className="text-xs text-destructive mt-1">{errors.area}</p>}
+            </div>
+            <Field label="Address" placeholder="Street, building, apartment" required value={form.address} error={errors.address} onChange={set("address")} />
+
             <Field label="New Password" type="password" placeholder="* * * * * * * *" required value={form.password} error={errors.password} onChange={set("password")} />
             <Field label="Confirm Password" type="password" placeholder="* * * * * * * *" required value={form.confirm} error={errors.confirm} onChange={set("confirm")} />
+
 
             <button type="submit" className="w-full bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 transition">
               Sign Up
