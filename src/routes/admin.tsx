@@ -53,10 +53,10 @@ function AdminLayout() {
   if (pathname === "/admin/login") return <Outlet />;
 
   return (
-    <div className="min-h-screen bg-stone-50 flex">
+    <div className="min-h-screen bg-cream flex">
       {/* Sidebar */}
-      <aside className={`${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-64 bg-stone-900 text-stone-100 flex flex-col transition-transform`}>
-        <div className="h-16 px-5 flex items-center justify-between border-b border-stone-800">
+      <aside className={`${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-40 w-64 bg-primary text-primary-foreground flex flex-col transition-transform`}>
+        <div className="h-16 px-5 flex items-center justify-between border-b border-white/10">
           <Link to="/admin" className="font-display text-lg tracking-wide">Terrific · Admin</Link>
           <button className="lg:hidden" onClick={() => setOpen(false)}><X className="h-5 w-5" /></button>
         </div>
@@ -69,7 +69,7 @@ function AdminLayout() {
                 key={item.to}
                 to={item.to}
                 onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 px-5 py-2.5 text-sm transition-colors ${active ? "bg-stone-800 text-white border-l-2 border-amber-400" : "text-stone-300 hover:bg-stone-800 hover:text-white"}`}
+                className={`flex items-center gap-3 px-5 py-2.5 text-sm transition-colors ${active ? "bg-white/10 text-white border-l-2 border-amber-300" : "text-primary-foreground/70 hover:bg-white/5 hover:text-white"}`}
               >
                 <Icon className="h-4 w-4" />
                 <span>{item.label}</span>
@@ -77,20 +77,21 @@ function AdminLayout() {
             );
           })}
         </nav>
-        <div className="p-4 border-t border-stone-800 text-xs text-stone-400">
+        <div className="p-4 border-t border-white/10 text-xs text-primary-foreground/70">
           <div className="mb-2">
-            <div className="text-stone-200 font-medium">{session?.email ?? "—"}</div>
+            <div className="text-white font-medium">{session?.email ?? "—"}</div>
             <div className="capitalize">{session?.role ?? "guest"}</div>
           </div>
           <div className="flex items-center gap-2">
-            <Link to="/" className="flex-1 flex items-center justify-center gap-1 rounded bg-stone-800 hover:bg-stone-700 py-1.5"><Home className="h-3 w-3" /> Store</Link>
+            <Link to="/" className="flex-1 flex items-center justify-center gap-1 rounded bg-white/10 hover:bg-white/20 py-1.5"><Home className="h-3 w-3" /> Store</Link>
             <button
               onClick={() => { adminAuth.signOut(); navigate({ to: "/admin/login" }); }}
-              className="flex-1 flex items-center justify-center gap-1 rounded bg-stone-800 hover:bg-stone-700 py-1.5"
+              className="flex-1 flex items-center justify-center gap-1 rounded bg-white/10 hover:bg-white/20 py-1.5"
             ><LogOut className="h-3 w-3" /> Sign out</button>
           </div>
         </div>
       </aside>
+
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
