@@ -167,13 +167,11 @@ function DeliveryPage() {
                     </div>
                   </div>
 
-                  <Field label="Area" required>
+                  <Field label="Riyadh Area" required>
                     <div className="relative">
                       <select value={area} onChange={(e) => setArea(e.target.value)} className="w-full appearance-none border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary bg-white">
-                        <option value="">Select area</option>
-                        <option>Riyadh</option>
-                        <option>Jeddah</option>
-                        <option>Dammam</option>
+                        <option value="">Select a Riyadh area</option>
+                        {RIYADH_AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
                       </select>
                       <ChevronDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                     </div>
