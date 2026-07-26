@@ -225,7 +225,3 @@ function ProductEditor({
     </div>
   );
 }
-      </Modal>
-    </Card>
-  );
-}
