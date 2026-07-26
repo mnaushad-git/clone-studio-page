@@ -95,6 +95,13 @@ function ProductPage() {
       { label: "9 INCH", sub: "3 Layers", delta: 80 },
     ],
   };
+  const sizeOverridesById: Record<string, { label: string; sub?: string; delta?: number }[]> = {
+    "extra-icecream": [
+      { label: "SMALL (3OZ)", delta: 0 },
+      { label: "MEDIUM (11OZ)", delta: 3 },
+      { label: "LARGE (16OZ)", delta: 6 },
+    ],
+  };
   const defaultFlavorsByCategory: Record<string, string[]> = {
     cupcakes: ["Vanilla", "Chocolate"],
     chocolates: ["Milk", "Dark"],
@@ -103,7 +110,7 @@ function ProductPage() {
     gifts: [],
     extras: [],
   };
-  const sizes = product.sizes ?? defaultSizesByCategory[product.category];
+  const sizes = product.sizes ?? sizeOverridesById[product.id] ?? defaultSizesByCategory[product.category];
   const flavors = product.flavors ?? (defaultFlavorsByCategory[product.category]?.length ? defaultFlavorsByCategory[product.category] : undefined);
   const selectedSize = sizes?.[sizeIdx];
   const selectedFlavor = flavors?.[flavorIdx];
