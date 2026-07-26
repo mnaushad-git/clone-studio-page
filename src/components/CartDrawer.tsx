@@ -191,18 +191,18 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                   <span>Amount</span>
                   <span>SAR {subtotal.toFixed(2)}</span>
                 </div>
-                {discount > 0 && (
+                {isAuthed && discount > 0 && (
                   <div className="flex justify-between text-primary">
                     <span className="flex items-center gap-1.5">
                       <Tag className="h-4 w-4" /> Discount ({activePromo?.code} −{activePromo?.percent}%)
                     </span>
-                    <span>−${discount.toFixed(2)}</span>
+                    <span>−SAR {discount.toFixed(2)}</span>
                   </div>
                 )}
-                {pointsDisc > 0 && (
+                {isAuthed && pointsDisc > 0 && (
                   <div className="flex justify-between text-primary">
                     <span className="flex items-center gap-1.5"><Wallet className="h-4 w-4" /> Points ({redeemed} pts)</span>
-                    <span>−${pointsDisc.toFixed(2)}</span>
+                    <span>−SAR {pointsDisc.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
