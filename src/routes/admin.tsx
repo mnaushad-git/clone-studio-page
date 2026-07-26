@@ -79,7 +79,8 @@ function AdminLayout() {
                 key={item.to}
                 to={item.to}
                 onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 px-5 py-2.5 text-sm transition-colors ${active ? "bg-white/10 text-white border-l-2 border-amber-300" : "text-primary-foreground/70 hover:bg-white/5 hover:text-white"}`}
+                className={`flex items-center gap-3 px-5 py-2.5 text-sm transition-colors ${active ? "bg-white/10 text-white border-l-2" : "text-primary-foreground/70 hover:bg-white/5 hover:text-white border-l-2 border-transparent"}`}
+                style={active ? { borderLeftColor: theme.sidebarActive } : undefined}
               >
                 <Icon className="h-4 w-4" />
                 <span>{item.label}</span>
