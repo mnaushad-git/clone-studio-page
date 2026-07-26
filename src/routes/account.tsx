@@ -65,12 +65,39 @@ function AccountPage() {
     toast.success("Profile saved");
   };
 
-  const addAddress = () => {
-    if (!newAddr.name || !newAddr.phone || !newAddr.address) return toast.error("Please complete address");
-    addressStore.add(newAddr);
-    setNewAddr({ name: "", phone: "", area: "", address: "", extra: "" });
+  const saveAddress = () => {
+    if (!addrForm.name || !addrForm.phone || !addrForm.address) return toast.error("Please complete address");
+    if (editId) {
+      addressStore.update(editId, addrForm);
+      toast.success("Address updated");
+    } else {
+      addressStore.add(addrForm);
+      toast.success("Address added");
+    }
+    setAddrForm({ name: "", phone: "", area: "", address: "", extra: "" });
+    setEditId(null);
     setShowAddr(false);
-    toast.success("Address added");
+  };
+
+  const openAdd = () => {
+    setEditId(null);
+    setAddrForm({ name: "", phone: "", area: "", address: "", extra: "" });
+    setShowAddr(true);
+  };
+
+  const openEdit = (id: string) => {
+    const a = addresses.find((x) => x.id === id);
+    if (!a) return;
+    setEditId(id);
+    setAddrForm({ name: a.name, phone: a.phone, area: a.area, address: a.address, extra: a.extra ?? "" });
+    setShowAddr(true);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteId) return;
+    addressStore.remove(deleteId);
+    setDeleteId(null);
+    toast.success("Address removed");
   };
 
   return (
