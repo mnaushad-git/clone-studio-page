@@ -69,8 +69,44 @@ function ProductPage() {
     setInscription("");
   }, [product.id]);
 
-  const selectedSize = product.sizes?.[sizeIdx];
-  const selectedFlavor = product.flavors?.[flavorIdx];
+  const defaultSizesByCategory: Record<string, { label: string; sub?: string; delta?: number }[]> = {
+    cupcakes: [
+      { label: "PACK OF 6", sub: "Assorted", delta: 0 },
+      { label: "PACK OF 12", sub: "Assorted", delta: product.price * 0.9 },
+    ],
+    chocolates: [
+      { label: "SMALL BOX", sub: "8 Pieces", delta: 0 },
+      { label: "LARGE BOX", sub: "16 Pieces", delta: product.price * 0.8 },
+    ],
+    donuts: [
+      { label: "SINGLE", sub: "1 Piece", delta: 0 },
+      { label: "PACK OF 6", sub: "Assorted", delta: product.price * 4 },
+    ],
+    gifts: [
+      { label: "STANDARD", sub: "Gift Box", delta: 0 },
+      { label: "DELUXE", sub: "Premium Box", delta: 15 },
+    ],
+    extras: [
+      { label: "SINGLE", sub: "1 Piece", delta: 0 },
+      { label: "PACK", sub: "4 Pieces", delta: product.price * 3 },
+    ],
+    cakes: [
+      { label: "6 INCH", sub: "3 Layers", delta: 0 },
+      { label: "9 INCH", sub: "3 Layers", delta: 80 },
+    ],
+  };
+  const defaultFlavorsByCategory: Record<string, string[]> = {
+    cupcakes: ["Vanilla", "Chocolate"],
+    chocolates: ["Milk", "Dark"],
+    donuts: ["Glazed", "Chocolate"],
+    cakes: ["Vanilla", "Chocolate"],
+    gifts: [],
+    extras: [],
+  };
+  const sizes = product.sizes ?? defaultSizesByCategory[product.category];
+  const flavors = product.flavors ?? (defaultFlavorsByCategory[product.category]?.length ? defaultFlavorsByCategory[product.category] : undefined);
+  const selectedSize = sizes?.[sizeIdx];
+  const selectedFlavor = flavors?.[flavorIdx];
   const unitPrice = product.price + (selectedSize?.delta ?? 0);
 
   const addToCart = () => {
@@ -167,9 +203,9 @@ function ProductPage() {
           )}
           {product.description && <p className="mt-2 text-sm text-muted-foreground">{product.description}</p>}
 
-          {product.sizes && (
+          {sizes && (
             <div className="mt-6 grid grid-cols-2 gap-3">
-              {product.sizes.map((s: { label: string; sub?: string; delta?: number }, i: number) => (
+              {sizes.map((s: { label: string; sub?: string; delta?: number }, i: number) => (
                 <button key={i} onClick={() => setSizeIdx(i)} className={`flex items-center gap-3 border rounded-md p-3 text-left ${sizeIdx === i ? "border-primary" : "border-border"}`}>
                   <span className={`h-4 w-4 rounded-full border ${sizeIdx === i ? "border-primary" : "border-muted-foreground/50"} flex items-center justify-center`}>
                     {sizeIdx === i && <span className="h-2 w-2 rounded-full bg-primary" />}
@@ -183,9 +219,9 @@ function ProductPage() {
             </div>
           )}
 
-          {product.flavors && (
+          {flavors && (
             <div className="mt-3 grid grid-cols-2 gap-3">
-              {product.flavors.map((f: string, i: number) => (
+              {flavors.map((f: string, i: number) => (
                 <button key={f} onClick={() => setFlavorIdx(i)} className={`flex items-center gap-3 border rounded-md p-3 uppercase text-sm ${flavorIdx === i ? "border-primary" : "border-border"}`}>
                   <span className={`h-4 w-4 rounded-full border ${flavorIdx === i ? "border-primary" : "border-muted-foreground/50"} flex items-center justify-center`}>
                     {flavorIdx === i && <span className="h-2 w-2 rounded-full bg-primary" />}
