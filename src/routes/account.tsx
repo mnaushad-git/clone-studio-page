@@ -159,20 +159,25 @@ function AccountPage() {
                 <div className="space-y-3">
                   {addresses.map((a) => (
                     <div key={a.id} className="border border-border rounded-lg p-4 flex items-start justify-between gap-4">
-                      <div>
+                      <div className="flex-1 min-w-0">
                         <p className="font-medium">{a.name}</p>
                         <p className="text-xs text-muted-foreground">{a.phone}</p>
                         <p className="text-xs text-muted-foreground">{a.area}{a.address ? ` — ${a.address}` : ""}</p>
                         {a.extra && <p className="text-xs text-muted-foreground">{a.extra}</p>}
                       </div>
-                      <button onClick={() => { addressStore.remove(a.id); toast.success("Address removed"); }} className="text-destructive hover:opacity-70" aria-label="Delete">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => openEdit(a.id)} className="p-1.5 text-foreground hover:text-primary hover:bg-secondary rounded-md transition" aria-label="Edit">
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => setDeleteId(a.id)} className="p-1.5 text-destructive hover:bg-destructive/10 rounded-md transition" aria-label="Delete">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
                 <button
-                  onClick={() => setShowAddr(true)}
+                  onClick={openAdd}
                   className="mt-4 w-full border border-border rounded-lg py-5 flex items-center justify-center gap-2 text-sm text-foreground hover:border-primary hover:text-primary transition"
                 >
                   <Plus className="h-5 w-5" /> Add Address
