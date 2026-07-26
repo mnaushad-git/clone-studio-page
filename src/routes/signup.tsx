@@ -3,9 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import illustration from "@/assets/signup-illustration.jpg";
-import { auth, addresses as addressStore } from "@/lib/store";
-
-const AREAS = ["Riyadh", "Jeddah", "Dammam"] as const;
+import { auth, addresses as addressStore, RIYADH_AREAS } from "@/lib/store";
 
 const signupSchema = z
   .object({
