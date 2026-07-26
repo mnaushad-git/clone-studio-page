@@ -317,7 +317,7 @@ function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { in
   const [time, setTime] = useState<string>(initialTime);
   const [calMonth, setCalMonth] = useState<Date>(new Date(now.getFullYear(), now.getMonth(), 1));
 
-  const timeSlots = ["10:00am - 2:00pm", "2:00pm - 6:00pm", "6:00pm - 9:00pm", "9:00am - 12:00pm", "12:00pm - 3:00pm"];
+  const timeSlots = SLOT_LABELS;
 
   const monthLabel = calMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   const firstDow = new Date(calMonth.getFullYear(), calMonth.getMonth(), 1).getDay();
