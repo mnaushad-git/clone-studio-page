@@ -148,8 +148,9 @@ function LoginPage() {
                     <label className="block text-sm font-semibold mb-2">Password</label>
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="* * * * * * * *" className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary bg-transparent" />
                     <div className="text-right mt-2">
-                      <a href="#" className="text-xs text-muted-foreground hover:text-primary">Forgot password?</a>
+                      <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-primary">Forgot password?</Link>
                     </div>
+
                   </div>
                 </>
               )}
