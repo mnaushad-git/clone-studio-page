@@ -188,6 +188,21 @@ function DeliveryPage() {
                   </Field>
                 </>
               )}
+              {gift && (
+                <label className="flex items-start gap-3 rounded-lg border border-border p-3 cursor-pointer hover:border-primary transition">
+                  <input
+                    type="checkbox"
+                    checked={identitySecret}
+                    onChange={(e) => setIdentitySecret(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 accent-primary"
+                  />
+                  <span className="text-sm">
+                    <span className="font-medium">Keep my identity secret</span>
+                    <span className="block text-xs text-muted-foreground mt-0.5">The recipient won't see who sent the gift.</span>
+                  </span>
+                </label>
+              )}
+
 
               <div className="mt-2">
                 <div className="flex items-center gap-2 mb-3">
