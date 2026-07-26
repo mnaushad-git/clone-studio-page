@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
+import { useAdmin } from "@/lib/admin-store";
 
 
 
@@ -121,7 +122,6 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function MaintenanceBanner() {
-  const { useAdmin } = require("@/lib/admin-store") as typeof import("@/lib/admin-store");
   const enabled = useAdmin((s) => s.settings.maintenanceMode);
   if (!enabled) return null;
   return (
