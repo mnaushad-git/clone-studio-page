@@ -42,7 +42,13 @@ const tabs = ["Description", "Storage Instructions", "Ingredients", "Allergens"]
 function ProductPage() {
   const { product } = Route.useLoaderData();
   const navigate = useNavigate();
-  const thumbs = product.thumbs ?? [product.image];
+  const fallbackThumbs = [
+    product.image,
+    ...products
+      .filter((p) => p.category === product.category && p.id !== product.id)
+      .map((p) => p.image),
+  ].slice(0, 4);
+  const thumbs = product.thumbs ?? (fallbackThumbs.length > 1 ? fallbackThumbs : [product.image]);
   const [active, setActive] = useState(0);
   const [sizeIdx, setSizeIdx] = useState(0);
   const [flavorIdx, setFlavorIdx] = useState(0);
