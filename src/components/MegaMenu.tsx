@@ -67,9 +67,9 @@ export function MegaMenu({ open, onClose }: { open: boolean; onClose: () => void
 
         <div className="px-6 py-6 space-y-3">
           {rows.map((row) => (
-            <Link
+            <a
               key={row.label}
-              to={row.to}
+              href={row.to}
               onClick={onClose}
               className="flex items-center justify-between bg-cream rounded-lg px-5 py-3 hover:bg-secondary transition"
             >
@@ -77,7 +77,7 @@ export function MegaMenu({ open, onClose }: { open: boolean; onClose: () => void
                 {row.label} <span className="ms-2">→</span>
               </span>
               <img src={row.img} alt="" className="h-14 w-14 rounded-md object-cover" />
-            </Link>
+            </a>
           ))}
         </div>
 
