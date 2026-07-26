@@ -209,21 +209,6 @@ function DeliveryPage() {
           </section>
 
           <aside className="space-y-4">
-            <div className="bg-white rounded-2xl shadow-sm p-5">
-              <div className="flex items-center gap-3">
-                <Bike className="h-8 w-8 text-primary shrink-0" />
-                <p className="text-sm font-medium flex-1">
-                  {subtotal - discount >= 200 ? "You've unlocked free delivery! 🎉" : `Only SAR ${(200 - (subtotal - discount)).toFixed(2)} to Go for Free Delivery!`}
-                </p>
-              </div>
-              <div className="mt-3 flex items-center gap-3">
-                <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden">
-                  <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${Math.min(100, ((subtotal - discount) / 200) * 100)}%` }} />
-                </div>
-                <span className="text-xs text-muted-foreground">SAR 200</span>
-              </div>
-            </div>
-
             {cartItems.length === 0 ? (
               <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
                 <p className="text-sm text-muted-foreground">Your cart is empty.</p>
@@ -411,16 +396,11 @@ function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { in
             {timeSlots.map((slot, idx) => {
               const isPastSlot = isTodaySelected && idx < currentSlotIdx;
               return (
-                <button key={slot} onClick={() => !isPastSlot && setTime(slot)} disabled={isPastSlot} className={`flex items-center justify-between rounded-lg border px-4 py-3 text-sm transition ${time === slot ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"} ${isPastSlot ? "opacity-50 cursor-not-allowed" : ""}`}>
-                  <span>{slot}</span>
-                  <span className="text-xs text-muted-foreground">SAR 130</span>
+                <button key={slot} onClick={() => !isPastSlot && setTime(slot)} disabled={isPastSlot} className={`text-center rounded-lg border px-4 py-3 text-sm transition ${time === slot ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"} ${isPastSlot ? "opacity-50 cursor-not-allowed" : ""}`}>
+                  {slot}
                 </button>
               );
             })}
-            <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3 text-sm opacity-60">
-              <span>Express Delivery</span>
-              <span className="text-xs text-primary">Not Available</span>
-            </div>
           </div>
         </div>
 
