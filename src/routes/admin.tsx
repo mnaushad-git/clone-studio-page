@@ -37,6 +37,7 @@ const NAV: NavItem[] = [
   { to: "/admin/loyalty", label: "Loyalty", icon: Gift },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/admin/staff", label: "Staff & Roles", icon: UserCog },
+  { to: "/admin/theme", label: "Theme", icon: Palette },
   { to: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
