@@ -9,6 +9,7 @@ import {
   useStore, orders, selectSubtotal, selectDiscount, selectTax,
   selectDeliveryFee, selectTotal,
 } from "@/lib/store";
+import { useAdmin } from "@/lib/admin-store";
 import { getProduct } from "@/lib/products";
 
 export const Route = createFileRoute("/payment")({
@@ -25,12 +26,13 @@ export const Route = createFileRoute("/payment")({
   }),
 });
 
-const methods = [
-  { id: "apple", label: "Apple Pay", type: "apple" as const },
-  { id: "credit", label: "Credit Card", type: "mc" as const },
-  { id: "paypal", label: "PayPal", type: "paypal" as const },
-  { id: "visa", label: "Visa Card", type: "visa" as const },
-];
+function methodType(label: string): "apple" | "mc" | "paypal" | "visa" {
+  const l = label.toLowerCase();
+  if (l.includes("apple")) return "apple";
+  if (l.includes("paypal")) return "paypal";
+  if (l.includes("visa")) return "visa";
+  return "mc";
+}
 
 function BrandBadge({ type }: { type: "apple" | "mc" | "paypal" | "visa" }) {
   const base = "h-7 w-10 rounded flex items-center justify-center text-[10px] font-bold";
@@ -62,20 +64,26 @@ function PaymentPage() {
   const tax = useStore(selectTax);
   const deliveryFee = useStore(selectDeliveryFee);
   const total = useStore(selectTotal);
+  const adminMethods = useAdmin((s) => s.paymentMethods);
+  const methods = adminMethods
+    .filter((m) => m.active)
+    .map((m) => ({ id: m.id, label: m.label, type: methodType(m.label) }));
 
   const lastAddress = addressList[addressList.length - 1] ?? null;
 
-  const [selected, setSelected] = useState("apple");
+  const [selected, setSelected] = useState(methods[0]?.id ?? "");
   const [card, setCard] = useState({ name: "", number: "", expiry: "", cvc: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof card, string>>>({});
   const [loading, setLoading] = useState(false);
+  const selectedLabel = methods.find((m) => m.id === selected)?.label ?? "";
+  const isCredit = /credit|card|mada/i.test(selectedLabel);
 
   const handleConfirm = async () => {
     setErrors({});
     if (cartItems.length === 0) { toast.error("Your cart is empty"); return; }
     if (!selected) { toast.error("Please choose a payment method"); return; }
     let methodLabel = methods.find((m) => m.id === selected)?.label ?? "Payment";
-    if (selected === "credit") {
+    if (isCredit) {
       const parsed = cardSchema.safeParse(card);
       if (!parsed.success) {
         const fieldErrors: Partial<Record<keyof typeof card, string>> = {};
@@ -87,7 +95,7 @@ function PaymentPage() {
         toast.error("Please fix the highlighted fields");
         return;
       }
-      methodLabel = `Credit Card •••• ${card.number.replace(/\s/g, "").slice(-4)}`;
+      methodLabel = `${selectedLabel} •••• ${card.number.replace(/\s/g, "").slice(-4)}`;
     }
     setLoading(true);
     try {
@@ -137,7 +145,7 @@ function PaymentPage() {
               })}
             </section>
 
-            {selected === "credit" && (
+            {isCredit && (
               <section className="bg-white rounded-2xl shadow-sm p-6 space-y-4">
                 <h2 className="font-semibold">Card details</h2>
                 <div>

@@ -14,6 +14,7 @@ import {
   selectDeliveryFee,
   selectCartCount,
 } from "@/lib/store";
+import { useAdmin } from "@/lib/admin-store";
 import { getProduct, products } from "@/lib/products";
 
 export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -30,13 +31,18 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   const pointsDiscRaw = useStore(selectPointsDiscount);
   const user = useStore((s) => s.user);
   const isAuthed = !!user;
+  const settings = useAdmin((s) => s.settings);
+  const loyaltyCfg = useAdmin((s) => s.loyalty);
+  const taxRate = (settings.taxRate ?? 5) / 100;
+  const minOrder = settings.minOrder ?? 0;
+  const belowMin = minOrder > 0 && subtotal < minOrder;
   const [code, setCode] = useState("");
   const [ptsInput, setPtsInput] = useState("");
   const [err, setErr] = useState<string | null>(null);
 
   // Guests: hide delivery, promo, and points from the cart summary
   const discount = isAuthed ? discountRaw : 0;
-  const tax = isAuthed ? taxRaw : +(subtotal * 0.05).toFixed(2);
+  const tax = isAuthed ? taxRaw : +(subtotal * taxRate).toFixed(2);
   const delivery = isAuthed ? deliveryRaw : 0;
   const pointsDisc = isAuthed ? pointsDiscRaw : 0;
   const total = isAuthed ? totalRaw : +(subtotal + tax).toFixed(2);
@@ -236,7 +242,7 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                 <label className="text-sm font-semibold text-primary flex items-center gap-1.5">
                   <Wallet className="h-4 w-4" /> Redeem Points
                 </label>
-                <p className="text-xs text-muted-foreground">Balance: {points} pts (20 pts = SAR 1)</p>
+                <p className="text-xs text-muted-foreground">Balance: {points} pts ({loyaltyCfg.redeemRate} pts = SAR 1)</p>
                 {redeemed > 0 ? (
                   <div className="flex items-center justify-between text-sm">
                     <span>Using <span className="font-semibold">{redeemed}</span> pts (−SAR {pointsDisc.toFixed(2)})</span>
@@ -277,14 +283,25 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
 
             {/* Actions */}
             <div className="space-y-2">
+              {belowMin && (
+                <p className="text-xs text-destructive text-center">
+                  Minimum order is SAR {minOrder.toFixed(2)}. Add SAR {(minOrder - subtotal).toFixed(2)} more to checkout.
+                </p>
+              )}
               {isAuthed ? (
-                <Link
-                  to="/customize"
-                  onClick={onClose}
-                  className="block text-center bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 transition"
-                >
-                  Checkout
-                </Link>
+                belowMin ? (
+                  <button disabled className="block w-full text-center bg-primary/50 text-primary-foreground rounded-md py-3 font-semibold cursor-not-allowed">
+                    Checkout
+                  </button>
+                ) : (
+                  <Link
+                    to="/customize"
+                    onClick={onClose}
+                    className="block text-center bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 transition"
+                  >
+                    Checkout
+                  </Link>
+                )
               ) : (
                 <Link
                   to="/login"

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronDown, Heart, MapPin, Menu, Search, ShoppingBag, User } from "lucide-react";
 import { useState } from "react";
 import { useStore, selectCartCount } from "@/lib/store";
+import { useAdmin } from "@/lib/admin-store";
 import { CartDrawer } from "./CartDrawer";
 import { MegaMenu } from "./MegaMenu";
 import { useLang, setLang, useT } from "@/lib/i18n";
@@ -10,12 +11,17 @@ export function SiteHeader({ variant = "cream" }: { variant?: "cream" | "white" 
   const count = useStore(selectCartCount);
   const wishCount = useStore((s) => s.wishlist.length);
   const user = useStore((s) => s.user);
+  const brandName = useAdmin((s) => s.settings.brandName);
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const lang = useLang();
   const t = useT();
   const bg = variant === "white" ? "bg-white" : "bg-background";
+
+  const parts = brandName.split(/\s+/);
+  const first = parts[0] ?? brandName;
+  const rest = parts.slice(1).join(" ");
 
   return (
     <>
@@ -69,7 +75,7 @@ export function SiteHeader({ variant = "cream" }: { variant?: "cream" | "white" 
             </span>
           </div>
           <Link to="/" className="font-script text-2xl sm:text-3xl text-primary leading-none justify-self-center text-center whitespace-nowrap">
-            Terrific<br /><span className="ms-6">Bites</span>
+            {first}<br /><span className="ms-6">{rest}</span>
           </Link>
           <div className="flex items-center gap-3 sm:gap-5 text-sm justify-self-end">
 

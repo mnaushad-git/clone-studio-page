@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { X } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { useAdmin } from "@/lib/admin-store";
 import moments from "@/assets/hero-cupcake.jpg";
 import recipients from "@/assets/gift-cream.jpg";
 import cakes from "@/assets/cake-main.jpg";
@@ -8,22 +9,23 @@ import chocolates from "@/assets/choc-1.jpg";
 import donuts from "@/assets/donuts-hero.jpg";
 import gifts from "@/assets/gift-donuts.jpg";
 
+const CAT_IMG: Record<string, string> = {
+  cakes, chocolates, donuts, gifts, cupcakes: moments, extras: gifts,
+};
+
 export function MegaMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useT();
+  const categories = useAdmin((s) => s.categories);
 
   const tiles = [
     { label: t("moments"), img: moments, to: "/moments" as const },
     { label: t("recipients"), img: recipients, to: "/recipients" as const },
   ];
 
-  const rows = [
-    { label: t("cakes"), img: cakes, to: "/cakes" as const },
-    { label: t("chocolates"), img: chocolates, to: "/chocolates" as const },
-    { label: t("donuts"), img: donuts, to: "/donuts" as const },
-    { label: t("gifts"), img: gifts, to: "/gifts" as const },
-    { label: "Cupcakes", img: moments, to: "/cupcakes" as const },
-    { label: "Extras", img: gifts, to: "/extras" as const },
-  ];
+  const rows = [...categories]
+    .filter((c) => c.visible)
+    .sort((a, b) => a.order - b.order)
+    .map((c) => ({ label: c.label, img: CAT_IMG[c.slug] ?? gifts, to: `/${c.slug}` }));
 
   return (
     <>
@@ -65,9 +67,9 @@ export function MegaMenu({ open, onClose }: { open: boolean; onClose: () => void
 
         <div className="px-6 py-6 space-y-3">
           {rows.map((row) => (
-            <Link
+            <a
               key={row.label}
-              to={row.to}
+              href={row.to}
               onClick={onClose}
               className="flex items-center justify-between bg-cream rounded-lg px-5 py-3 hover:bg-secondary transition"
             >
@@ -75,7 +77,7 @@ export function MegaMenu({ open, onClose }: { open: boolean; onClose: () => void
                 {row.label} <span className="ms-2">→</span>
               </span>
               <img src={row.img} alt="" className="h-14 w-14 rounded-md object-cover" />
-            </Link>
+            </a>
           ))}
         </div>
 

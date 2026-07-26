@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { getProduct } from "./products";
+import { getAdminState } from "./admin-store";
 
 export type CartItem = {
   lineId: string;
@@ -317,11 +318,23 @@ export const cart = {
 };
 
 export const promo = {
-  apply(code: string): boolean {
+  apply(code: string): { ok: boolean; error?: string } | boolean {
     const c = code.trim().toUpperCase();
-    const percent = PROMOS[c];
-    if (!percent) return false;
-    state = { ...state, promo: { code: c, percent } };
+    if (!c) return false;
+    const admin = getAdminState();
+    const found = admin.promos.find((p) => p.code.toUpperCase() === c && p.active);
+    if (found) {
+      const sub = selectSubtotal(state);
+      if (found.minSubtotal && sub < found.minSubtotal) return false;
+      if (found.usageLimit && found.used >= found.usageLimit) return false;
+      const percent = found.type === "percent" ? found.value : +(((found.value / Math.max(1, sub)) * 100).toFixed(2));
+      state = { ...state, promo: { code: c, percent } };
+      emit();
+      return true;
+    }
+    const legacy = PROMOS[c];
+    if (!legacy) return false;
+    state = { ...state, promo: { code: c, percent: legacy } };
     emit();
     return true;
   },
@@ -378,17 +391,23 @@ export function selectPromoDiscount(s: State): number {
   return s.promo ? +(sub * (s.promo.percent / 100)).toFixed(2) : 0;
 }
 export function selectPointsDiscount(s: State): number {
-  return +((s.redeemedPoints ?? 0) / POINTS_REDEEM_RATE).toFixed(2);
+  const rate = getAdminState().loyalty.redeemRate || POINTS_REDEEM_RATE;
+  return +((s.redeemedPoints ?? 0) / rate).toFixed(2);
 }
 export function selectDiscount(s: State): number {
   return +(selectPromoDiscount(s) + selectPointsDiscount(s)).toFixed(2);
 }
 export function selectDeliveryFee(s: State): number {
   const sub = selectSubtotal(s) - selectDiscount(s);
-  return sub === 0 ? 0 : 15; // Flat SAR 15 delivery fee for Riyadh (distance-based logic later)
+  if (sub <= 0) return 0;
+  const a = getAdminState();
+  const threshold = a.settings.freeDeliveryThreshold ?? 0;
+  if (threshold > 0 && sub >= threshold) return 0;
+  return a.settings.defaultDeliveryFee ?? 15;
 }
 export function selectTax(s: State): number {
-  return +(Math.max(0, selectSubtotal(s) - selectDiscount(s)) * 0.05).toFixed(2);
+  const rate = (getAdminState().settings.taxRate ?? 5) / 100;
+  return +(Math.max(0, selectSubtotal(s) - selectDiscount(s)) * rate).toFixed(2);
 }
 export function selectTotal(s: State): number {
   return +(Math.max(0, selectSubtotal(s) - selectDiscount(s)) + selectTax(s) + selectDeliveryFee(s)).toFixed(2);
@@ -411,6 +430,12 @@ export function selectAverageRating(id: string) {
 }
 export function selectHasPurchased(productId: string) {
   return (s: State) => s.orders.some((o) => o.items.some((it) => it.productId === productId));
+}
+export function selectPointsRedeemRate(): number {
+  return getAdminState().loyalty.redeemRate || POINTS_REDEEM_RATE;
+}
+export function selectMinOrder(): number {
+  return getAdminState().settings.minOrder ?? 0;
 }
 
 // ---------- Auth ----------

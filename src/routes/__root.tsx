@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
+import { useAdmin } from "@/lib/admin-store";
 
 
 
@@ -120,14 +121,25 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function MaintenanceBanner() {
+  const enabled = useAdmin((s) => s.settings.maintenanceMode);
+  if (!enabled) return null;
+  return (
+    <div className="bg-amber-500 text-black text-center text-xs py-2 font-medium">
+      🛠️ We're doing a bit of maintenance — some features may be temporarily unavailable.
+    </div>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
+      <MaintenanceBanner />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-      
+
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );
