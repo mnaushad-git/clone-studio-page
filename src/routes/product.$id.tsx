@@ -95,6 +95,13 @@ function ProductPage() {
       { label: "9 INCH", sub: "3 Layers", delta: 80 },
     ],
   };
+  const sizeOverridesById: Record<string, { label: string; sub?: string; delta?: number }[]> = {
+    "extra-icecream": [
+      { label: "SMALL (3OZ)", delta: 0 },
+      { label: "MEDIUM (11OZ)", delta: 3 },
+      { label: "LARGE (16OZ)", delta: 6 },
+    ],
+  };
   const defaultFlavorsByCategory: Record<string, string[]> = {
     cupcakes: ["Vanilla", "Chocolate"],
     chocolates: ["Milk", "Dark"],
@@ -103,7 +110,7 @@ function ProductPage() {
     gifts: [],
     extras: [],
   };
-  const sizes = product.sizes ?? defaultSizesByCategory[product.category];
+  const sizes = product.sizes ?? sizeOverridesById[product.id] ?? defaultSizesByCategory[product.category];
   const flavors = product.flavors ?? (defaultFlavorsByCategory[product.category]?.length ? defaultFlavorsByCategory[product.category] : undefined);
   const selectedSize = sizes?.[sizeIdx];
   const selectedFlavor = flavors?.[flavorIdx];
@@ -204,16 +211,18 @@ function ProductPage() {
           {product.description && <p className="mt-2 text-sm text-muted-foreground">{product.description}</p>}
 
           {sizes && (
-            <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className={`mt-6 grid gap-3 ${sizes.length >= 3 ? "grid-cols-3" : "grid-cols-2"}`}>
               {sizes.map((s: { label: string; sub?: string; delta?: number }, i: number) => (
-                <button key={i} onClick={() => setSizeIdx(i)} className={`flex items-center gap-3 border rounded-md p-3 text-left ${sizeIdx === i ? "border-primary" : "border-border"}`}>
+                <button
+                  key={i}
+                  onClick={() => setSizeIdx(i)}
+                  className={`relative flex flex-col items-center justify-center gap-2 border rounded-md px-2 py-4 text-center ${sizeIdx === i ? "border-primary" : "border-border"}`}
+                >
                   <span className={`h-4 w-4 rounded-full border ${sizeIdx === i ? "border-primary" : "border-muted-foreground/50"} flex items-center justify-center`}>
                     {sizeIdx === i && <span className="h-2 w-2 rounded-full bg-primary" />}
                   </span>
-                  <span>
-                    <span className="block text-sm font-semibold">{s.label}</span>
-                    {s.sub && <span className="block text-[11px] text-muted-foreground uppercase tracking-wider">{s.sub}</span>}
-                  </span>
+                  <span className="block text-sm font-semibold tracking-wide">{s.label}</span>
+                  {s.sub && <span className="block text-[11px] text-muted-foreground uppercase tracking-wider">{s.sub}</span>}
                 </button>
               ))}
             </div>
