@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  UserRound, MapPin, ShoppingCart, DollarSign, FileText, Calendar, Heart, Wallet, Plus,
+  UserRound, MapPin, ShoppingCart, FileText, Calendar, Heart, Wallet, Plus,
   LogOut, Trash2, X,
+
 } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -29,12 +30,12 @@ const menu = [
   { key: "personal", label: "My Personal Information", icon: UserRound },
   { key: "address", label: "My Address", icon: MapPin },
   { key: "orders", label: "My Orders", icon: ShoppingCart },
-  { key: "subs", label: "My Subscriptions", icon: DollarSign },
   { key: "invoices", label: "Invoices", icon: FileText },
   { key: "occasions", label: "My Occasions", icon: Calendar },
   { key: "favorite", label: "Favorite", icon: Heart },
   { key: "wallet", label: "Terrific Wallet", icon: Wallet },
 ] as const;
+
 
 type MenuKey = typeof menu[number]["key"];
 
@@ -215,7 +216,7 @@ function AccountPage() {
 
             {active === "wallet" && <WalletPanel />}
 
-            {(active === "subs" || active === "invoices" || active === "occasions") && (
+            {(active === "invoices" || active === "occasions") && (
               <div className="h-full flex flex-col items-center justify-center text-center py-24">
                 <h2 className="font-display text-2xl text-primary">{menu.find((m) => m.key === active)?.label}</h2>
                 <p className="text-sm text-muted-foreground mt-3 max-w-sm">
