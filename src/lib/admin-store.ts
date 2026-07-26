@@ -372,3 +372,9 @@ export const notificationStore = {
   markAllRead() { update({ notifications: state.notifications.map((n) => ({ ...n, read: true })) }); },
   clear() { update({ notifications: [] }); },
 };
+
+export const themeStore = {
+  update(patch: Partial<AdminTheme>) { update({ theme: { ...state.theme, ...patch } }); },
+  set(theme: AdminTheme) { update({ theme }); },
+  reset() { update({ theme: DEFAULT_ADMIN_THEME }); },
+};
