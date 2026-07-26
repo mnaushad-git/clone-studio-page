@@ -23,14 +23,15 @@ function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-primary flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
         <div className="flex flex-col items-center mb-6">
-          <div className="h-12 w-12 rounded-full bg-stone-900 flex items-center justify-center mb-3">
-            <Lock className="h-5 w-5 text-amber-400" />
+          <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center mb-3">
+            <Lock className="h-5 w-5 text-amber-300" />
           </div>
           <h1 className="font-display text-2xl text-stone-800">Admin Portal</h1>
           <p className="text-sm text-stone-500 mt-1">Terrific Bites — Staff sign in</p>
+
         </div>
         <form onSubmit={submit} className="space-y-4">
           <div>
