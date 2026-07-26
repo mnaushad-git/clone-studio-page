@@ -11,7 +11,7 @@ function ContentPage() {
   const sections = useAdmin((s) => [...s.homepageSections].sort((a, b) => a.order - b.order));
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState({ title: "", subtitle: "", ctaLabel: "", ctaLink: "", image: "", position: "hero" as const, active: true, order: banners.length + 1 });
+  const [form, setForm] = useState<{ title: string; subtitle: string; ctaLabel: string; ctaLink: string; image: string; position: "hero" | "midpage" | "footer"; active: boolean; order: number }>({ title: "", subtitle: "", ctaLabel: "", ctaLink: "", image: "", position: "hero", active: true, order: banners.length + 1 });
 
   function moveSection(id: string, dir: -1 | 1) {
     const arr = [...sections];

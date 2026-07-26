@@ -48,7 +48,7 @@ function OrdersPage() {
                   <td>SAR {o.total.toFixed(2)}</td>
                   <td className="text-slate-500">{new Date(o.createdAt).toLocaleString()}</td>
                   <td>
-                    <Select value={o.status} onChange={(e) => ordersApi.updateStatus(o.id, e.target.value as any)} className="w-32">
+                    <Select value={o.status} onChange={(e) => ordersApi.setStatus(o.id, e.target.value as any)} className="w-32">
                       {ORDER_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                     </Select>
                   </td>
