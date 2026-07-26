@@ -50,6 +50,7 @@ function DeliveryPage() {
   const defaultSlot = useMemo(() => nextSlot(), []);
 
   const [gift, setGift] = useState(false);
+  const [identitySecret, setIdentitySecret] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [area, setArea] = useState("");
