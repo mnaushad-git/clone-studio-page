@@ -50,7 +50,7 @@ export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
 export function Button({ variant = "primary", ...p }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" | "danger" | "outline" }) {
   const base = "inline-flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50";
   const styles = {
-    primary: "bg-stone-900 text-white hover:bg-stone-800",
+    primary: "bg-primary text-primary-foreground hover:opacity-90",
     ghost: "text-stone-600 hover:bg-stone-100",
     danger: "bg-red-600 text-white hover:bg-red-700",
     outline: "border border-stone-300 text-stone-700 hover:bg-stone-50",
