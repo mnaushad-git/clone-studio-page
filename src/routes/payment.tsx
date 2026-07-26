@@ -9,6 +9,7 @@ import {
   useStore, orders, selectSubtotal, selectDiscount, selectTax,
   selectDeliveryFee, selectTotal,
 } from "@/lib/store";
+import { useAdmin } from "@/lib/admin-store";
 import { getProduct } from "@/lib/products";
 
 export const Route = createFileRoute("/payment")({
@@ -25,12 +26,13 @@ export const Route = createFileRoute("/payment")({
   }),
 });
 
-const methods = [
-  { id: "apple", label: "Apple Pay", type: "apple" as const },
-  { id: "credit", label: "Credit Card", type: "mc" as const },
-  { id: "paypal", label: "PayPal", type: "paypal" as const },
-  { id: "visa", label: "Visa Card", type: "visa" as const },
-];
+function methodType(label: string): "apple" | "mc" | "paypal" | "visa" {
+  const l = label.toLowerCase();
+  if (l.includes("apple")) return "apple";
+  if (l.includes("paypal")) return "paypal";
+  if (l.includes("visa")) return "visa";
+  return "mc";
+}
 
 function BrandBadge({ type }: { type: "apple" | "mc" | "paypal" | "visa" }) {
   const base = "h-7 w-10 rounded flex items-center justify-center text-[10px] font-bold";
