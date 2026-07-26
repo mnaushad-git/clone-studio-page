@@ -1,11 +1,25 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Check, MapPin, Truck, Bike, Ticket, ChevronDown, ChevronLeft, ChevronRight, X, CalendarPlus } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useStore, addresses as addressStore, selectSubtotal, selectDiscount, selectTax, selectDeliveryFee, selectTotal, promo } from "@/lib/store";
 import { getProduct } from "@/lib/products";
+
+const DAY_SLOTS: [number, number][] = [[8, 10], [10, 12], [12, 14], [14, 16], [16, 18], [18, 20]];
+const fmtHour = (h: number) => {
+  const period = h >= 12 && h < 24 ? "pm" : "am";
+  const hh = h % 12 === 0 ? 12 : h % 12;
+  return `${hh}:00${period}`;
+};
+export const SLOT_LABELS = DAY_SLOTS.map(([s, e]) => `${fmtHour(s)} - ${fmtHour(e)}`);
+function nextSlot(now = new Date()): { day: "Today" | "Tomorrow"; label: string } {
+  const h = now.getHours();
+  const idx = DAY_SLOTS.findIndex(([s]) => s > h);
+  if (idx >= 0) return { day: "Today", label: SLOT_LABELS[idx] };
+  return { day: "Tomorrow", label: SLOT_LABELS[0] };
+}
 
 export const Route = createFileRoute("/delivery")({
   component: DeliveryPage,
