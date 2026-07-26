@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, Link, useRouterState, useNavigate, redirect } 
 import { useState } from "react";
 import {
   LayoutDashboard, Package, ShoppingBag, Users, Tags, Ticket, Truck, Image as ImageIcon,
-  Star, Gift, Settings, UserCog, BarChart3, Bell, LogOut, Menu, X, Home,
+  Star, Gift, Settings, UserCog, BarChart3, Bell, LogOut, Menu, X, Home, Palette,
 } from "lucide-react";
 import { useAdmin, adminAuth, notificationStore } from "@/lib/admin-store";
 
