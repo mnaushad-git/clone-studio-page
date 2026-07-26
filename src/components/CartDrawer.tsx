@@ -171,19 +171,21 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
                   );
                 })}
               </div>
-              <div className="px-4 py-3 border-t border-border text-sm space-y-1.5">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground flex items-center gap-1.5">
-                    <Truck className="h-4 w-4" /> Delivery
-                  </span>
-                  <span>{delivery === 0 ? "Free" : `SAR ${delivery.toFixed(2)}`}</span>
+              {isAuthed && (
+                <div className="px-4 py-3 border-t border-border text-sm space-y-1.5">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground flex items-center gap-1.5">
+                      <Truck className="h-4 w-4" /> Delivery
+                    </span>
+                    <span>{delivery === 0 ? "Free" : `SAR ${delivery.toFixed(2)}`}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground flex items-center gap-1.5">
+                      <MapPin className="h-4 w-4" /> Deliver to <span className="text-foreground font-medium">your address</span>
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground flex items-center gap-1.5">
-                    <MapPin className="h-4 w-4" /> Deliver to <span className="text-foreground font-medium">your address</span>
-                  </span>
-                </div>
-              </div>
+              )}
               <div className="px-4 py-3 border-t border-border text-sm space-y-1.5">
                 <div className="flex justify-between">
                   <span>Amount</span>
