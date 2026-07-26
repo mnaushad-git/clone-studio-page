@@ -106,8 +106,27 @@ function SignupPage() {
             <Field label="Name" placeholder="Enter your name" required value={form.name} error={errors.name} onChange={set("name")} />
             <Field label="Email" type="email" placeholder="you@example.com" required value={form.email} error={errors.email} onChange={set("email")} />
             <Field label="Phone" type="tel" placeholder="+888 2148956" required value={form.phone} error={errors.phone} onChange={set("phone")} />
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Area <span className="text-destructive">*</span>
+              </label>
+              <select
+                value={form.area}
+                onChange={set("area")}
+                aria-invalid={!!errors.area}
+                className={`w-full border rounded-md px-4 py-3 text-sm focus:outline-none bg-white ${errors.area ? "border-destructive focus:border-destructive" : "border-border focus:border-primary"}`}
+              >
+                <option value="">Select area</option>
+                {AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
+              </select>
+              {errors.area && <p className="text-xs text-destructive mt-1">{errors.area}</p>}
+            </div>
+            <Field label="Address" placeholder="Street, building, apartment" required value={form.address} error={errors.address} onChange={set("address")} />
+
             <Field label="New Password" type="password" placeholder="* * * * * * * *" required value={form.password} error={errors.password} onChange={set("password")} />
             <Field label="Confirm Password" type="password" placeholder="* * * * * * * *" required value={form.confirm} error={errors.confirm} onChange={set("confirm")} />
+
 
             <button type="submit" className="w-full bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 transition">
               Sign Up
