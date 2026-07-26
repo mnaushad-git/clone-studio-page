@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, Link, useRouterState, useNavigate, redirect } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Package, ShoppingBag, Users, Tags, Ticket, Truck, Image as ImageIcon,
   Star, Gift, Settings, UserCog, BarChart3, Bell, LogOut, Menu, X, Home, Palette,
