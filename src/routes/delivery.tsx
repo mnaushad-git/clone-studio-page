@@ -340,6 +340,21 @@ function DeliveryPage() {
         />
       )}
 
+      {addressModalOpen && (
+        <AddressPickerModal
+          addresses={selfAddresses}
+          selectedId={selectedAddressId}
+          onClose={() => setAddressModalOpen(false)}
+          onSelect={(id) => { applyAddress(id); setAddressModalOpen(false); toast.success("Address selected"); }}
+          onAdd={(a) => {
+            const id = addressStore.add({ ...a, isGift: false });
+            applyAddress(id);
+            setAddressModalOpen(false);
+            toast.success("Address added");
+          }}
+        />
+      )}
+
       <SiteFooter />
     </div>
   );
