@@ -4,7 +4,7 @@ import { Check, MapPin, Truck, Bike, Ticket, ChevronDown, ChevronLeft, ChevronRi
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { useStore, addresses as addressStore, selectSubtotal, selectDiscount, selectTax, selectDeliveryFee, selectTotal, promo, RIYADH_AREAS } from "@/lib/store";
+import { useStore, addresses as addressStore, selectSubtotal, selectDiscount, selectTax, selectDeliveryFee, selectTotal, promo, RIYADH_AREAS, type Address } from "@/lib/store";
 import { getAdminState } from "@/lib/admin-store";
 import { getProduct } from "@/lib/products";
 
