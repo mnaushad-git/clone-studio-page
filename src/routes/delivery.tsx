@@ -91,9 +91,14 @@ function DeliveryPage() {
     setExtra(a.extra || "");
   };
 
-  // When gift toggle is off, prefill from user profile + default (or latest) self address
+  // Prefill from profile when self-order; clear recipient fields for gifts
   useEffect(() => {
-    if (gift) return;
+    if (gift) {
+      setName("");
+      setPhone("");
+      setSelectedAddressId(null);
+      return;
+    }
     const def = selfAddresses.find((a) => a.isDefault) ?? selfAddresses[selfAddresses.length - 1];
     if (user?.name) setName(user.name);
     else if (def?.name) setName(def.name);
