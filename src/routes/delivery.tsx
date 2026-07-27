@@ -191,6 +191,19 @@ function DeliveryPage() {
 
               {!gift && (
                 <>
+                  {selfAddresses.length > 0 && (
+                    <div className="flex items-center justify-between rounded-lg border border-border bg-secondary/40 px-4 py-3">
+                      <div className="min-w-0">
+                        <p className="text-xs text-muted-foreground">Delivering to</p>
+                        <p className="text-sm font-medium truncate">
+                          {area ? `${area} — ${address || "—"}` : "No address selected"}
+                        </p>
+                      </div>
+                      <button type="button" onClick={() => setAddressModalOpen(true)} className="text-sm text-primary font-medium hover:underline shrink-0 ml-3">
+                        Change address
+                      </button>
+                    </div>
+                  )}
                   <div className="relative rounded-lg overflow-hidden border border-border h-56 bg-secondary flex items-center justify-center">
                     <div className="text-center">
                       <MapPin className="h-8 w-8 mx-auto text-primary" />
