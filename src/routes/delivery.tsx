@@ -70,23 +70,41 @@ function DeliveryPage() {
   const [area, setArea] = useState("");
   const [address, setAddress] = useState("");
   const [extra, setExtra] = useState("");
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
   const [timeSlot, setTimeSlot] = useState<"tomorrow" | "another">("tomorrow");
   const [promoInput, setPromoInput] = useState(currentPromo?.code ?? "");
   const [timeModalOpen, setTimeModalOpen] = useState(false);
   const [pickedDate, setPickedDate] = useState<string>("");
   const [pickedTime, setPickedTime] = useState<string>("");
 
-  // When gift toggle is off, prefill from user profile + last saved (non-gift) address
+  const selfAddresses = useMemo(() => savedAddresses.filter((a) => !a.isGift), [savedAddresses]);
+
+  const applyAddress = (id: string) => {
+    const a = selfAddresses.find((x) => x.id === id);
+    if (!a) return;
+    setSelectedAddressId(a.id);
+    if (a.name) setName(a.name);
+    if (a.phone) setPhone(a.phone.replace(/^\+966\s?/, ""));
+    setArea(a.area || "");
+    setAddress(a.address || "");
+    setExtra(a.extra || "");
+  };
+
+  // When gift toggle is off, prefill from user profile + default (or latest) self address
   useEffect(() => {
     if (gift) return;
-    const lastSelf = savedAddresses.find((a) => !a.isGift && a.isDefault) ?? [...savedAddresses].reverse().find((a) => !a.isGift);
+    const def = selfAddresses.find((a) => a.isDefault) ?? selfAddresses[selfAddresses.length - 1];
     if (user?.name) setName(user.name);
-    else if (lastSelf?.name) setName(lastSelf.name);
+    else if (def?.name) setName(def.name);
     if (user?.phone) setPhone(user.phone.replace(/^\+966\s?/, ""));
-    else if (lastSelf?.phone) setPhone(lastSelf.phone.replace(/^\+966\s?/, ""));
-    if (lastSelf?.area) setArea(lastSelf.area);
-    if (lastSelf?.address) setAddress(lastSelf.address);
-    if (lastSelf?.extra) setExtra(lastSelf.extra);
+    else if (def?.phone) setPhone(def.phone.replace(/^\+966\s?/, ""));
+    if (def) {
+      setSelectedAddressId(def.id);
+      setArea(def.area || "");
+      setAddress(def.address || "");
+      setExtra(def.extra || "");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gift]);
 
