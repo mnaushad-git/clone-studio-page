@@ -123,18 +123,20 @@ function DeliveryPage() {
     const deliveryDate = timeSlot === "tomorrow" ? defaultSlot.day : pickedDate;
     const deliveryTime = timeSlot === "tomorrow" ? defaultSlot.label : pickedTime;
 
-    addressStore.add({
-      name,
-      phone: phone.startsWith("+966") ? phone : `+966 ${phone}`,
-      area: gift ? "Gift" : area,
-      address: gift ? `${deliveryDate} · ${deliveryTime}` : address,
-      extra: extra || undefined,
-      isGift: gift,
-      identitySecret: gift ? identitySecret : undefined,
-      timeSlot,
-      deliveryDate,
-      deliveryTime,
-    });
+    if (gift || !selectedAddressId) {
+      addressStore.add({
+        name,
+        phone: phone.startsWith("+966") ? phone : `+966 ${phone}`,
+        area: gift ? "Gift" : area,
+        address: gift ? `${deliveryDate} · ${deliveryTime}` : address,
+        extra: extra || undefined,
+        isGift: gift,
+        identitySecret: gift ? identitySecret : undefined,
+        timeSlot,
+        deliveryDate,
+        deliveryTime,
+      });
+    }
     toast.success("Delivery details saved");
     navigate({ to: "/payment" });
   };
