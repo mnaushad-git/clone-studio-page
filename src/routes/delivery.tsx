@@ -516,3 +516,111 @@ function Field({ label, required, children }: { label: string; required?: boolea
 function Row({ label, val }: { label: string; val: string }) {
   return <div className="flex items-center justify-between"><span>{label}</span><span>{val}</span></div>;
 }
+
+function AddressPickerModal({
+  addresses,
+  selectedId,
+  onClose,
+  onSelect,
+  onAdd,
+}: {
+  addresses: Address[];
+  selectedId: string | null;
+  onClose: () => void;
+  onSelect: (id: string) => void;
+  onAdd: (a: Omit<Address, "id" | "isGift">) => void;
+}) {
+  const [mode, setMode] = useState<"list" | "add">(addresses.length === 0 ? "add" : "list");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [area, setArea] = useState("");
+  const [addr, setAddr] = useState("");
+  const [extra, setExtra] = useState("");
+
+  const save = () => {
+    if (!name.trim()) return toast.error("Name is required");
+    if (!phone.trim()) return toast.error("Phone is required");
+    if (!area) return toast.error("Select a Riyadh area");
+    if (!addr.trim()) return toast.error("Address is required");
+    onAdd({
+      name,
+      phone: phone.startsWith("+966") ? phone : `+966 ${phone}`,
+      area,
+      address: addr,
+      extra: extra || undefined,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <h3 className="font-semibold">{mode === "list" ? "Select address" : "Add new address"}</h3>
+          <button onClick={onClose} aria-label="Close"><X className="h-5 w-5" /></button>
+        </div>
+
+        {mode === "list" ? (
+          <>
+            <div className="p-5 space-y-3 overflow-y-auto">
+              {addresses.map((a) => (
+                <button
+                  key={a.id}
+                  onClick={() => onSelect(a.id)}
+                  className={`w-full text-left rounded-lg border p-4 transition ${selectedId === a.id ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-medium text-sm">{a.name || "Unnamed"}{a.isDefault && <span className="ml-2 text-[10px] uppercase tracking-wide text-primary">Default</span>}</p>
+                    {selectedId === a.id && <Check className="h-4 w-4 text-primary shrink-0" />}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">{a.area} — {a.address}</p>
+                  {a.extra && <p className="text-xs text-muted-foreground">{a.extra}</p>}
+                  <p className="text-xs text-muted-foreground mt-1">{a.phone}</p>
+                </button>
+              ))}
+              {addresses.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-6">No saved addresses yet.</p>
+              )}
+            </div>
+            <div className="border-t border-border p-4">
+              <button onClick={() => setMode("add")} className="w-full border border-primary text-primary rounded-md py-3 text-sm font-medium hover:bg-primary hover:text-primary-foreground transition">
+                + Add new address
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="p-5 space-y-4 overflow-y-auto">
+              <Field label="Full name" required>
+                <input value={name} onChange={(e) => setName(e.target.value)} className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary" />
+              </Field>
+              <Field label="Phone" required>
+                <input value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 15))} placeholder="5XXXXXXXX" className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary" />
+              </Field>
+              <Field label="Riyadh Area" required>
+                <div className="relative">
+                  <select value={area} onChange={(e) => setArea(e.target.value)} className="w-full appearance-none border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary bg-white">
+                    <option value="">Select a Riyadh area</option>
+                    {RIYADH_AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
+                  </select>
+                  <ChevronDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                </div>
+              </Field>
+              <Field label="Address" required>
+                <input value={addr} onChange={(e) => setAddr(e.target.value)} className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary" />
+              </Field>
+              <Field label="Extra Address">
+                <input value={extra} onChange={(e) => setExtra(e.target.value)} placeholder="Apartment, floor, landmark (optional)" className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary placeholder:text-muted-foreground" />
+              </Field>
+            </div>
+            <div className="border-t border-border p-4 flex gap-3">
+              {addresses.length > 0 && (
+                <button onClick={() => setMode("list")} className="flex-1 border border-border rounded-md py-3 text-sm hover:border-primary transition">Cancel</button>
+              )}
+              <button onClick={save} className="flex-1 bg-primary text-primary-foreground rounded-md py-3 text-sm font-semibold hover:opacity-90 transition">Save address</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
