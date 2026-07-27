@@ -1,15 +1,25 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ShopGrid } from "@/components/ShopGrid";
-import { slugToOccasion, products } from "@/lib/products";
+import { slugToOccasion, products, type Occasion } from "@/lib/products";
+import { useT, type TKey } from "@/lib/i18n";
 
-const OCCASION_HERO: Record<string, { subtitle: string; blurb: string; accent: string }> = {
-  Birthday: { subtitle: "Make the day unforgettable", blurb: "Show-stopping cakes, candle-ready cupcakes, and treat boxes built for singing 'happy birthday' at least twice.", accent: "🎂" },
-  Anniversary: { subtitle: "Sweeter with every year", blurb: "Refined desserts and elegant hampers to mark the milestones that matter.", accent: "💐" },
-  Wedding: { subtitle: "Say 'I do' to something delicious", blurb: "From bespoke tiered cakes to sharing platters, curated for the biggest day.", accent: "💍" },
-  Graduation: { subtitle: "Sugar-dust the achievement", blurb: "Celebration bites and gift sets for every capped-and-gowned occasion.", accent: "🎓" },
-  Congratulations: { subtitle: "Big news deserves a big treat", blurb: "New job, new baby, new home — mark the moment sweetly.", accent: "🎉" },
-  "Thank You": { subtitle: "Gratitude, gift-wrapped", blurb: "Elegant, share-worthy boxes that say more than a card ever could.", accent: "💌" },
+const OCCASION_LABEL_KEYS: Record<Occasion, TKey> = {
+  Birthday: "shopOccasionBirthday",
+  Anniversary: "shopOccasionAnniversary",
+  Wedding: "shopOccasionWedding",
+  Graduation: "shopOccasionGraduation",
+  Congratulations: "shopOccasionCongratulations",
+  "Thank You": "shopOccasionThankYou",
+};
+
+const OCCASION_HERO: Record<string, { subtitleKey: TKey; blurbKey: TKey; accent: string }> = {
+  Birthday: { subtitleKey: "momentsHeroBirthdaySubtitle", blurbKey: "momentsHeroBirthdayBlurb", accent: "🎂" },
+  Anniversary: { subtitleKey: "momentsHeroAnniversarySubtitle", blurbKey: "momentsHeroAnniversaryBlurb", accent: "💐" },
+  Wedding: { subtitleKey: "momentsHeroWeddingSubtitle", blurbKey: "momentsHeroWeddingBlurb", accent: "💍" },
+  Graduation: { subtitleKey: "momentsHeroGraduationSubtitle", blurbKey: "momentsHeroGraduationBlurb", accent: "🎓" },
+  Congratulations: { subtitleKey: "momentsHeroCongratulationsSubtitle", blurbKey: "momentsHeroCongratulationsBlurb", accent: "🎉" },
+  "Thank You": { subtitleKey: "momentsHeroThankYouSubtitle", blurbKey: "momentsHeroThankYouBlurb", accent: "💌" },
 };
 
 export const Route = createFileRoute("/moments/$slug")({
@@ -34,9 +44,11 @@ export const Route = createFileRoute("/moments/$slug")({
 });
 
 function MomentsPage() {
-  const { occasion } = Route.useLoaderData();
-  const hero = OCCASION_HERO[occasion] ?? { subtitle: "Handpicked for the moment", blurb: "Sweet treats delivered with care.", accent: "✨" };
+  const t = useT();
+  const { occasion } = Route.useLoaderData() as { occasion: Occasion };
+  const hero = OCCASION_HERO[occasion] ?? { subtitleKey: "momentsHeroDefaultSubtitle" as TKey, blurbKey: "momentsHeroDefaultBlurb" as TKey, accent: "✨" };
   const sample = products.find((p) => p.occasions?.includes(occasion)) ?? products[0];
+  const occasionLabel = t(OCCASION_LABEL_KEYS[occasion]);
 
   const HeroBlock = (
     <section className="relative overflow-hidden">
@@ -47,19 +59,19 @@ function MomentsPage() {
       <div className="relative max-w-4xl mx-auto px-6 py-14 sm:py-20 text-center">
         <div className="text-4xl">{hero.accent}</div>
         <p className="mt-3 text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-          <Link to="/moments" className="hover:text-primary">Moments</Link> · {occasion}
+          <Link to="/moments" className="hover:text-primary">{t("momentsBreadcrumbLabel")}</Link> · {occasionLabel}
         </p>
-        <h1 className="font-display text-4xl sm:text-5xl text-primary mt-2">{occasion}</h1>
-        <p className="mt-3 font-display text-lg text-primary/70 italic">{hero.subtitle}</p>
-        <p className="mt-4 text-sm text-muted-foreground max-w-2xl mx-auto">{hero.blurb}</p>
+        <h1 className="font-display text-4xl sm:text-5xl text-primary mt-2">{occasionLabel}</h1>
+        <p className="mt-3 font-display text-lg text-primary/70 italic">{t(hero.subtitleKey)}</p>
+        <p className="mt-4 text-sm text-muted-foreground max-w-2xl mx-auto">{t(hero.blurbKey)}</p>
       </div>
     </section>
   );
 
   return (
     <ShopGrid
-      title={occasion}
-      breadcrumb={[{ label: "Moments" }, { label: occasion }]}
+      title={occasionLabel}
+      breadcrumb={[{ label: t("momentsBreadcrumbLabel") }, { label: occasionLabel }]}
       forcedOccasion={occasion}
       showSearch={false}
       hero={HeroBlock}

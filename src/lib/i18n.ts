@@ -1,4 +1,15 @@
 import { useSyncExternalStore } from "react";
+import { common } from "./i18n-dict/common";
+import { home } from "./i18n-dict/home";
+import { about } from "./i18n-dict/about";
+import { corporate } from "./i18n-dict/corporate";
+import { shop } from "./i18n-dict/shop";
+import { product } from "./i18n-dict/product";
+import { cart } from "./i18n-dict/cart";
+import { customizeDelivery } from "./i18n-dict/customizeDelivery";
+import { checkout } from "./i18n-dict/checkout";
+import { account } from "./i18n-dict/account";
+import { moments } from "./i18n-dict/moments";
 
 export type Lang = "en" | "ar";
 
@@ -37,45 +48,35 @@ export function useLang(): Lang {
 
 const dict = {
   en: {
-    orderPickup: "Order Desserts for Local Pickup",
-    myAccount: "My Account",
-    cart: "Cart",
-    english: "English",
-    arabic: "العربية",
-    menu: "Menu",
-    explore: "Explore",
-    moments: "Moments",
-    recipients: "Recipients",
-    cakes: "Cakes & Cupcakes",
-    chocolates: "Chocolates",
-    donuts: "Donuts & Pastries",
-    gifts: "Gifts & Hampers",
-    aboutUs: "About Us",
-    signIn: "Sign in",
-    close: "Close",
+    ...common.en,
+    ...home.en,
+    ...about.en,
+    ...corporate.en,
+    ...shop.en,
+    ...product.en,
+    ...cart.en,
+    ...customizeDelivery.en,
+    ...checkout.en,
+    ...account.en,
+    ...moments.en,
   },
   ar: {
-    orderPickup: "اطلب الحلويات للاستلام محلياً",
-    myAccount: "حسابي",
-    cart: "السلة",
-    english: "English",
-    arabic: "العربية",
-    menu: "القائمة",
-    explore: "استكشف",
-    moments: "المناسبات",
-    recipients: "المستلمون",
-    cakes: "الكعك والكب كيك",
-    chocolates: "الشوكولاتة",
-    donuts: "الدونات والمعجنات",
-    gifts: "الهدايا والسلال",
-    aboutUs: "من نحن",
-    signIn: "تسجيل الدخول",
-    close: "إغلاق",
+    ...common.ar,
+    ...home.ar,
+    ...about.ar,
+    ...corporate.ar,
+    ...shop.ar,
+    ...product.ar,
+    ...cart.ar,
+    ...customizeDelivery.ar,
+    ...checkout.ar,
+    ...account.ar,
+    ...moments.ar,
   },
 } as const;
 
 export type TKey = keyof typeof dict["en"];
 export function useT() {
   const lang = useLang();
-  return (k: TKey) => dict[lang][k] ?? dict.en[k];
+  return (k: TKey) => (dict[lang] as Record<TKey, string>)[k] ?? dict.en[k];
 }

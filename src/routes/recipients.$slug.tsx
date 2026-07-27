@@ -1,6 +1,14 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { ShopGrid } from "@/components/ShopGrid";
-import { slugToRecipient } from "@/lib/products";
+import { slugToRecipient, type Recipient } from "@/lib/products";
+import { useT, type TKey } from "@/lib/i18n";
+
+const RECIPIENT_LABEL_KEYS: Record<Recipient, TKey> = {
+  "For Him": "shopRecipientForHim",
+  "For Her": "shopRecipientForHer",
+  "For Kids": "shopRecipientForKids",
+  "For Family": "shopRecipientForFamily",
+};
 
 export const Route = createFileRoute("/recipients/$slug")({
   loader: ({ params }) => {
@@ -24,11 +32,13 @@ export const Route = createFileRoute("/recipients/$slug")({
 });
 
 function RecipientsPage() {
-  const { recipient } = Route.useLoaderData();
+  const t = useT();
+  const { recipient } = Route.useLoaderData() as { recipient: Recipient };
+  const recipientLabel = t(RECIPIENT_LABEL_KEYS[recipient]);
   return (
     <ShopGrid
-      title={recipient}
-      breadcrumb={[{ label: "Recipients" }, { label: recipient }]}
+      title={recipientLabel}
+      breadcrumb={[{ label: t("recipientsBreadcrumbLabel") }, { label: recipientLabel }]}
       forcedRecipient={recipient}
       showSearch={false}
     />

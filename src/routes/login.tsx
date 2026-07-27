@@ -3,10 +3,11 @@ import { useRef, useState } from "react";
 import { User, X, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { auth } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): { redirect?: string } => ({
     redirect: typeof search.redirect === "string" ? search.redirect : undefined,
   }),
   head: () => ({
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
+  const t = useT();
   const navigate = useNavigate();
   const { redirect } = Route.useSearch();
   const [mode, setMode] = useState<"phone" | "email" | "otp">("phone");
@@ -34,7 +36,7 @@ function LoginPage() {
 
   const finish = (user: { phone?: string; email?: string }) => {
     auth.signIn(user);
-    toast.success("Welcome back!");
+    toast.success(t("accountLoginToastWelcomeBack"));
     const dest = redirect && redirect.startsWith("/") ? redirect : "/account";
     navigate({ to: dest });
   };
@@ -57,13 +59,13 @@ function LoginPage() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (mode === "phone") {
-      if (!phone.trim()) return toast.error("Enter your mobile number");
+      if (!phone.trim()) return toast.error(t("accountLoginToastEnterMobile"));
       setOtp(["", "", "", ""]);
       setMode("otp");
       setTimeout(() => otpRefs.current[0]?.focus(), 0);
-      toast.info("OTP sent — try 1234 (any 4 digits work in demo)");
+      toast.info(t("accountLoginToastOtpSentDemo"));
     } else if (mode === "email") {
-      if (!email.trim() || !password) return toast.error("Enter email and password");
+      if (!email.trim() || !password) return toast.error(t("accountLoginToastEnterEmailPassword"));
       finish({ email });
     }
   };
@@ -77,11 +79,11 @@ function LoginPage() {
   return (
     <div className="min-h-screen bg-black/40 flex items-center justify-center p-4">
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-10">
-        <Link to="/" className="absolute top-5 right-5 text-foreground hover:text-primary" aria-label="Close">
+        <Link to="/" className="absolute top-5 right-5 text-foreground hover:text-primary" aria-label={t("accountLoginCloseAriaLabel")}>
           <X className="h-5 w-5" />
         </Link>
         {mode === "otp" && (
-          <button type="button" onClick={() => setMode("phone")} className="absolute top-5 left-5 text-foreground hover:text-primary" aria-label="Back">
+          <button type="button" onClick={() => setMode("phone")} className="absolute top-5 left-5 text-foreground hover:text-primary" aria-label={t("accountLoginBackAriaLabel")}>
             <ArrowLeft className="h-5 w-5" />
           </button>
         )}
@@ -91,11 +93,11 @@ function LoginPage() {
             <User className="h-6 w-6 text-primary" />
           </div>
           <h1 className="font-display text-2xl text-primary mt-4">
-            {mode === "otp" ? "Verify Code" : "Login"}
+            {mode === "otp" ? t("accountLoginVerifyTitle") : t("accountLoginTitle")}
           </h1>
           {mode === "otp" && (
             <p className="text-xs text-muted-foreground mt-2 text-center">
-              Enter the 4-digit code sent to<br />
+              {t("accountLoginOtpSentTo")}<br />
               <span className="font-semibold text-foreground">+966 {phone}</span>
             </p>
           )}
@@ -119,11 +121,11 @@ function LoginPage() {
               ))}
             </div>
             <button type="submit" disabled={otp.some((d) => !d)} className="w-full bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
-              Verify & Sign In
+              {t("accountLoginVerifyButton")}
             </button>
             <div className="text-center">
-              <button type="button" onClick={() => toast.info("Code resent")} className="text-sm text-foreground hover:text-primary underline-offset-2 hover:underline">
-                Resend code
+              <button type="button" onClick={() => toast.info(t("accountLoginToastCodeResent"))} className="text-sm text-foreground hover:text-primary underline-offset-2 hover:underline">
+                {t("accountLoginResendCode")}
               </button>
             </div>
           </form>
@@ -132,7 +134,7 @@ function LoginPage() {
             <form className="mt-8 space-y-5" onSubmit={submit}>
               {mode === "phone" ? (
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Mobile Number</label>
+                  <label className="block text-sm font-semibold mb-2">{t("accountLoginMobileLabel")}</label>
                   <div className="flex items-center border border-border rounded-md overflow-hidden focus-within:border-primary">
                     <span className="px-4 py-3 text-sm border-r border-border text-foreground">+966</span>
                     <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 15))} placeholder="214 895 62147" className="flex-1 px-4 py-3 text-sm outline-none bg-transparent" />
@@ -141,30 +143,30 @@ function LoginPage() {
               ) : (
                 <>
                   <div>
-                    <label className="block text-sm font-semibold mb-2">Email</label>
+                    <label className="block text-sm font-semibold mb-2">{t("accountLoginEmailLabel")}</label>
                     <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary bg-transparent" />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-2">Password</label>
+                    <label className="block text-sm font-semibold mb-2">{t("accountLoginPasswordLabel")}</label>
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="* * * * * * * *" className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary bg-transparent" />
                     <div className="text-right mt-2">
-                      <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-primary">Forgot password?</Link>
+                      <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-primary">{t("accountLoginForgotPassword")}</Link>
                     </div>
 
                   </div>
                 </>
               )}
-              <button type="submit" className="w-full bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 transition">Enter</button>
+              <button type="submit" className="w-full bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 transition">{t("accountLoginEnterButton")}</button>
             </form>
 
             <div className="text-center mt-5">
               <button type="button" onClick={() => setMode(mode === "phone" ? "email" : "phone")} className="text-sm text-foreground hover:text-primary underline-offset-2 hover:underline">
-                {mode === "phone" ? "Sign in with email" : "Sign in with mobile number"}
+                {mode === "phone" ? t("accountLoginSwitchToEmail") : t("accountLoginSwitchToMobile")}
               </button>
             </div>
 
             <p className="text-center text-xs text-muted-foreground mt-4">
-              Don't have an account? <Link to="/signup" className="font-semibold text-foreground hover:text-primary">Sign up</Link>
+              {t("accountLoginNoAccountPrefix")} <Link to="/signup" className="font-semibold text-foreground hover:text-primary">{t("accountLoginSignUpLink")}</Link>
             </p>
           </>
         )}

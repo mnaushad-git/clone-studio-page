@@ -2,7 +2,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { OCCASIONS, occasionToSlug, products } from "@/lib/products";
+import { OCCASIONS, occasionToSlug, products, type Occasion } from "@/lib/products";
+import { useT, type TKey } from "@/lib/i18n";
+
+const OCCASION_LABEL_KEYS: Record<Occasion, TKey> = {
+  Birthday: "shopOccasionBirthday",
+  Anniversary: "shopOccasionAnniversary",
+  Wedding: "shopOccasionWedding",
+  Graduation: "shopOccasionGraduation",
+  Congratulations: "shopOccasionCongratulations",
+  "Thank You": "shopOccasionThankYou",
+};
 
 export const Route = createFileRoute("/moments/")({
   component: MomentsIndex,
@@ -19,19 +29,20 @@ export const Route = createFileRoute("/moments/")({
 });
 
 function MomentsIndex() {
+  const t = useT();
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
 
       <div className="max-w-7xl mx-auto px-6 pt-10 pb-6 text-center">
-        <h1 className="font-display text-4xl md:text-5xl text-primary">Moments</h1>
+        <h1 className="font-display text-4xl md:text-5xl text-primary">{t("momentsIndexTitle")}</h1>
         <nav className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <Link to="/" className="hover:text-primary">Home</Link>
+          <Link to="/" className="hover:text-primary">{t("momentsBreadcrumbHome")}</Link>
           <ChevronRight className="h-3 w-3" />
-          <span className="text-primary">Moments</span>
+          <span className="text-primary">{t("momentsBreadcrumbLabel")}</span>
         </nav>
         <p className="mt-4 text-sm text-muted-foreground max-w-xl mx-auto">
-          Handpicked treats for every celebration — pick the moment, we'll do the rest.
+          {t("momentsIndexSubtitle")}
         </p>
       </div>
 
@@ -45,10 +56,10 @@ function MomentsIndex() {
               params={{ slug: occasionToSlug(o) }}
               className="relative aspect-[4/3] rounded-lg overflow-hidden group"
             >
-              <img src={sample.image} alt={o} className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition duration-500" />
+              <img src={sample.image} alt={t(OCCASION_LABEL_KEYS[o])} className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition duration-500" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               <span className="absolute inset-x-0 bottom-5 text-center text-white font-display text-2xl tracking-wide">
-                {o}
+                {t(OCCASION_LABEL_KEYS[o])}
               </span>
             </Link>
           );

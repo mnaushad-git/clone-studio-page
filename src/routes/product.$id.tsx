@@ -8,6 +8,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { ProductReviews } from "@/components/ProductReviews";
 import { getProduct, products } from "@/lib/products";
 import { useAdmin } from "@/lib/admin-store";
+import { useT } from "@/lib/i18n";
 import {
   cart,
   wishlist,
@@ -38,9 +39,8 @@ export const Route = createFileRoute("/product/$id")({
   }),
 });
 
-const tabs = ["Description", "Storage Instructions", "Ingredients", "Allergens"];
-
 function ProductPage() {
+  const t = useT();
   const { product: baseProduct } = Route.useLoaderData();
   const navigate = useNavigate();
   const override = useAdmin((s) => s.productOverrides[baseProduct.id]);
@@ -78,44 +78,46 @@ function ProductPage() {
     setInscription("");
   }, [product.id]);
 
+  const tabs = [t("productTabDescription"), t("productTabStorage"), t("productTabIngredients"), t("productTabAllergens")];
+
   const defaultSizesByCategory: Record<string, { label: string; sub?: string; delta?: number }[]> = {
     cupcakes: [
-      { label: "PACK OF 6", sub: "Assorted", delta: 0 },
-      { label: "PACK OF 12", sub: "Assorted", delta: product.price * 0.9 },
+      { label: t("productSizeLabelPack6"), sub: t("productSizeSubAssorted"), delta: 0 },
+      { label: t("productSizeLabelPack12"), sub: t("productSizeSubAssorted"), delta: product.price * 0.9 },
     ],
     chocolates: [
-      { label: "SMALL BOX", sub: "8 Pieces", delta: 0 },
-      { label: "LARGE BOX", sub: "16 Pieces", delta: product.price * 0.8 },
+      { label: t("productSizeLabelSmallBox"), sub: t("productSizeSub8Pieces"), delta: 0 },
+      { label: t("productSizeLabelLargeBox"), sub: t("productSizeSub16Pieces"), delta: product.price * 0.8 },
     ],
     donuts: [
-      { label: "SINGLE", sub: "1 Piece", delta: 0 },
-      { label: "PACK OF 6", sub: "Assorted", delta: product.price * 4 },
+      { label: t("productSizeLabelSingle"), sub: t("productSizeSub1Piece"), delta: 0 },
+      { label: t("productSizeLabelPack6"), sub: t("productSizeSubAssorted"), delta: product.price * 4 },
     ],
     gifts: [
-      { label: "STANDARD", sub: "Gift Box", delta: 0 },
-      { label: "DELUXE", sub: "Premium Box", delta: 15 },
+      { label: t("productSizeLabelStandard"), sub: t("productSizeSubGiftBox"), delta: 0 },
+      { label: t("productSizeLabelDeluxe"), sub: t("productSizeSubPremiumBox"), delta: 15 },
     ],
     extras: [
-      { label: "SINGLE", sub: "1 Piece", delta: 0 },
-      { label: "PACK", sub: "4 Pieces", delta: product.price * 3 },
+      { label: t("productSizeLabelSingle"), sub: t("productSizeSub1Piece"), delta: 0 },
+      { label: t("productSizeLabelPack"), sub: t("productSizeSub4Pieces"), delta: product.price * 3 },
     ],
     cakes: [
-      { label: "6 INCH", sub: "3 Layers", delta: 0 },
-      { label: "9 INCH", sub: "3 Layers", delta: 80 },
+      { label: t("productSizeLabel6Inch"), sub: t("productSizeSub3Layers"), delta: 0 },
+      { label: t("productSizeLabel9Inch"), sub: t("productSizeSub3Layers"), delta: 80 },
     ],
   };
   const sizeOverridesById: Record<string, { label: string; sub?: string; delta?: number }[]> = {
     "extra-icecream": [
-      { label: "SMALL (3OZ)", delta: 0 },
-      { label: "MEDIUM (11OZ)", delta: 3 },
-      { label: "LARGE (16OZ)", delta: 6 },
+      { label: t("productSizeLabelSmall3oz"), delta: 0 },
+      { label: t("productSizeLabelMedium11oz"), delta: 3 },
+      { label: t("productSizeLabelLarge16oz"), delta: 6 },
     ],
   };
   const defaultFlavorsByCategory: Record<string, string[]> = {
-    cupcakes: ["Vanilla", "Chocolate"],
-    chocolates: ["Milk", "Dark"],
-    donuts: ["Glazed", "Chocolate"],
-    cakes: ["Vanilla", "Chocolate"],
+    cupcakes: [t("productFlavorVanilla"), t("productFlavorChocolate")],
+    chocolates: [t("productFlavorMilk"), t("productFlavorDark")],
+    donuts: [t("productFlavorGlazed"), t("productFlavorChocolate")],
+    cakes: [t("productFlavorVanilla"), t("productFlavorChocolate")],
     gifts: [],
     extras: [],
   };
@@ -134,7 +136,7 @@ function ProductPage() {
       inscription: inscription || undefined,
       unitPrice,
     });
-    toast.success(`${product.name} added to cart`);
+    toast.success([t("productAddedToCartPrefix"), product.name, t("productAddedToCartSuffix")].filter(Boolean).join(" "));
   };
 
   const buyNow = () => {
@@ -144,7 +146,7 @@ function ProductPage() {
 
   const toggleWish = () => {
     const added = wishlist.toggle(product.id);
-    toast.success(added ? "Added to wishlist" : "Removed from wishlist");
+    toast.success(added ? t("productAddedToWishlistToast") : t("productRemovedFromWishlistToast"));
   };
 
   const related = products.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
@@ -160,7 +162,7 @@ function ProductPage() {
 
       <div className="max-w-7xl mx-auto px-6 pt-8">
         <nav className="flex items-center gap-2 text-xs text-muted-foreground">
-          <Link to="/" className="hover:text-primary">Home</Link>
+          <Link to="/" className="hover:text-primary">{t("productBreadcrumbHome")}</Link>
           <ChevronRight className="h-3 w-3" />
           <Link to="/shop" className="hover:text-primary capitalize">{product.category}</Link>
           <ChevronRight className="h-3 w-3" />
@@ -174,7 +176,7 @@ function ProductPage() {
             <img src={thumbs[active]} alt={product.name} className="w-full h-full object-cover" />
             <button
               onClick={toggleWish}
-              aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
+              aria-label={wished ? t("productRemoveFromWishlistAria") : t("productAddToWishlistAria")}
               className="absolute top-4 end-4 h-10 w-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow hover:scale-110 transition"
             >
               <Heart className={`h-5 w-5 ${wished ? "text-red-500 fill-red-500" : "text-foreground"}`} />
@@ -182,9 +184,9 @@ function ProductPage() {
           </div>
           {thumbs.length > 1 && (
             <div className="mt-4 grid grid-cols-4 gap-3">
-              {thumbs.map((t: string, i: number) => (
+              {thumbs.map((thumb: string, i: number) => (
                 <button key={i} onClick={() => setActive(i)} className={`aspect-square rounded-md overflow-hidden border ${active === i ? "border-primary" : "border-border"}`}>
-                  <img src={t} alt="thumbnail" loading="lazy" className="w-full h-full object-cover" />
+                  <img src={thumb} alt={t("productThumbnailAlt")} loading="lazy" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -195,14 +197,14 @@ function ProductPage() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="text-3xl font-bold text-foreground">SAR {unitPrice.toFixed(2)}</div>
-              <div className="text-xs text-muted-foreground mt-1">All prices include VAT</div>
+              <div className="text-xs text-muted-foreground mt-1">{t("productAllPricesVat")}</div>
             </div>
             <div className="text-right">
               <div className="flex items-center gap-2 justify-end text-sm">
                 <Cake className="h-4 w-4 text-primary" />
-                <span className="font-semibold">Earn {Math.round(unitPrice * 4)}</span>
+                <span className="font-semibold">{t("productEarnPrefix")} {Math.round(unitPrice * 4)}</span>
               </div>
-              <span className="text-xs underline text-muted-foreground">Terrific points</span>
+              <span className="text-xs underline text-muted-foreground">{t("productTerrificPoints")}</span>
             </div>
           </div>
 
@@ -256,25 +258,25 @@ function ProductPage() {
               <span className="w-10 text-center">{qty}</span>
               <button onClick={() => setQty(qty + 1)} className="p-3"><Plus className="h-4 w-4" /></button>
             </div>
-            <button onClick={addToCart} className="bg-foreground text-background rounded-md font-semibold hover:opacity-90">Add To Cart</button>
+            <button onClick={addToCart} className="bg-foreground text-background rounded-md font-semibold hover:opacity-90">{t("productAddToCartBtn")}</button>
             <button
               onClick={toggleWish}
-              aria-label="Save"
+              aria-label={t("productSaveAria")}
               className="h-full border border-border rounded-md px-4 hover:border-primary transition inline-flex items-center justify-center"
             >
               <Heart className={`h-4 w-4 ${wished ? "text-red-500 fill-red-500" : "text-foreground"}`} />
             </button>
           </div>
-          <button onClick={buyNow} className="mt-3 w-full bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90">Buy Now</button>
+          <button onClick={buyNow} className="mt-3 w-full bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90">{t("productBuyNowBtn")}</button>
 
           {(override?.allowInscription ?? baseProduct.category === "cakes") && (
             <div className="mt-6">
               <div className="flex items-center justify-between border-b border-border pb-2 text-sm text-muted-foreground">
-                <input value={inscription} onChange={(e) => setInscription(e.target.value.slice(0, 22))} placeholder="Add Custom Inscription" className="bg-transparent outline-none flex-1" />
+                <input value={inscription} onChange={(e) => setInscription(e.target.value.slice(0, 22))} placeholder={t("productCustomInscriptionPlaceholder")} className="bg-transparent outline-none flex-1" />
                 <span>{inscription.length}/22</span>
               </div>
               <div className="flex items-center justify-between border-b border-border pb-2 text-sm mt-4">
-                <span>Select Inscription Color: <span className="text-foreground">White</span></span>
+                <span>{t("productInscriptionColorLabel")} <span className="text-foreground">{t("productInscriptionColorWhite")}</span></span>
                 <ChevronDown className="h-4 w-4" />
               </div>
             </div>
@@ -282,7 +284,7 @@ function ProductPage() {
 
           <div className="mt-6 border border-border rounded-md p-4">
             <div className="flex items-center justify-between">
-              <h4 className="font-semibold">Ways to pay</h4>
+              <h4 className="font-semibold">{t("productWaysToPay")}</h4>
               <div className="flex items-center gap-2">
                 {["VISA", "PayPal", "APay", "MC"].map(p => (
                   <span key={p} className="bg-secondary text-foreground rounded px-2 py-1 text-[10px] font-semibold">{p}</span>
@@ -295,17 +297,17 @@ function ProductPage() {
 
       <section className="max-w-7xl mx-auto px-6 pb-16">
         <div className="grid grid-cols-2 md:grid-cols-4 border-b border-border">
-          {tabs.map((t, i) => (
-            <button key={t} onClick={() => setTab(i)} className={`py-4 text-sm ${tab === i ? "text-foreground border-b-2 border-foreground font-semibold" : "text-muted-foreground"}`}>{t}</button>
+          {tabs.map((label, i) => (
+            <button key={label} onClick={() => setTab(i)} className={`py-4 text-sm ${tab === i ? "text-foreground border-b-2 border-foreground font-semibold" : "text-muted-foreground"}`}>{label}</button>
           ))}
         </div>
         <div className="pt-8 max-w-4xl">
           <h3 className="font-semibold mb-4">{tabs[tab]}</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            {tab === 0 && (product.description ?? "Made fresh in-house with premium ingredients.")}
-            {tab === 1 && "Best enjoyed within 48 hours. Store in a cool, dry place away from direct sunlight. Refrigerate items containing cream or dairy."}
-            {tab === 2 && "Flour, sugar, butter, eggs, milk, vanilla, natural food coloring, chocolate, and other ingredients specific to this product."}
-            {tab === 3 && "Contains: wheat, dairy, eggs. May contain traces of nuts, soy and sesame. Please contact us for full allergen information."}
+            {tab === 0 && (product.description ?? t("productDefaultDescription"))}
+            {tab === 1 && t("productStorageInstructionsText")}
+            {tab === 2 && t("productIngredientsText")}
+            {tab === 3 && t("productAllergensText")}
           </p>
         </div>
       </section>
@@ -314,7 +316,7 @@ function ProductPage() {
 
       {related.length > 0 && (
         <section className="max-w-7xl mx-auto px-6 pb-16">
-          <h2 className="font-display text-2xl text-primary mb-6">You May Also Like</h2>
+          <h2 className="font-display text-2xl text-primary mb-6">{t("productRelatedTitle")}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {related.map((r) => (
               <ProductCard key={r.id} product={r} />
@@ -325,7 +327,7 @@ function ProductPage() {
 
       {recent.length > 0 && (
         <section className="max-w-7xl mx-auto px-6 pb-16">
-          <h2 className="font-display text-2xl text-primary mb-6">Recently Viewed</h2>
+          <h2 className="font-display text-2xl text-primary mb-6">{t("productRecentlyViewedTitle")}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {recent.map((r) => (
               <ProductCard key={r.id} product={r} />

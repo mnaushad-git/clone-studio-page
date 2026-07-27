@@ -71,7 +71,7 @@ export function SiteHeader({ variant = "cream" }: { variant?: "cream" | "white" 
             </div>
             <span className="hidden md:inline-flex items-center gap-1 text-xs text-muted-foreground">
               <MapPin className="h-4 w-4" />
-              <span>🇸🇦 Riyadh</span>
+              <span>🇸🇦 {t("cdRiyadh")}</span>
             </span>
           </div>
           <Link to="/" className="font-script text-2xl sm:text-3xl text-primary leading-none justify-self-center text-center whitespace-nowrap">

@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { ProductCard } from "@/components/ProductCard";
 import { useStore, wishlist as wishlistApi } from "@/lib/store";
 import { getProduct } from "@/lib/products";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/wishlist")({
   component: WishlistPage,
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/wishlist")({
 });
 
 function WishlistPage() {
+  const t = useT();
   const ids = useStore((s) => s.wishlist);
   const items = ids.map((id) => getProduct(id)).filter((p): p is NonNullable<ReturnType<typeof getProduct>> => !!p);
 
@@ -30,11 +32,11 @@ function WishlistPage() {
       <SiteHeader />
 
       <div className="max-w-7xl mx-auto px-6 pt-10 pb-6 text-center">
-        <h1 className="font-display text-4xl md:text-5xl text-primary">My Wishlist</h1>
+        <h1 className="font-display text-4xl md:text-5xl text-primary">{t("cartWishlistTitle")}</h1>
         <nav className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <Link to="/" className="hover:text-primary">Home</Link>
+          <Link to="/" className="hover:text-primary">{t("cartHomeBreadcrumb")}</Link>
           <ChevronRight className="h-3 w-3" />
-          <span className="text-primary">Wishlist</span>
+          <span className="text-primary">{t("cartWishlistBreadcrumb")}</span>
         </nav>
       </div>
 
@@ -42,17 +44,17 @@ function WishlistPage() {
         {items.length === 0 ? (
           <div className="text-center py-24 border border-dashed border-border rounded-lg bg-white">
             <Heart className="h-10 w-10 mx-auto text-muted-foreground/60" />
-            <p className="mt-3 text-sm text-muted-foreground">Your wishlist is empty.</p>
+            <p className="mt-3 text-sm text-muted-foreground">{t("cartWishlistEmptyMessage")}</p>
             <Link to="/shop" className="mt-4 inline-block bg-primary text-primary-foreground rounded-md px-5 py-2 text-sm font-medium hover:opacity-90">
-              Discover treats
+              {t("cartDiscoverTreats")}
             </Link>
           </div>
         ) : (
           <>
             <div className="flex items-center justify-between mb-4">
-              <p className="text-xs text-muted-foreground">{items.length} saved item{items.length !== 1 && "s"}</p>
+              <p className="text-xs text-muted-foreground">{items.length} {items.length === 1 ? t("cartSavedItemSingular") : t("cartSavedItemsPlural")}</p>
               <button onClick={() => wishlistApi.clear()} className="text-xs underline text-muted-foreground hover:text-foreground">
-                Clear wishlist
+                {t("cartClearWishlist")}
               </button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

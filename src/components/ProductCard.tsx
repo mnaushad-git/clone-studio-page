@@ -3,22 +3,28 @@ import { Heart, Plus, Star } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/lib/products";
 import { cart, wishlist, useStore, selectIsWishlisted, selectAverageRating } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 import { DeliveryCountdown } from "./DeliveryCountdown";
 
 export function ProductCard({ product }: { product: Product }) {
   const wished = useStore(selectIsWishlisted(product.id));
   const avg = useStore(selectAverageRating(product.id));
+  const t = useT();
 
   const toggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     const added = wishlist.toggle(product.id);
-    toast.success(added ? `${product.name} added to wishlist` : `${product.name} removed from wishlist`);
+    toast.success(
+      added
+        ? `${product.name} ${t("shopAddedToWishlist")}`
+        : `${product.name} ${t("shopRemovedFromWishlist")}`,
+    );
   };
 
   const add = () => {
     cart.add({ productId: product.id });
-    toast.success(`${product.name} added to cart`);
+    toast.success(`${product.name} ${t("shopAddedToCart")}`);
   };
 
   return (
@@ -34,7 +40,7 @@ export function ProductCard({ product }: { product: Product }) {
         </Link>
         <button
           onClick={toggle}
-          aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
+          aria-label={wished ? t("shopRemoveFromWishlistAria") : t("shopAddToWishlistAria")}
           className="absolute top-3 end-3 h-9 w-9 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow hover:scale-110 transition"
         >
           <Heart className={`h-4 w-4 ${wished ? "text-red-500 fill-red-500" : "text-foreground"}`} />
@@ -42,7 +48,7 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="absolute top-3 start-3 flex flex-col gap-1">
           {product.isNew && (
             <span className="bg-primary text-primary-foreground text-[10px] uppercase tracking-wider px-2 py-1 rounded">
-              New
+              {t("shopBadgeNew")}
             </span>
           )}
           <DeliveryCountdown variant="chip" />
@@ -66,13 +72,13 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
         )}
         <p className="mt-1 text-xs text-muted-foreground line-clamp-2 flex-1">
-          {product.description ?? "Handmade with love and the finest ingredients."}
+          {product.description ?? t("shopDefaultDescription")}
         </p>
         <button
           onClick={add}
           className="mt-3 w-full border border-border rounded-md py-2 text-xs font-medium hover:bg-primary hover:text-primary-foreground hover:border-primary transition inline-flex items-center justify-center gap-1"
         >
-          <Plus className="h-3 w-3" /> Add to Cart
+          <Plus className="h-3 w-3" /> {t("shopAddToCart")}
         </button>
       </div>
     </div>

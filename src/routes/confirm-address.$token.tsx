@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useStore, recipientConfirm } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/confirm-address/$token")({
   component: ConfirmPage,
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/confirm-address/$token")({
 });
 
 function ConfirmPage() {
+  const t = useT();
   const { token } = Route.useParams();
   const record = useStore((s) => s.recipientConfirmations.find((r) => r.token === token) ?? null);
   const order = useStore((s) => (record ? s.orders.find((o) => o.id === record.orderId) : null));
@@ -35,24 +37,24 @@ function ConfirmPage() {
       <div className="min-h-screen bg-background text-foreground flex flex-col">
         <SiteHeader />
         <main className="flex-1 max-w-lg w-full mx-auto px-6 py-16 text-center">
-          <h1 className="font-display text-2xl text-primary">Link expired</h1>
-          <p className="mt-2 text-sm text-muted-foreground">This gift confirmation link isn't valid on this device.</p>
-          <Link to="/" className="mt-6 inline-block text-primary underline text-sm">Back home</Link>
+          <h1 className="font-display text-2xl text-primary">{t("checkoutLinkExpired")}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">{t("checkoutLinkExpiredCopy")}</p>
+          <Link to="/" className="mt-6 inline-block text-primary underline text-sm">{t("checkoutBackHome")}</Link>
         </main>
         <SiteFooter />
       </div>
     );
   }
 
-  const senderName = order?.address?.identitySecret ? "Someone special" : order?.address?.name ?? "A friend";
+  const senderName = order?.address?.identitySecret ? t("checkoutSenderSomeoneSpecial") : order?.address?.name ?? t("checkoutSenderAFriend");
   const items = order?.items ?? [];
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!address.trim() || !phone.trim()) { toast.error("Please fill address and phone"); return; }
+    if (!address.trim() || !phone.trim()) { toast.error(t("checkoutToastFillAddressPhone")); return; }
     recipientConfirm.confirm(token, { address: address.trim(), phone: phone.trim(), timeSlot: slot });
     setDone(true);
-    toast.success("Delivery details confirmed!");
+    toast.success(t("checkoutToastDeliveryConfirmed"));
   };
 
   if (done || record.confirmed) {
@@ -63,13 +65,13 @@ function ConfirmPage() {
           <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
             <PartyPopper className="h-8 w-8 text-green-700" />
           </div>
-          <h1 className="font-display text-2xl text-primary mt-4">You're all set!</h1>
+          <h1 className="font-display text-2xl text-primary mt-4">{t("checkoutAllSet")}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Your gift will arrive at the address you shared. We'll text you when the courier's on the way.
+            {t("checkoutGiftArrivalCopy")}
           </p>
           {order?.trackingToken && (
             <Link to="/track/$id" params={{ id: order.trackingToken }} className="mt-6 inline-block text-primary underline text-sm">
-              Track this delivery
+              {t("checkoutTrackThisDelivery")}
             </Link>
           )}
         </main>
@@ -87,15 +89,15 @@ function ConfirmPage() {
             <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
               <Gift className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="font-display text-2xl sm:text-3xl text-primary mt-4">You have a gift!</h1>
+            <h1 className="font-display text-2xl sm:text-3xl text-primary mt-4">{t("checkoutYouHaveGift")}</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              <span className="font-semibold text-foreground">{senderName}</span> sent you a Terrific Bites surprise 🎁
+              <span className="font-semibold text-foreground">{senderName}</span> {t("checkoutGiftSentSuffix")}
             </p>
           </div>
 
           {items.length > 0 && (
             <div className="mt-6 bg-muted/40 rounded-lg p-4 text-sm">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">What's inside</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">{t("checkoutWhatsInside")}</p>
               <ul className="space-y-1">
                 {items.map((it, i) => (
                   <li key={i} className="text-foreground">🍰 {it.qty} × {it.name}</li>
@@ -105,20 +107,20 @@ function ConfirmPage() {
           )}
 
           <form onSubmit={submit} className="mt-6 space-y-4">
-            <p className="text-sm font-semibold text-primary">Where should we deliver it?</p>
+            <p className="text-sm font-semibold text-primary">{t("checkoutWhereDeliver")}</p>
             <div>
-              <label className="text-xs text-muted-foreground">Your full address</label>
+              <label className="text-xs text-muted-foreground">{t("checkoutYourFullAddress")}</label>
               <textarea
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 rows={3}
-                placeholder="Building, street, area, city"
+                placeholder={t("checkoutAddressPlaceholder")}
                 className="mt-1 w-full border border-border rounded-md px-3 py-2 text-sm"
                 required
               />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground">Your phone (for courier)</label>
+              <label className="text-xs text-muted-foreground">{t("checkoutYourPhone")}</label>
               <input
                 type="tel"
                 value={phone}
@@ -129,18 +131,18 @@ function ConfirmPage() {
               />
             </div>
             <div>
-              <label className="text-xs text-muted-foreground">Preferred delivery window</label>
+              <label className="text-xs text-muted-foreground">{t("checkoutPreferredWindow")}</label>
               <select value={slot} onChange={(e) => setSlot(e.target.value)} className="mt-1 w-full border border-border rounded-md px-3 py-2 text-sm bg-white">
-                <option>10:00 AM – 2:00 PM</option>
-                <option>2:00 PM – 6:00 PM</option>
-                <option>6:00 PM – 10:00 PM</option>
+                <option value="10:00 AM – 2:00 PM">{t("checkoutSlotMorning")}</option>
+                <option value="2:00 PM – 6:00 PM">{t("checkoutSlotAfternoon")}</option>
+                <option value="6:00 PM – 10:00 PM">{t("checkoutSlotEvening")}</option>
               </select>
             </div>
             <button type="submit" className="w-full bg-primary text-primary-foreground rounded-md py-3 text-sm font-semibold hover:bg-primary/90">
-              Confirm delivery
+              {t("checkoutConfirmDelivery")}
             </button>
             <p className="text-[11px] text-muted-foreground text-center flex items-center justify-center gap-1">
-              <MessageSquare className="h-3 w-3" /> Your details won't be shared back with the sender.
+              <MessageSquare className="h-3 w-3" /> {t("checkoutDetailsPrivacy")}
             </p>
           </form>
         </div>

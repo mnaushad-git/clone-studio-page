@@ -1,10 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ShopGrid } from "@/components/ShopGrid";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/cakes")({
-  component: () => (
-    <ShopGrid title="Cakes" breadcrumb={[{ label: "Cakes" }]} initialCategory="cakes" lockCategory />
-  ),
+  component: () => {
+    const t = useT();
+    return (
+      <ShopGrid title={t("shopCategoryCakes")} breadcrumb={[{ label: t("shopCategoryCakes") }]} initialCategory="cakes" lockCategory />
+    );
+  },
   head: () => ({
     meta: [
       { title: "Cakes — Terrific Bites" },

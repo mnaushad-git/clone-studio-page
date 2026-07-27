@@ -1,5 +1,6 @@
 import { Check, Loader2 } from "lucide-react";
 import { ORDER_STATUSES, type Order, type OrderStatus } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 
 function formatStamp(at: number) {
   const d = new Date(at);
@@ -9,7 +10,14 @@ function formatStamp(at: number) {
   };
 }
 
+const statusKey: Record<OrderStatus, "checkoutStatusProcessing" | "checkoutStatusPaid" | "checkoutStatusDelivered"> = {
+  Processing: "checkoutStatusProcessing",
+  Paid: "checkoutStatusPaid",
+  Delivered: "checkoutStatusDelivered",
+};
+
 export function OrderStatusTimeline({ order, compact = false }: { order: Order; compact?: boolean }) {
+  const t = useT();
   const currentIdx = ORDER_STATUSES.indexOf(order.status);
 
   return (
@@ -39,7 +47,7 @@ export function OrderStatusTimeline({ order, compact = false }: { order: Order; 
                   )}
                 </div>
                 <p className={`mt-2 text-xs font-medium ${reached ? "text-foreground" : "text-muted-foreground"}`}>
-                  {s}
+                  {t(statusKey[s])}
                 </p>
                 {stamp ? (
                   <>
@@ -47,7 +55,7 @@ export function OrderStatusTimeline({ order, compact = false }: { order: Order; 
                     <p className="text-[10px] text-muted-foreground leading-tight">{stamp.time}</p>
                   </>
                 ) : (
-                  <p className="text-[10px] text-muted-foreground/60 mt-0.5">Pending</p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-0.5">{t("checkoutStatusPending")}</p>
                 )}
               </div>
               {i < ORDER_STATUSES.length - 1 && (

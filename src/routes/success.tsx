@@ -5,6 +5,7 @@ import jsPDF from "jspdf";
 import { useStore, orders as orderStore } from "@/lib/store";
 import { SiteHeader } from "@/components/SiteHeader";
 import { OrderStatusTimeline } from "@/components/OrderStatusTimeline";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/success")({
   component: SuccessPage,
@@ -22,13 +23,14 @@ export const Route = createFileRoute("/success")({
 });
 
 function SuccessPage() {
+  const t = useT();
   const lastOrderId = useStore((s) => s.lastOrderId);
   const order = useStore((s) => s.orders.find((o) => o.id === s.lastOrderId) ?? null);
 
   useEffect(() => {
     if (order && order.status === "Processing") {
-      const t = setTimeout(() => orderStore.setStatus(order.id, "Paid"), 600);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => orderStore.setStatus(order.id, "Paid"), 600);
+      return () => clearTimeout(timer);
     }
   }, [order?.id, order?.status]);
 
@@ -44,7 +46,7 @@ function SuccessPage() {
     doc.text("Terrific Bites", 40, y);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
-    doc.text("Invoice / Receipt", w - 40, y, { align: "right" });
+    doc.text(t("checkoutInvoiceReceipt"), w - 40, y, { align: "right" });
 
     y += 30;
     doc.setDrawColor(200);
@@ -52,21 +54,21 @@ function SuccessPage() {
     y += 25;
 
     doc.setFontSize(10);
-    doc.text(`Order #: ${order.id}`, 40, y);
-    doc.text(`Date: ${new Date(order.createdAt).toLocaleString()}`, w - 40, y, { align: "right" });
+    doc.text(`${t("checkoutOrderNumberLabel")} ${order.id}`, 40, y);
+    doc.text(`${t("checkoutDateLabel")} ${new Date(order.createdAt).toLocaleString()}`, w - 40, y, { align: "right" });
     y += 16;
-    doc.text(`Customer: ${order.address?.name ?? "Guest"}`, 40, y);
+    doc.text(`${t("checkoutCustomerLabel")} ${order.address?.name ?? t("checkoutGuestFallback")}`, 40, y);
     y += 16;
-    doc.text(`Deliver to: ${order.address?.address ?? "—"}`, 40, y);
+    doc.text(`${t("checkoutDeliverTo")}: ${order.address?.address ?? "—"}`, 40, y);
     y += 16;
-    doc.text(`Payment: ${order.method}`, 40, y);
+    doc.text(`${t("checkoutStepPayment")}: ${order.method}`, 40, y);
 
     y += 30;
     doc.setFont("helvetica", "bold");
-    doc.text("Item", 40, y);
-    doc.text("Qty", 320, y);
-    doc.text("Price", 400, y);
-    doc.text("Total", w - 40, y, { align: "right" });
+    doc.text(t("checkoutTableItem"), 40, y);
+    doc.text(t("checkoutQty"), 320, y);
+    doc.text(t("checkoutTablePrice"), 400, y);
+    doc.text(t("checkoutTableTotal"), w - 40, y, { align: "right" });
     y += 8;
     doc.line(40, y, w - 40, y);
     y += 18;
@@ -83,29 +85,29 @@ function SuccessPage() {
     y += 10;
     doc.line(40, y, w - 40, y);
     y += 20;
-    doc.text("Subtotal", 400, y);
+    doc.text(t("checkoutSubtotal"), 400, y);
     doc.text(`SAR ${order.subtotal.toFixed(2)}`, w - 40, y, { align: "right" });
     if (order.discount > 0) {
       y += 16;
-      doc.text("Discount", 400, y);
+      doc.text(t("checkoutDiscount"), 400, y);
       doc.text(`-SAR ${order.discount.toFixed(2)}`, w - 40, y, { align: "right" });
     }
     y += 16;
-    doc.text("Delivery", 400, y);
-    doc.text(order.deliveryFee === 0 ? "Free" : `SAR ${order.deliveryFee.toFixed(2)}`, w - 40, y, { align: "right" });
+    doc.text(t("checkoutDelivery"), 400, y);
+    doc.text(order.deliveryFee === 0 ? t("checkoutFree") : `SAR ${order.deliveryFee.toFixed(2)}`, w - 40, y, { align: "right" });
     y += 16;
-    doc.text("Tax", 400, y);
+    doc.text(t("checkoutTax"), 400, y);
     doc.text(`SAR ${order.tax.toFixed(2)}`, w - 40, y, { align: "right" });
     y += 20;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
-    doc.text("Total", 400, y);
+    doc.text(t("checkoutTableTotal"), 400, y);
     doc.text(`SAR ${order.total.toFixed(2)}`, w - 40, y, { align: "right" });
 
     y += 50;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    doc.text("Thank you for your order! — Terrific Bites", 40, y);
+    doc.text(t("checkoutThankYouFooter"), 40, y);
 
     doc.save(`invoice-${order.id}.pdf`);
   };
@@ -116,10 +118,10 @@ function SuccessPage() {
         <SiteHeader />
         <main className="flex-1 max-w-md w-full mx-auto px-6 py-16 text-center">
           <ShoppingBag className="h-12 w-12 mx-auto text-muted-foreground" />
-          <h1 className="mt-4 font-display text-2xl text-primary">No recent order</h1>
-          <p className="text-sm text-muted-foreground mt-2">You haven't placed an order yet.</p>
+          <h1 className="mt-4 font-display text-2xl text-primary">{t("checkoutNoRecentOrder")}</h1>
+          <p className="text-sm text-muted-foreground mt-2">{t("checkoutNoOrderYet")}</p>
           <Link to="/chocolates" className="mt-6 inline-block bg-primary text-primary-foreground rounded-md px-6 py-3 text-sm">
-            Browse Products
+            {t("checkoutBrowseProducts")}
           </Link>
         </main>
       </div>
@@ -135,54 +137,54 @@ function SuccessPage() {
           <div className="mx-auto h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
             <CheckCircle2 className="h-9 w-9 text-primary" />
           </div>
-          <h1 className="font-script text-4xl text-primary mt-4">Thank You!</h1>
-          <p className="text-sm text-muted-foreground mt-2">Your order has been confirmed and is being prepared with love.</p>
+          <h1 className="font-script text-4xl text-primary mt-4">{t("checkoutThankYou")}</h1>
+          <p className="text-sm text-muted-foreground mt-2">{t("checkoutOrderConfirmedCopy")}</p>
           <div className="mt-4 inline-flex items-center gap-2 bg-secondary rounded-full px-4 py-1.5 text-sm">
-            Order # <span className="font-semibold">{order.id}</span>
+            {t("checkoutOrderHash")} <span className="font-semibold">{order.id}</span>
           </div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm p-6 mt-6">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="font-semibold">Order Status</h2>
+            <h2 className="font-semibold">{t("checkoutOrderStatus")}</h2>
             {order.status !== "Delivered" && (
               <button
                 onClick={() => orderStore.advance(order.id)}
                 className="text-xs text-primary hover:underline"
               >
-                Mark as {order.status === "Processing" ? "Paid" : "Delivered"}
+                {t("checkoutMarkAs")} {order.status === "Processing" ? t("checkoutStatusPaid") : t("checkoutStatusDelivered")}
               </button>
             )}
           </div>
           <OrderStatusTimeline order={order} />
           {order.trackingToken && (
             <div className="mt-4 flex items-center justify-between rounded-lg border border-border bg-secondary/40 px-3 py-2 text-xs">
-              <span className="truncate">Share tracking: <span className="font-mono">/track/{order.trackingToken}</span></span>
+              <span className="truncate">{t("checkoutShareTrackingLabel")} <span className="font-mono">/track/{order.trackingToken}</span></span>
               <div className="flex gap-2 shrink-0">
-                <Link to="/track/$id" params={{ id: order.trackingToken }} className="text-primary font-medium hover:underline">Open</Link>
+                <Link to="/track/$id" params={{ id: order.trackingToken }} className="text-primary font-medium hover:underline">{t("checkoutOpen")}</Link>
                 <button
                   onClick={() => navigator.clipboard?.writeText(`${window.location.origin}/track/${order.trackingToken}`)}
                   className="text-primary font-medium hover:underline"
-                >Copy link</button>
+                >{t("checkoutCopyLink")}</button>
               </div>
             </div>
           )}
           {order.pointsEarned ? (
             <div className="mt-3 rounded-lg bg-primary/10 text-primary text-xs px-3 py-2 font-medium">
-              🎉 You earned {order.pointsEarned} loyalty points on this order.
+              🎉 {t("checkoutLoyaltyEarnedPrefix")} {order.pointsEarned} {t("checkoutLoyaltyEarnedSuffix")}
             </div>
           ) : null}
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm p-6 mt-6">
-          <h2 className="font-semibold mb-4">Order Details</h2>
+          <h2 className="font-semibold mb-4">{t("checkoutOrderDetails")}</h2>
           <div className="divide-y divide-border">
             {order.items.map((it, i) => (
               <div key={i} className="flex items-center justify-between py-3 text-sm">
                 <div>
                   <p className="font-medium">{it.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    Qty {it.qty}{it.size ? ` · ${it.size}` : ""}{it.flavor ? ` · ${it.flavor}` : ""}
+                    {t("checkoutQty")} {it.qty}{it.size ? ` · ${it.size}` : ""}{it.flavor ? ` · ${it.flavor}` : ""}
                   </p>
                   {it.inscription && <p className="text-xs italic text-muted-foreground">"{it.inscription}"</p>}
                 </div>
@@ -191,12 +193,12 @@ function SuccessPage() {
             ))}
           </div>
           <div className="border-t border-border mt-4 pt-4 space-y-2 text-sm">
-            <div className="flex justify-between"><span>Subtotal</span><span>SAR {order.subtotal.toFixed(2)}</span></div>
-            {order.discount > 0 && <div className="flex justify-between text-primary"><span>Discount</span><span>-SAR {order.discount.toFixed(2)}</span></div>}
-            <div className="flex justify-between"><span>Delivery</span><span>{order.deliveryFee === 0 ? "Free" : `SAR ${order.deliveryFee.toFixed(2)}`}</span></div>
-            <div className="flex justify-between"><span>Tax</span><span>SAR {order.tax.toFixed(2)}</span></div>
+            <div className="flex justify-between"><span>{t("checkoutSubtotal")}</span><span>SAR {order.subtotal.toFixed(2)}</span></div>
+            {order.discount > 0 && <div className="flex justify-between text-primary"><span>{t("checkoutDiscount")}</span><span>-SAR {order.discount.toFixed(2)}</span></div>}
+            <div className="flex justify-between"><span>{t("checkoutDelivery")}</span><span>{order.deliveryFee === 0 ? t("checkoutFree") : `SAR ${order.deliveryFee.toFixed(2)}`}</span></div>
+            <div className="flex justify-between"><span>{t("checkoutTax")}</span><span>SAR {order.tax.toFixed(2)}</span></div>
             <div className="flex justify-between font-semibold text-base pt-2 border-t border-border">
-              <span>Total</span><span>SAR {order.total.toFixed(2)}</span>
+              <span>{t("checkoutTableTotal")}</span><span>SAR {order.total.toFixed(2)}</span>
             </div>
           </div>
 
@@ -204,7 +206,7 @@ function SuccessPage() {
             <div className="flex items-start gap-2">
               <MapPin className="h-4 w-4 text-primary mt-0.5" />
               <div>
-                <p className="text-xs text-muted-foreground">Deliver to</p>
+                <p className="text-xs text-muted-foreground">{t("checkoutDeliverTo")}</p>
                 <p className="font-medium">{order.address?.name ?? "—"}</p>
                 <p className="text-xs text-muted-foreground">{order.address?.address ?? "—"}</p>
               </div>
@@ -212,7 +214,7 @@ function SuccessPage() {
             <div className="flex items-start gap-2">
               <Truck className="h-4 w-4 text-primary mt-0.5" />
               <div>
-                <p className="text-xs text-muted-foreground">Payment</p>
+                <p className="text-xs text-muted-foreground">{t("checkoutStepPayment")}</p>
                 <p className="font-medium">{order.method}</p>
               </div>
             </div>
@@ -221,10 +223,10 @@ function SuccessPage() {
 
         <div className="mt-6 flex flex-col sm:flex-row gap-3">
           <button onClick={downloadInvoice} className="flex-1 bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 inline-flex items-center justify-center gap-2">
-            <Download className="h-4 w-4" /> Download Invoice (PDF)
+            <Download className="h-4 w-4" /> {t("checkoutDownloadInvoice")}
           </button>
           <Link to="/" className="flex-1 border border-border rounded-md py-3 font-semibold hover:border-primary hover:text-primary inline-flex items-center justify-center gap-2">
-            <Home className="h-4 w-4" /> Back to Home
+            <Home className="h-4 w-4" /> {t("checkoutBackToHome")}
           </Link>
         </div>
       </main>

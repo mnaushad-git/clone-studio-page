@@ -2,8 +2,10 @@ import { useMemo, useRef, useState } from "react";
 import { BadgeCheck, Camera, Star, X } from "lucide-react";
 import { toast } from "sonner";
 import { useStore, selectAverageRating, selectHasPurchased, reviews as reviewsApi } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 
 export function ProductReviews({ productId }: { productId: string }) {
+  const t = useT();
   const allReviews = useStore((s) => s.reviews);
   const list = useMemo(
     () => allReviews.filter((r) => r.productId === productId).sort((a, b) => b.createdAt - a.createdAt),
@@ -26,7 +28,7 @@ export function ProductReviews({ productId }: { productId: string }) {
     const remaining = 3 - photos.length;
     const picks = Array.from(files).slice(0, remaining);
     picks.forEach((f) => {
-      if (f.size > 800_000) { toast.error(`${f.name} is too large (max 800KB)`); return; }
+      if (f.size > 800_000) { toast.error(`${f.name} ${t("productFileTooLargeSuffix")}`); return; }
       const reader = new FileReader();
       reader.onload = () => setPhotos((p) => (p.length < 3 ? [...p, String(reader.result)] : p));
       reader.readAsDataURL(f);
@@ -35,7 +37,7 @@ export function ProductReviews({ productId }: { productId: string }) {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!author.trim() || !body.trim()) { toast.error("Please add your name and review"); return; }
+    if (!author.trim() || !body.trim()) { toast.error(t("productMissingFieldsError")); return; }
     reviewsApi.add({
       productId, author: author.trim(), rating,
       title: title.trim() || undefined, body: body.trim(),
@@ -43,14 +45,14 @@ export function ProductReviews({ productId }: { productId: string }) {
       verified: hasPurchased,
     });
     setTitle(""); setBody(""); setRating(5); setPhotos([]);
-    toast.success("Thanks for the review!");
+    toast.success(t("productReviewThanksToast"));
   };
 
   return (
     <section className="max-w-7xl mx-auto px-6 pb-16">
       <div className="border border-border rounded-lg bg-white p-6 md:p-10">
         <div className="flex items-baseline justify-between flex-wrap gap-4">
-          <h2 className="font-display text-2xl text-primary">Reviews</h2>
+          <h2 className="font-display text-2xl text-primary">{t("productReviewsTitle")}</h2>
           {list.length > 0 && (
             <div className="flex items-center gap-2 text-sm">
               <div className="flex items-center gap-0.5">
@@ -66,7 +68,7 @@ export function ProductReviews({ productId }: { productId: string }) {
 
         <div className="mt-6 space-y-5">
           {list.length === 0 && (
-            <p className="text-sm text-muted-foreground">No reviews yet — be the first to share your thoughts.</p>
+            <p className="text-sm text-muted-foreground">{t("productReviewsEmpty")}</p>
           )}
           {list.map((r) => (
             <div key={r.id} className="border-b border-border pb-4 last:border-0">
@@ -74,7 +76,7 @@ export function ProductReviews({ productId }: { productId: string }) {
                 <span className="font-semibold text-foreground">{r.author}</span>
                 {r.verified && (
                   <span className="inline-flex items-center gap-1 text-green-700 bg-green-50 px-2 py-0.5 rounded text-[10px] font-semibold">
-                    <BadgeCheck className="h-3 w-3" /> Verified purchase
+                    <BadgeCheck className="h-3 w-3" /> {t("productVerifiedPurchaseBadge")}
                   </span>
                 )}
                 <span>·</span>
@@ -90,7 +92,7 @@ export function ProductReviews({ productId }: { productId: string }) {
               {r.photos && r.photos.length > 0 && (
                 <div className="mt-3 flex gap-2 flex-wrap">
                   {r.photos.map((src, i) => (
-                    <img key={i} src={src} alt="Review photo" className="h-20 w-20 object-cover rounded border border-border" />
+                    <img key={i} src={src} alt={t("productReviewPhotoAlt")} className="h-20 w-20 object-cover rounded border border-border" />
                   ))}
                 </div>
               )}
@@ -99,10 +101,10 @@ export function ProductReviews({ productId }: { productId: string }) {
         </div>
 
         <form onSubmit={submit} className="mt-8 pt-6 border-t border-border">
-          <h3 className="font-display text-lg text-primary">Write a review</h3>
+          <h3 className="font-display text-lg text-primary">{t("productWriteReviewTitle")}</h3>
           {hasPurchased && (
             <p className="mt-1 text-xs text-green-700 inline-flex items-center gap-1">
-              <BadgeCheck className="h-3 w-3" /> Your review will be marked as a verified purchase.
+              <BadgeCheck className="h-3 w-3" /> {t("productVerifiedReviewNote")}
             </p>
           )}
           <div className="mt-3 flex items-center gap-1">
@@ -113,17 +115,17 @@ export function ProductReviews({ productId }: { productId: string }) {
                 onMouseEnter={() => setHover(n)}
                 onMouseLeave={() => setHover(0)}
                 onClick={() => setRating(n)}
-                aria-label={`Rate ${n} star`}
+                aria-label={`${t("productRateStarPrefix")} ${n} ${t("productRateStarSuffix")}`}
               >
                 <Star className={`h-6 w-6 transition ${n <= (hover || rating) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/40"}`} />
               </button>
             ))}
           </div>
           <div className="mt-3 grid sm:grid-cols-2 gap-3">
-            <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Your name" className="border border-border rounded-md px-3 py-2 text-sm" />
-            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title (optional)" className="border border-border rounded-md px-3 py-2 text-sm" />
+            <input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder={t("productNamePlaceholder")} className="border border-border rounded-md px-3 py-2 text-sm" />
+            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("productReviewTitlePlaceholder")} className="border border-border rounded-md px-3 py-2 text-sm" />
           </div>
-          <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={4} placeholder="Tell us what you thought…" className="mt-3 w-full border border-border rounded-md px-3 py-2 text-sm" />
+          <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={4} placeholder={t("productReviewBodyPlaceholder")} className="mt-3 w-full border border-border rounded-md px-3 py-2 text-sm" />
 
           <div className="mt-3">
             <div className="flex items-center gap-2 flex-wrap">
@@ -133,7 +135,7 @@ export function ProductReviews({ productId }: { productId: string }) {
                 disabled={photos.length >= 3}
                 className="inline-flex items-center gap-1 text-xs border border-border rounded-md px-3 py-2 hover:bg-muted disabled:opacity-50"
               >
-                <Camera className="h-3 w-3" /> Add photos ({photos.length}/3)
+                <Camera className="h-3 w-3" /> {t("productAddPhotosBtn")} ({photos.length}/3)
               </button>
               <input
                 ref={fileInput}
@@ -145,7 +147,7 @@ export function ProductReviews({ productId }: { productId: string }) {
               />
               {photos.map((src, i) => (
                 <div key={i} className="relative">
-                  <img src={src} alt="preview" className="h-14 w-14 object-cover rounded border border-border" />
+                  <img src={src} alt={t("productPhotoPreviewAlt")} className="h-14 w-14 object-cover rounded border border-border" />
                   <button
                     type="button"
                     onClick={() => setPhotos((p) => p.filter((_, idx) => idx !== i))}
@@ -159,7 +161,7 @@ export function ProductReviews({ productId }: { productId: string }) {
           </div>
 
           <button type="submit" className="mt-4 bg-primary text-primary-foreground rounded-md px-5 py-2 text-sm font-semibold hover:bg-primary/90">
-            Post review
+            {t("productPostReviewBtn")}
           </button>
         </form>
       </div>

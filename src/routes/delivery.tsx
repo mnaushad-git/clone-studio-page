@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { useStore, addresses as addressStore, selectSubtotal, selectDiscount, selectTax, selectDeliveryFee, selectTotal, promo, RIYADH_AREAS, type Address } from "@/lib/store";
 import { getAdminState } from "@/lib/admin-store";
 import { getProduct } from "@/lib/products";
+import { useT, type TKey } from "@/lib/i18n";
 
 const DAY_SLOTS: [number, number][] = [[8, 10], [10, 12], [12, 14], [14, 16], [16, 18], [18, 20]];
 const fmtHour = (h: number) => {
@@ -50,6 +51,7 @@ export const Route = createFileRoute("/delivery")({
 });
 
 function DeliveryPage() {
+  const t = useT();
   const navigate = useNavigate();
   const cartItems = useStore((s) => s.cart);
   const currentPromo = useStore((s) => s.promo);
@@ -115,15 +117,15 @@ function DeliveryPage() {
 
   const applyPromo = () => {
     if (!promoInput.trim()) return;
-    if (promo.apply(promoInput)) toast.success("Promo code applied");
-    else toast.error("Invalid promo code");
+    if (promo.apply(promoInput)) toast.success(t("cdPromoApplied"));
+    else toast.error(t("cdInvalidPromoCode"));
   };
 
   const submit = () => {
-    if (!name.trim()) return toast.error("Recipient name is required");
-    if (!phone.trim()) return toast.error("Recipient phone is required");
-    if (!gift && (!area || !address.trim())) return toast.error("Please add a delivery address");
-    if (timeSlot === "another" && (!pickedDate || !pickedTime)) return toast.error("Please pick a delivery date and time");
+    if (!name.trim()) return toast.error(t("cdRecipientNameRequired"));
+    if (!phone.trim()) return toast.error(t("cdRecipientPhoneRequired"));
+    if (!gift && (!area || !address.trim())) return toast.error(t("cdPleaseAddDeliveryAddress"));
+    if (timeSlot === "another" && (!pickedDate || !pickedTime)) return toast.error(t("cdPleasePickDateTime"));
 
     const deliveryDate = timeSlot === "tomorrow" ? defaultSlot.day : pickedDate;
     const deliveryTime = timeSlot === "tomorrow" ? defaultSlot.label : pickedTime;
@@ -142,7 +144,7 @@ function DeliveryPage() {
         deliveryTime,
       });
     }
-    toast.success("Delivery details saved");
+    toast.success(t("cdDeliveryDetailsSaved"));
     navigate({ to: "/payment" });
   };
 
@@ -152,11 +154,11 @@ function DeliveryPage() {
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="bg-white rounded-2xl shadow-sm px-3 sm:px-8 py-4 sm:py-5 flex items-center gap-2 sm:gap-4 mb-6">
-          <Step n={1} label="Customize" done />
+          <Step n={1} label={t("cdStepCustomize")} done />
           <div className="flex-1 h-px bg-border" />
-          <Step n={2} label="Delivery Details" active />
+          <Step n={2} label={t("cdStepDelivery")} active />
           <div className="flex-1 h-px bg-border" />
-          <Step n={3} label="Payment" />
+          <Step n={3} label={t("cdStepPayment")} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
@@ -165,30 +167,30 @@ function DeliveryPage() {
               <div className="flex gap-3 min-w-0">
                 <MapPin className="h-5 w-5 text-primary shrink-0 mt-1" />
                 <div className="min-w-0">
-                  <h2 className="font-semibold">Recipient & Delivery</h2>
+                  <h2 className="font-semibold">{t("cdRecipientDelivery")}</h2>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Tell us where to deliver. Sending a gift? Toggle the switch and we'll pick a time slot.
+                    {t("cdDeliveryIntro")}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-sm">Gift?</span>
-                <button onClick={() => setGift(!gift)} className={`w-11 h-6 rounded-full transition relative ${gift ? "bg-primary" : "bg-secondary"}`} aria-label="Toggle gift">
+                <span className="text-sm">{t("cdGiftQuestion")}</span>
+                <button onClick={() => setGift(!gift)} className={`w-11 h-6 rounded-full transition relative ${gift ? "bg-primary" : "bg-secondary"}`} aria-label={t("cdToggleGift")}>
                   <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${gift ? "left-5" : "left-0.5"}`} />
                 </button>
               </div>
             </div>
 
             <div className="mt-6 space-y-5">
-              <Field label="Recipient name" required>
+              <Field label={t("cdRecipientName")} required>
                 <input value={name} onChange={(e) => setName(e.target.value)} className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary" />
               </Field>
 
               <div>
-                <label className="block text-sm mb-2">Recipient phone <span className="text-primary">*</span></label>
+                <label className="block text-sm mb-2">{t("cdRecipientPhone")} <span className="text-primary">*</span></label>
                 <div className="grid grid-cols-1 sm:grid-cols-[180px_minmax(0,1fr)] gap-3">
                   <button type="button" className="border border-border rounded-md px-3 py-3 text-sm flex items-center justify-between">
-                    <span className="truncate">Saudi Arabia (+966)</span> <ChevronDown className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{t("cdSaudiArabiaCode")}</span> <ChevronDown className="h-4 w-4 shrink-0" />
                   </button>
                   <input value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 15))} className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary" />
                 </div>
@@ -199,44 +201,44 @@ function DeliveryPage() {
                   {selfAddresses.length > 0 && (
                     <div className="flex items-center justify-between rounded-lg border border-border bg-secondary/40 px-4 py-3">
                       <div className="min-w-0">
-                        <p className="text-xs text-muted-foreground">Delivering to</p>
+                        <p className="text-xs text-muted-foreground">{t("cdDeliveringTo")}</p>
                         <p className="text-sm font-medium truncate">
-                          {area ? `${area} — ${address || "—"}` : "No address selected"}
+                          {area ? `${area} — ${address || "—"}` : t("cdNoAddressSelected")}
                         </p>
                       </div>
                       <button type="button" onClick={() => setAddressModalOpen(true)} className="text-sm text-primary font-medium hover:underline shrink-0 ml-3">
-                        Change address
+                        {t("cdChangeAddress")}
                       </button>
                     </div>
                   )}
                   <div className="relative rounded-lg overflow-hidden border border-border h-56 bg-secondary flex items-center justify-center">
                     <div className="text-center">
                       <MapPin className="h-8 w-8 mx-auto text-primary" />
-                      <p className="text-xs text-muted-foreground mt-2">Interactive map preview</p>
-                      <p className="text-sm font-medium mt-1">{area || "Select an area"}{address && ` — ${address}`}</p>
+                      <p className="text-xs text-muted-foreground mt-2">{t("cdMapPreview")}</p>
+                      <p className="text-sm font-medium mt-1">{area || t("cdSelectAnArea")}{address && ` — ${address}`}</p>
                     </div>
                     <div className="absolute top-2 left-2 bg-white rounded shadow text-[11px] flex">
-                      <span className="px-2 py-1 border-r border-border">Map</span>
-                      <span className="px-2 py-1">Satellite</span>
+                      <span className="px-2 py-1 border-r border-border">{t("cdMapLabel")}</span>
+                      <span className="px-2 py-1">{t("cdSatelliteLabel")}</span>
                     </div>
                   </div>
 
-                  <Field label="Riyadh Area" required>
+                  <Field label={t("cdRiyadhArea")} required>
                     <div className="relative">
                       <select value={area} onChange={(e) => setArea(e.target.value)} className="w-full appearance-none border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary bg-white">
-                        <option value="">Select a Riyadh area</option>
+                        <option value="">{t("cdSelectRiyadhArea")}</option>
                         {RIYADH_AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
                       </select>
                       <ChevronDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                     </div>
                   </Field>
 
-                  <Field label="Address" required>
+                  <Field label={t("cdAddressLabel")} required>
                     <input value={address} onChange={(e) => setAddress(e.target.value)} className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary" />
                   </Field>
 
-                  <Field label="Extra Address">
-                    <input value={extra} onChange={(e) => setExtra(e.target.value)} placeholder="Apartment, floor, landmark (optional)" className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary placeholder:text-muted-foreground" />
+                  <Field label={t("cdExtraAddress")}>
+                    <input value={extra} onChange={(e) => setExtra(e.target.value)} placeholder={t("cdApartmentPlaceholder")} className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary placeholder:text-muted-foreground" />
                   </Field>
                 </>
               )}
@@ -249,8 +251,8 @@ function DeliveryPage() {
                     className="mt-0.5 h-4 w-4 accent-primary"
                   />
                   <span className="text-sm">
-                    <span className="font-medium">Keep my identity secret</span>
-                    <span className="block text-xs text-muted-foreground mt-0.5">The recipient won't see who sent the gift.</span>
+                    <span className="font-medium">{t("cdKeepIdentitySecret")}</span>
+                    <span className="block text-xs text-muted-foreground mt-0.5">{t("cdRecipientWontSeeSender")}</span>
                   </span>
                 </label>
               )}
@@ -259,16 +261,16 @@ function DeliveryPage() {
               <div className="mt-2">
                 <div className="flex items-center gap-2 mb-3">
                   <Bike className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">Delivery time</h3>
+                  <h3 className="font-semibold">{t("cdDeliveryTime")}</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <button onClick={() => setTimeSlot("tomorrow")} className={`rounded-xl border p-5 text-center transition ${timeSlot === "tomorrow" ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
-                    <p className="font-semibold">{defaultSlot.day}</p>
+                    <p className="font-semibold">{defaultSlot.day === "Today" ? t("cdToday") : t("cdTomorrow")}</p>
                     <p className="text-xs text-muted-foreground mt-1">{defaultSlot.label}</p>
                   </button>
                   <button onClick={() => { setTimeSlot("another"); setTimeModalOpen(true); }} className={`rounded-xl border p-5 text-center transition ${timeSlot === "another" ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}>
-                    <p className="font-semibold">Another time</p>
-                    <p className="text-xs text-muted-foreground mt-1">{timeSlot === "another" && pickedDate && pickedTime ? `${pickedDate} · ${pickedTime}` : "Choose date & time"}</p>
+                    <p className="font-semibold">{t("cdAnotherTime")}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{timeSlot === "another" && pickedDate && pickedTime ? `${pickedDate} · ${pickedTime}` : t("cdChooseDateTime")}</p>
                   </button>
                 </div>
               </div>
@@ -278,8 +280,8 @@ function DeliveryPage() {
           <aside className="space-y-4">
             {cartItems.length === 0 ? (
               <div className="bg-white rounded-2xl shadow-sm p-8 text-center">
-                <p className="text-sm text-muted-foreground">Your cart is empty.</p>
-                <Link to="/chocolates" className="mt-3 inline-block text-sm text-primary underline">Continue shopping</Link>
+                <p className="text-sm text-muted-foreground">{t("cdCartEmpty")}</p>
+                <Link to="/chocolates" className="mt-3 inline-block text-sm text-primary underline">{t("cdContinueShopping")}</Link>
               </div>
             ) : (
               <div className="bg-white rounded-2xl shadow-sm p-5 space-y-3 max-h-72 overflow-y-auto">
@@ -290,7 +292,7 @@ function DeliveryPage() {
                       <img src={p?.image} alt={p?.name} className="w-14 h-14 rounded-md object-cover" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{p?.name}</p>
-                        <p className="text-xs text-muted-foreground">Qty {it.qty}</p>
+                        <p className="text-xs text-muted-foreground">{t("cdQty")} {it.qty}</p>
                       </div>
                       <p className="text-sm font-semibold">SAR {(it.unitPrice * it.qty).toFixed(2)}</p>
                     </div>
@@ -302,30 +304,30 @@ function DeliveryPage() {
             <div className="bg-white rounded-2xl shadow-sm p-3 flex items-center gap-2">
               <div className="flex items-center gap-2 flex-1 px-3">
                 <Ticket className="h-4 w-4 text-muted-foreground" />
-                <input value={promoInput} onChange={(e) => setPromoInput(e.target.value.toUpperCase())} placeholder="Promo Code" className="flex-1 text-sm outline-none bg-transparent py-2" />
+                <input value={promoInput} onChange={(e) => setPromoInput(e.target.value.toUpperCase())} placeholder={t("cdPromoCodePlaceholder")} className="flex-1 text-sm outline-none bg-transparent py-2" />
               </div>
-              <button onClick={applyPromo} className="bg-[oklch(0.72_0.08_160)] text-white rounded-md px-6 py-2 text-sm hover:opacity-90">Apply</button>
+              <button onClick={applyPromo} className="bg-[oklch(0.72_0.08_160)] text-white rounded-md px-6 py-2 text-sm hover:opacity-90">{t("cdApply")}</button>
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm p-5 space-y-4">
-              <h3 className="font-semibold">Order Summary</h3>
+              <h3 className="font-semibold">{t("cdOrderSummary")}</h3>
               <div className="space-y-2 text-sm">
-                <Row label="Subtotal" val={`SAR ${subtotal.toFixed(2)}`} />
-                {discount > 0 && <Row label={`Discount`} val={`-SAR ${discount.toFixed(2)}`} />}
-                <Row label="Delivery" val={deliveryFee === 0 ? "Free" : `SAR ${deliveryFee.toFixed(2)}`} />
-                <Row label="Tax" val={`SAR ${tax.toFixed(2)}`} />
+                <Row label={t("cdSubtotal")} val={`SAR ${subtotal.toFixed(2)}`} />
+                {discount > 0 && <Row label={t("cdDiscount")} val={`-SAR ${discount.toFixed(2)}`} />}
+                <Row label={t("cdDelivery")} val={deliveryFee === 0 ? t("cdFree") : `SAR ${deliveryFee.toFixed(2)}`} />
+                <Row label={t("cdTax")} val={`SAR ${tax.toFixed(2)}`} />
                 <div className="flex items-center gap-2 text-xs text-foreground/80 pt-2">
-                  <Truck className="h-3.5 w-3.5" /> Skinniy Express
+                  <Truck className="h-3.5 w-3.5" /> {t("cdSkinniyExpress")}
                 </div>
               </div>
               <div className="border-t border-border pt-4 flex items-center justify-between">
-                <span className="font-semibold">Order Total</span>
+                <span className="font-semibold">{t("cdOrderTotal")}</span>
                 <span className="font-semibold text-lg">SAR {total.toFixed(2)}</span>
               </div>
             </div>
 
             <button onClick={submit} disabled={cartItems.length === 0} className="w-full bg-primary text-primary-foreground rounded-md py-4 font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed">
-              Continue to Payment
+              {t("cdContinueToPayment")}
             </button>
           </aside>
         </div>
@@ -336,11 +338,11 @@ function DeliveryPage() {
           initialDate={pickedDate}
           initialTime={pickedTime}
           onClose={() => setTimeModalOpen(false)}
-          onConfirm={(d, t) => {
+          onConfirm={(d, pt) => {
             setPickedDate(d);
-            setPickedTime(t);
+            setPickedTime(pt);
             setTimeModalOpen(false);
-            toast.success("Delivery time selected");
+            toast.success(t("cdDeliveryTimeSelected"));
           }}
         />
       )}
@@ -350,7 +352,7 @@ function DeliveryPage() {
           addresses={selfAddresses}
           selectedId={selectedAddressId}
           onClose={() => setAddressModalOpen(false)}
-          onSelect={(id) => { applyAddress(id); setAddressModalOpen(false); toast.success("Address selected"); }}
+          onSelect={(id) => { applyAddress(id); setAddressModalOpen(false); toast.success(t("cdAddressSelected")); }}
           onAdd={(a) => {
             const id = addressStore.add({ ...a, isGift: false });
             setSelectedAddressId(id);
@@ -360,7 +362,7 @@ function DeliveryPage() {
             setAddress(a.address || "");
             setExtra(a.extra || "");
             setAddressModalOpen(false);
-            toast.success("Address added");
+            toast.success(t("cdAddressAdded"));
           }}
         />
       )}
@@ -372,25 +374,37 @@ function DeliveryPage() {
 
 type Quick = { key: string; label: string; sub: string };
 
+const WEEKDAY_KEYS: TKey[] = [
+  "cdWeekdaySun",
+  "cdWeekdayMon",
+  "cdWeekdayTue",
+  "cdWeekdayWed",
+  "cdWeekdayThu",
+  "cdWeekdayFri",
+  "cdWeekdaySat",
+];
+
 function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { initialDate: string; initialTime: string; onClose: () => void; onConfirm: (date: string, time: string) => void }) {
+  const t = useT();
   const now = new Date();
   const quickDates = useMemo<Quick[]>(() => {
     const fmt = (d: Date) => d.toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long" });
     const today = new Date(now);
-    const t = new Date(now); t.setDate(t.getDate() + 1);
-    const t2 = new Date(now); t2.setDate(t2.getDate() + 2);
+    const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+    const dayAfter = new Date(now); dayAfter.setDate(dayAfter.getDate() + 2);
 
     const slots: Quick[] = [];
     // If any same-day slots remain, offer Today as a quick option
     if (DAY_SLOTS.some(([s]) => s > now.getHours())) {
-      slots.push({ key: fmt(today), label: "Today", sub: today.toLocaleDateString("en-US", { day: "numeric", month: "long" }) });
+      slots.push({ key: fmt(today), label: t("cdToday"), sub: today.toLocaleDateString("en-US", { day: "numeric", month: "long" }) });
     }
     slots.push(
-      { key: fmt(t), label: "Tomorrow", sub: t.toLocaleDateString("en-US", { day: "numeric", month: "long" }) },
-      { key: fmt(t2), label: t2.toLocaleDateString("en-US", { weekday: "long" }), sub: t2.toLocaleDateString("en-US", { day: "numeric", month: "long" }) },
+      { key: fmt(tomorrowDate), label: t("cdTomorrow"), sub: tomorrowDate.toLocaleDateString("en-US", { day: "numeric", month: "long" }) },
+      { key: fmt(dayAfter), label: dayAfter.toLocaleDateString("en-US", { weekday: "long" }), sub: dayAfter.toLocaleDateString("en-US", { day: "numeric", month: "long" }) },
     );
     return slots;
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t]);
 
   const [mode, setMode] = useState<"quick" | "pick">(initialDate && !quickDates.find((q) => q.key === initialDate) ? "pick" : "quick");
   const [date, setDate] = useState<string>(initialDate || quickDates[0].key);
@@ -417,7 +431,7 @@ function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { in
   };
 
   const confirm = () => {
-    if (!time) return toast.error("Please select a delivery time");
+    if (!time) return toast.error(t("cdPleaseSelectDeliveryTime"));
     onConfirm(date, time);
   };
 
@@ -425,12 +439,12 @@ function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { in
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-lg">Another time</h3>
-          <button onClick={onClose} aria-label="Close"><X className="h-5 w-5" /></button>
+          <h3 className="font-semibold text-lg">{t("cdAnotherTime")}</h3>
+          <button onClick={onClose} aria-label={t("cdClose")}><X className="h-5 w-5" /></button>
         </div>
 
         <div className="mt-5">
-          <p className="text-sm mb-3">Select Delivery date</p>
+          <p className="text-sm mb-3">{t("cdSelectDeliveryDate")}</p>
           <div className="grid grid-cols-3 gap-3">
             {quickDates.map((q) => (
               <button key={q.key} onClick={() => { setMode("quick"); setDate(q.key); }} className={`rounded-lg p-4 text-center text-sm transition ${mode === "quick" && date === q.key ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/70"}`}>
@@ -440,7 +454,7 @@ function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { in
             ))}
             <button onClick={() => setMode("pick")} className={`rounded-lg p-4 text-center text-sm transition flex flex-col items-center justify-center gap-1 ${mode === "pick" ? "bg-primary text-primary-foreground" : "bg-secondary hover:bg-secondary/70"}`}>
               <CalendarPlus className="h-5 w-5" />
-              <span className="font-medium">Pick a date</span>
+              <span className="font-medium">{t("cdPickADate")}</span>
             </button>
           </div>
         </div>
@@ -453,7 +467,7 @@ function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { in
               <button onClick={() => setCalMonth(new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1))} className="p-1.5 rounded bg-secondary hover:bg-secondary/70"><ChevronRight className="h-4 w-4" /></button>
             </div>
             <div className="grid grid-cols-7 text-center text-xs text-muted-foreground mb-1">
-              {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => <div key={d} className="py-1">{d}</div>)}
+              {WEEKDAY_KEYS.map((k) => <div key={k} className="py-1">{t(k)}</div>)}
             </div>
             <div className="grid grid-cols-7 text-center text-sm">
               {cells.map((c, i) => {
@@ -478,7 +492,7 @@ function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { in
         )}
 
         <div className="mt-6">
-          <p className="text-sm mb-3">Select a Delivery time <span className="text-primary">*</span></p>
+          <p className="text-sm mb-3">{t("cdSelectDeliveryTime")} <span className="text-primary">*</span></p>
           <div className="grid grid-cols-2 gap-3">
             {timeSlots.map((slot, idx) => {
               const isPastSlot = isTodaySelected && idx < currentSlotIdx;
@@ -492,8 +506,8 @@ function AnotherTimeModal({ initialDate, initialTime, onClose, onConfirm }: { in
         </div>
 
         <div className="mt-6 flex items-center gap-3">
-          <button onClick={onClose} className="px-6 py-2.5 rounded-md border border-border text-sm hover:bg-secondary">Cancel</button>
-          <button onClick={confirm} className="px-6 py-2.5 rounded-md bg-primary text-primary-foreground text-sm hover:opacity-90">Confirm</button>
+          <button onClick={onClose} className="px-6 py-2.5 rounded-md border border-border text-sm hover:bg-secondary">{t("cdCancel")}</button>
+          <button onClick={confirm} className="px-6 py-2.5 rounded-md bg-primary text-primary-foreground text-sm hover:opacity-90">{t("cdConfirm")}</button>
         </div>
       </div>
     </div>
@@ -540,6 +554,7 @@ function AddressPickerModal({
   onSelect: (id: string) => void;
   onAdd: (a: Omit<Address, "id" | "isGift">) => void;
 }) {
+  const t = useT();
   const [mode, setMode] = useState<"list" | "add">(addresses.length === 0 ? "add" : "list");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -548,10 +563,10 @@ function AddressPickerModal({
   const [extra, setExtra] = useState("");
 
   const save = () => {
-    if (!name.trim()) return toast.error("Name is required");
-    if (!phone.trim()) return toast.error("Phone is required");
-    if (!area) return toast.error("Select a Riyadh area");
-    if (!addr.trim()) return toast.error("Address is required");
+    if (!name.trim()) return toast.error(t("cdNameRequired"));
+    if (!phone.trim()) return toast.error(t("cdPhoneRequired"));
+    if (!area) return toast.error(t("cdSelectRiyadhArea"));
+    if (!addr.trim()) return toast.error(t("cdAddressRequired"));
     onAdd({
       name,
       phone: phone.startsWith("+966") ? phone : `+966 ${phone}`,
@@ -565,8 +580,8 @@ function AddressPickerModal({
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <h3 className="font-semibold">{mode === "list" ? "Select address" : "Add new address"}</h3>
-          <button onClick={onClose} aria-label="Close"><X className="h-5 w-5" /></button>
+          <h3 className="font-semibold">{mode === "list" ? t("cdSelectAddress") : t("cdAddNewAddress")}</h3>
+          <button onClick={onClose} aria-label={t("cdClose")}><X className="h-5 w-5" /></button>
         </div>
 
         {mode === "list" ? (
@@ -579,7 +594,7 @@ function AddressPickerModal({
                   className={`w-full text-left rounded-lg border p-4 transition ${selectedId === a.id ? "border-primary bg-[oklch(0.95_0.03_20)]" : "border-border hover:border-primary"}`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <p className="font-medium text-sm">{a.name || "Unnamed"}{a.isDefault && <span className="ml-2 text-[10px] uppercase tracking-wide text-primary">Default</span>}</p>
+                    <p className="font-medium text-sm">{a.name || t("cdUnnamedAddress")}{a.isDefault && <span className="ml-2 text-[10px] uppercase tracking-wide text-primary">{t("cdDefaultBadge")}</span>}</p>
                     {selectedId === a.id && <Check className="h-4 w-4 text-primary shrink-0" />}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">{a.area} — {a.address}</p>
@@ -588,45 +603,45 @@ function AddressPickerModal({
                 </button>
               ))}
               {addresses.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-6">No saved addresses yet.</p>
+                <p className="text-sm text-muted-foreground text-center py-6">{t("cdNoSavedAddresses")}</p>
               )}
             </div>
             <div className="border-t border-border p-4">
               <button onClick={() => setMode("add")} className="w-full border border-primary text-primary rounded-md py-3 text-sm font-medium hover:bg-primary hover:text-primary-foreground transition">
-                + Add new address
+                + {t("cdAddNewAddress")}
               </button>
             </div>
           </>
         ) : (
           <>
             <div className="p-5 space-y-4 overflow-y-auto">
-              <Field label="Full name" required>
+              <Field label={t("cdFullName")} required>
                 <input value={name} onChange={(e) => setName(e.target.value)} className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary" />
               </Field>
-              <Field label="Phone" required>
+              <Field label={t("cdPhoneLabel")} required>
                 <input value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 15))} placeholder="5XXXXXXXX" className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary" />
               </Field>
-              <Field label="Riyadh Area" required>
+              <Field label={t("cdRiyadhArea")} required>
                 <div className="relative">
                   <select value={area} onChange={(e) => setArea(e.target.value)} className="w-full appearance-none border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary bg-white">
-                    <option value="">Select a Riyadh area</option>
+                    <option value="">{t("cdSelectRiyadhArea")}</option>
                     {RIYADH_AREAS.map((a) => <option key={a} value={a}>{a}</option>)}
                   </select>
                   <ChevronDown className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                 </div>
               </Field>
-              <Field label="Address" required>
+              <Field label={t("cdAddressLabel")} required>
                 <input value={addr} onChange={(e) => setAddr(e.target.value)} className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary" />
               </Field>
-              <Field label="Extra Address">
-                <input value={extra} onChange={(e) => setExtra(e.target.value)} placeholder="Apartment, floor, landmark (optional)" className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary placeholder:text-muted-foreground" />
+              <Field label={t("cdExtraAddress")}>
+                <input value={extra} onChange={(e) => setExtra(e.target.value)} placeholder={t("cdApartmentPlaceholder")} className="w-full border border-border rounded-md px-4 py-3 text-sm outline-none focus:border-primary placeholder:text-muted-foreground" />
               </Field>
             </div>
             <div className="border-t border-border p-4 flex gap-3">
               {addresses.length > 0 && (
-                <button onClick={() => setMode("list")} className="flex-1 border border-border rounded-md py-3 text-sm hover:border-primary transition">Cancel</button>
+                <button onClick={() => setMode("list")} className="flex-1 border border-border rounded-md py-3 text-sm hover:border-primary transition">{t("cdCancel")}</button>
               )}
-              <button onClick={save} className="flex-1 bg-primary text-primary-foreground rounded-md py-3 text-sm font-semibold hover:opacity-90 transition">Save address</button>
+              <button onClick={save} className="flex-1 bg-primary text-primary-foreground rounded-md py-3 text-sm font-semibold hover:opacity-90 transition">{t("cdSaveAddress")}</button>
             </div>
           </>
         )}

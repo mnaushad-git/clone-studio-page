@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { OrderStatusTimeline } from "@/components/OrderStatusTimeline";
 import { useStore } from "@/lib/store";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/track/$id")({
   component: TrackPage,
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/track/$id")({
 });
 
 function TrackPage() {
+  const t = useT();
   const { id } = Route.useParams();
   const order = useStore((s) => s.orders.find((o) => o.trackingToken === id) ?? null);
 
@@ -31,11 +33,11 @@ function TrackPage() {
         <SiteHeader />
         <main className="flex-1 max-w-2xl w-full mx-auto px-6 py-16 text-center">
           <Package className="h-10 w-10 text-muted-foreground mx-auto" />
-          <h1 className="font-display text-2xl text-primary mt-4">Order not found</h1>
+          <h1 className="font-display text-2xl text-primary mt-4">{t("checkoutOrderNotFound")}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            This tracking link is invalid or the order isn't in this device's history.
+            {t("checkoutTrackingLinkInvalid")}
           </p>
-          <Link to="/" className="mt-6 inline-block text-primary underline text-sm">Back home</Link>
+          <Link to="/" className="mt-6 inline-block text-primary underline text-sm">{t("checkoutBackHome")}</Link>
         </main>
         <SiteFooter />
       </div>
@@ -47,8 +49,8 @@ function TrackPage() {
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      toast.success("Tracking link copied");
-    } catch { toast.error("Could not copy"); }
+      toast.success(t("checkoutToastLinkCopied"));
+    } catch { toast.error(t("checkoutToastCopyFailed")); }
   };
 
   const share = async () => {
@@ -66,18 +68,18 @@ function TrackPage() {
         <div className="bg-white rounded-2xl border border-border p-6 sm:p-8">
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Tracking</p>
-              <h1 className="font-display text-2xl sm:text-3xl text-primary mt-1">Order {order.id}</h1>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("checkoutTrackingLabel")}</p>
+              <h1 className="font-display text-2xl sm:text-3xl text-primary mt-1">{t("checkoutOrderPrefix")} {order.id}</h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Placed {new Date(order.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                {t("checkoutPlacedPrefix")} {new Date(order.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
               </p>
             </div>
             <div className="flex gap-2">
               <button onClick={copyLink} className="inline-flex items-center gap-1 text-xs border border-border rounded-md px-3 py-2 hover:bg-muted">
-                <Copy className="h-3 w-3" /> Copy link
+                <Copy className="h-3 w-3" /> {t("checkoutCopyLink")}
               </button>
               <button onClick={share} className="inline-flex items-center gap-1 text-xs bg-primary text-primary-foreground rounded-md px-3 py-2 hover:bg-primary/90">
-                <Share2 className="h-3 w-3" /> Share
+                <Share2 className="h-3 w-3" /> {t("checkoutShare")}
               </button>
             </div>
           </div>
@@ -88,7 +90,7 @@ function TrackPage() {
 
           {order.courier && (
             <div className="mt-8 border-t border-border pt-6">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Your courier</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("checkoutYourCourier")}</p>
               <div className="mt-3 flex items-center justify-between flex-wrap gap-3">
                 <div className="flex items-center gap-3">
                   <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -96,7 +98,7 @@ function TrackPage() {
                   </div>
                   <div>
                     <div className="font-semibold text-primary">{order.courier.name}</div>
-                    <div className="text-xs text-muted-foreground">On-the-way partner</div>
+                    <div className="text-xs text-muted-foreground">{t("checkoutOnTheWayPartner")}</div>
                   </div>
                 </div>
                 <a href={`tel:${order.courier.phone}`} className="inline-flex items-center gap-1 text-sm text-primary underline">
@@ -108,7 +110,7 @@ function TrackPage() {
 
           <div className="mt-8 border-t border-border pt-6 grid sm:grid-cols-2 gap-6 text-sm">
             <div>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Deliver to</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("checkoutDeliverTo")}</p>
               <p className="mt-2 font-semibold">{order.address?.name ?? "—"}</p>
               <p className="text-muted-foreground">{order.address?.address ?? "—"}</p>
               {order.address?.deliveryDate && (
@@ -118,13 +120,13 @@ function TrackPage() {
               )}
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Items</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("checkoutItems")}</p>
               <ul className="mt-2 space-y-1 text-muted-foreground">
                 {order.items.map((it, i) => (
                   <li key={i}>{it.qty} × {it.name}{it.size ? ` (${it.size})` : ""}</li>
                 ))}
               </ul>
-              <p className="mt-3 font-semibold text-primary">Total ${order.total.toFixed(2)}</p>
+              <p className="mt-3 font-semibold text-primary">{t("checkoutTableTotal")} ${order.total.toFixed(2)}</p>
             </div>
           </div>
         </div>

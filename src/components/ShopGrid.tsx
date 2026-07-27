@@ -4,6 +4,7 @@ import { ChevronDown, ChevronRight, Search, X } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ProductCard } from "@/components/ProductCard";
+import { useT, type TKey } from "@/lib/i18n";
 import {
   products,
   type Category,
@@ -11,24 +12,39 @@ import {
   type Recipient,
   OCCASIONS,
   RECIPIENTS,
-  CATEGORY_LABEL,
 } from "@/lib/products";
 
-const CATEGORIES: { key: Category | "all"; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "cupcakes", label: "Cupcakes" },
-  { key: "cakes", label: "Cakes" },
-  { key: "chocolates", label: "Chocolates" },
-  { key: "donuts", label: "Donuts" },
-  { key: "gifts", label: "Gifts" },
-  { key: "extras", label: "Extras" },
+const CATEGORIES: { key: Category | "all"; labelKey: TKey }[] = [
+  { key: "all", labelKey: "shopCategoryAll" },
+  { key: "cupcakes", labelKey: "shopCategoryCupcakes" },
+  { key: "cakes", labelKey: "shopCategoryCakes" },
+  { key: "chocolates", labelKey: "shopCategoryChocolates" },
+  { key: "donuts", labelKey: "shopCategoryDonuts" },
+  { key: "gifts", labelKey: "shopCategoryGifts" },
+  { key: "extras", labelKey: "shopCategoryExtras" },
 ];
 
-const PRICE_BUCKETS = [
-  { label: "Under SAR 10", min: 0, max: 10 },
-  { label: "SAR 10 – SAR 25", min: 10, max: 25 },
-  { label: "SAR 25 – SAR 100", min: 25, max: 100 },
-  { label: "SAR 100+", min: 100, max: Infinity },
+const OCCASION_LABEL_KEYS: Record<Occasion, TKey> = {
+  Birthday: "shopOccasionBirthday",
+  Anniversary: "shopOccasionAnniversary",
+  Wedding: "shopOccasionWedding",
+  Graduation: "shopOccasionGraduation",
+  Congratulations: "shopOccasionCongratulations",
+  "Thank You": "shopOccasionThankYou",
+};
+
+const RECIPIENT_LABEL_KEYS: Record<Recipient, TKey> = {
+  "For Him": "shopRecipientForHim",
+  "For Her": "shopRecipientForHer",
+  "For Kids": "shopRecipientForKids",
+  "For Family": "shopRecipientForFamily",
+};
+
+const PRICE_BUCKETS: { labelKey: TKey; min: number; max: number }[] = [
+  { labelKey: "shopPriceUnder10", min: 0, max: 10 },
+  { labelKey: "shopPrice10to25", min: 10, max: 25 },
+  { labelKey: "shopPrice25to100", min: 25, max: 100 },
+  { labelKey: "shopPrice100Plus", min: 100, max: Infinity },
 ];
 
 type Props = {
@@ -60,6 +76,7 @@ export function ShopGrid({
   const [recipients, setRecipients] = useState<Recipient[]>(forcedRecipient ? [forcedRecipient] : []);
   const [sort, setSort] = useState<"featured" | "low" | "high" | "name">("featured");
   const [query, setQuery] = useState("");
+  const t = useT();
 
   const filtered = useMemo(() => {
     let list = category === "all" ? products : products.filter((p) => p.category === category);
@@ -111,7 +128,7 @@ export function ShopGrid({
         <div className="max-w-7xl mx-auto px-6 pt-10 pb-6 text-center">
           <h1 className="font-display text-4xl md:text-5xl text-primary">{title}</h1>
           <nav className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground flex-wrap">
-            <Link to="/" className="hover:text-primary">Home</Link>
+            <Link to="/" className="hover:text-primary">{t("shopBreadcrumbHome")}</Link>
             {(breadcrumb ?? []).map((b, i) => (
               <span key={i} className="flex items-center gap-2">
                 <ChevronRight className="h-3 w-3" />
@@ -133,11 +150,11 @@ export function ShopGrid({
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search cakes, chocolates, donuts…"
+              placeholder={t("shopSearchPlaceholder")}
               className="w-full ps-11 pe-10 py-3 rounded-full border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
             {query && (
-              <button onClick={() => setQuery("")} aria-label="Clear" className="absolute end-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground">
+              <button onClick={() => setQuery("")} aria-label={t("shopClearSearchAria")} className="absolute end-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground">
                 <X className="h-4 w-4" />
               </button>
             )}
@@ -160,8 +177,8 @@ export function ShopGrid({
                     active ? "bg-primary text-primary-foreground border-primary" : "bg-white border-border hover:border-primary"
                   }`}
                 >
-                  {sample && <img src={sample.image} alt={c.label} className="h-7 w-7 rounded object-cover" />}
-                  <span>{c.label}</span>
+                  {sample && <img src={sample.image} alt={t(c.labelKey)} className="h-7 w-7 rounded object-cover" />}
+                  <span>{t(c.labelKey)}</span>
                 </button>
               );
             })}
@@ -173,15 +190,15 @@ export function ShopGrid({
         {/* Sidebar */}
         <aside className="border border-border rounded-md p-5 h-fit bg-white">
           <div className="flex items-center justify-between pb-4 border-b border-border">
-            <h3 className="font-display text-base text-primary">Filters</h3>
+            <h3 className="font-display text-base text-primary">{t("shopFiltersHeading")}</h3>
             <button onClick={clearAll} className="text-[11px] underline text-muted-foreground hover:text-foreground">
-              Clear all
+              {t("shopClearAll")}
             </button>
           </div>
 
           <div className="pt-5 space-y-6">
             {!lockCategory && (
-              <FilterGroup title="Category">
+              <FilterGroup title={t("shopFilterCategory")}>
                 <ul className="space-y-2">
                   {CATEGORIES.filter((c) => c.key !== "all").map((c) => {
                     const count = products.filter((p) => p.category === c.key).length;
@@ -195,7 +212,7 @@ export function ShopGrid({
                             onChange={() => setCategory(c.key)}
                             className="accent-primary"
                           />
-                          <span>{c.label}</span>
+                          <span>{t(c.labelKey)}</span>
                         </label>
                         <span className="text-muted-foreground">({count})</span>
                       </li>
@@ -205,7 +222,7 @@ export function ShopGrid({
               </FilterGroup>
             )}
 
-            <FilterGroup title="Occasions">
+            <FilterGroup title={t("shopFilterOccasions")}>
               <ul className="space-y-2">
                 {OCCASIONS.map((o) => (
                   <li key={o} className="text-xs">
@@ -217,14 +234,14 @@ export function ShopGrid({
                         onChange={() => toggle(occasions, setOccasions, o)}
                         className="accent-primary"
                       />
-                      <span>{o}</span>
+                      <span>{t(OCCASION_LABEL_KEYS[o])}</span>
                     </label>
                   </li>
                 ))}
               </ul>
             </FilterGroup>
 
-            <FilterGroup title="Recipient">
+            <FilterGroup title={t("shopFilterRecipient")}>
               <ul className="space-y-2">
                 {RECIPIENTS.map((r) => (
                   <li key={r} className="text-xs">
@@ -236,17 +253,17 @@ export function ShopGrid({
                         onChange={() => toggle(recipients, setRecipients, r)}
                         className="accent-primary"
                       />
-                      <span>{r}</span>
+                      <span>{t(RECIPIENT_LABEL_KEYS[r])}</span>
                     </label>
                   </li>
                 ))}
               </ul>
             </FilterGroup>
 
-            <FilterGroup title="Price">
+            <FilterGroup title={t("shopFilterPrice")}>
               <ul className="space-y-2">
                 {PRICE_BUCKETS.map((b, i) => (
-                  <li key={b.label} className="text-xs">
+                  <li key={b.labelKey} className="text-xs">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
@@ -254,23 +271,23 @@ export function ShopGrid({
                         onChange={() => toggle(prices, setPrices, i)}
                         className="accent-primary"
                       />
-                      <span>{b.label}</span>
+                      <span>{t(b.labelKey)}</span>
                     </label>
                   </li>
                 ))}
               </ul>
             </FilterGroup>
 
-            <FilterGroup title="Sort by">
+            <FilterGroup title={t("shopFilterSortBy")}>
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as typeof sort)}
                 className="w-full border border-border rounded-md px-2 py-2 text-xs bg-white"
               >
-                <option value="featured">Featured</option>
-                <option value="low">Price: Low to High</option>
-                <option value="high">Price: High to Low</option>
-                <option value="name">Name</option>
+                <option value="featured">{t("shopSortFeatured")}</option>
+                <option value="low">{t("shopSortPriceLowHigh")}</option>
+                <option value="high">{t("shopSortPriceHighLow")}</option>
+                <option value="name">{t("shopSortName")}</option>
               </select>
             </FilterGroup>
           </div>
@@ -279,13 +296,14 @@ export function ShopGrid({
         {/* Product grid */}
         <div>
           <p className="text-xs text-muted-foreground mb-4">
-            {filtered.length} product{filtered.length !== 1 && "s"}
-            {category !== "all" && ` in ${CATEGORY_LABEL[category as Category]}`}
+            {filtered.length} {filtered.length === 1 ? t("shopProductSingular") : t("shopProductPlural")}
+            {category !== "all" &&
+              ` ${t("shopInCategory")} ${t(CATEGORIES.find((c) => c.key === category)!.labelKey)}`}
           </p>
           {filtered.length === 0 ? (
             <div className="text-center py-24 border border-dashed border-border rounded-lg">
-              <p className="text-sm text-muted-foreground">No products match your filters.</p>
-              <button onClick={clearAll} className="mt-3 text-xs underline text-primary">Reset filters</button>
+              <p className="text-sm text-muted-foreground">{t("shopNoProductsMatch")}</p>
+              <button onClick={clearAll} className="mt-3 text-xs underline text-primary">{t("shopResetFilters")}</button>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

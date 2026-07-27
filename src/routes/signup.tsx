@@ -4,18 +4,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import illustration from "@/assets/signup-illustration.jpg";
 import { auth, addresses as addressStore, RIYADH_AREAS } from "@/lib/store";
-
-const signupSchema = z
-  .object({
-    name: z.string().trim().min(1, "Name is required").max(100),
-    email: z.string().trim().email("Enter a valid email").max(255),
-    phone: z.string().trim().min(6, "Phone is required").max(20),
-    area: z.string().trim().min(1, "Area is required"),
-    address: z.string().trim().min(3, "Address is required").max(200),
-    password: z.string().min(8, "Password must be at least 8 characters").max(100),
-    confirm: z.string().min(1, "Please confirm your password"),
-  })
-  .refine((d) => d.password === d.confirm, { path: ["confirm"], message: "Passwords don't match" });
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
@@ -49,6 +38,7 @@ function Field({ label, error, ...props }: { label: string; error?: string } & R
 }
 
 function SignupPage() {
+  const t = useT();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", phone: "", area: "", address: "", password: "", confirm: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({});
@@ -59,6 +49,18 @@ function SignupPage() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    const signupSchema = z
+      .object({
+        name: z.string().trim().min(1, t("accountSignupErrorNameRequired")).max(100),
+        email: z.string().trim().email(t("accountSignupErrorEmailInvalid")).max(255),
+        phone: z.string().trim().min(6, t("accountSignupErrorPhoneRequired")).max(20),
+        area: z.string().trim().min(1, t("accountSignupErrorAreaRequired")),
+        address: z.string().trim().min(3, t("accountSignupErrorAddressRequired")).max(200),
+        password: z.string().min(8, t("accountSignupErrorPasswordMin")).max(100),
+        confirm: z.string().min(1, t("accountSignupErrorConfirmRequired")),
+      })
+      .refine((d) => d.password === d.confirm, { path: ["confirm"], message: t("accountSignupToastPasswordsMismatch") });
+
     const result = signupSchema.safeParse(form);
     if (!result.success) {
       const fieldErrors: Partial<Record<keyof typeof form, string>> = {};
@@ -67,7 +69,7 @@ function SignupPage() {
         if (key && !fieldErrors[key]) fieldErrors[key] = issue.message;
       }
       setErrors(fieldErrors);
-      toast.error("Please fix the errors and try again");
+      toast.error(t("accountSignupToastFixErrors"));
       return;
     }
     setErrors({});
@@ -79,7 +81,7 @@ function SignupPage() {
       address: form.address,
       isGift: false,
     });
-    toast.success("Account created! Welcome to Terrific Bites.");
+    toast.success(t("accountSignupToastAccountCreated"));
     navigate({ to: "/account" });
   };
 
@@ -90,24 +92,24 @@ function SignupPage() {
         <div className="absolute top-14 left-14 w-24 h-24 rounded-full border-[8px] border-white/60" />
         <div className="text-center max-w-md relative">
           <h2 className="font-display text-3xl md:text-4xl text-foreground leading-tight">
-            Welcome To Our Terrific<br />Bites Restaurant
+            {t("accountSignupHeroTitle")}
           </h2>
-          <img src={illustration} alt="Terrific Bites app illustration" className="mt-10 w-full max-w-md mx-auto" />
+          <img src={illustration} alt={t("accountSignupIllustrationAlt")} className="mt-10 w-full max-w-md mx-auto" />
         </div>
       </div>
 
       <div className="w-full md:w-1/2 bg-background rounded-l-3xl p-8 md:p-14 flex items-center">
         <div className="w-full max-w-md mx-auto">
-          <h1 className="font-display text-3xl md:text-4xl text-primary text-center mb-8">Create An Account</h1>
+          <h1 className="font-display text-3xl md:text-4xl text-primary text-center mb-8">{t("accountSignupTitle")}</h1>
 
           <form className="space-y-4" onSubmit={submit} noValidate>
-            <Field label="Name" placeholder="Enter your name" required value={form.name} error={errors.name} onChange={set("name")} />
-            <Field label="Email" type="email" placeholder="you@example.com" required value={form.email} error={errors.email} onChange={set("email")} />
-            <Field label="Phone" type="tel" placeholder="+888 2148956" required value={form.phone} error={errors.phone} onChange={set("phone")} />
+            <Field label={t("accountSignupFieldName")} placeholder={t("accountSignupPlaceholderName")} required value={form.name} error={errors.name} onChange={set("name")} />
+            <Field label={t("accountSignupFieldEmail")} type="email" placeholder="you@example.com" required value={form.email} error={errors.email} onChange={set("email")} />
+            <Field label={t("accountSignupFieldPhone")} type="tel" placeholder="+888 2148956" required value={form.phone} error={errors.phone} onChange={set("phone")} />
 
             <div>
               <label className="block text-sm font-medium mb-2">
-                Riyadh Area <span className="text-destructive">*</span>
+                {t("accountSignupFieldArea")} <span className="text-destructive">*</span>
               </label>
               <select
                 value={form.area}
@@ -115,24 +117,24 @@ function SignupPage() {
                 aria-invalid={!!errors.area}
                 className={`w-full border rounded-md px-4 py-3 text-sm focus:outline-none bg-white ${errors.area ? "border-destructive focus:border-destructive" : "border-border focus:border-primary"}`}
               >
-                <option value="">Select a Riyadh area</option>
+                <option value="">{t("accountSelectAreaOption")}</option>
                 {RIYADH_AREAS.map((area) => <option key={area} value={area}>{area}</option>)}
               </select>
               {errors.area && <p className="text-xs text-destructive mt-1">{errors.area}</p>}
             </div>
-            <Field label="Address" placeholder="Street, building, apartment" required value={form.address} error={errors.address} onChange={set("address")} />
+            <Field label={t("accountSignupFieldAddress")} placeholder={t("accountSignupPlaceholderAddress")} required value={form.address} error={errors.address} onChange={set("address")} />
 
-            <Field label="New Password" type="password" placeholder="* * * * * * * *" required value={form.password} error={errors.password} onChange={set("password")} />
-            <Field label="Confirm Password" type="password" placeholder="* * * * * * * *" required value={form.confirm} error={errors.confirm} onChange={set("confirm")} />
+            <Field label={t("accountSignupFieldNewPassword")} type="password" placeholder="* * * * * * * *" required value={form.password} error={errors.password} onChange={set("password")} />
+            <Field label={t("accountSignupFieldConfirmPassword")} type="password" placeholder="* * * * * * * *" required value={form.confirm} error={errors.confirm} onChange={set("confirm")} />
 
 
             <button type="submit" className="w-full bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 transition">
-              Sign Up
+              {t("accountSignupSubmitButton")}
             </button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Already have an account? <Link to="/login" className="font-semibold text-foreground hover:text-primary">Sign In</Link>
+            {t("accountSignupHaveAccountPrefix")} <Link to="/login" className="font-semibold text-foreground hover:text-primary">{t("accountSignupSignInLink")}</Link>
           </p>
         </div>
       </div>

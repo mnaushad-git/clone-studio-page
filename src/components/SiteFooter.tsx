@@ -1,8 +1,10 @@
 import { Facebook, Instagram, Twitter, Music2, Mail, Phone } from "lucide-react";
 import logoFooter from "@/assets/logo-footer.png.asset.json";
 import { useAdmin } from "@/lib/admin-store";
+import { useT } from "@/lib/i18n";
 
 export function SiteFooter() {
+  const t = useT();
   const settings = useAdmin((s) => s.settings);
   const categories = useAdmin((s) => s.categories);
   const socials = settings.socials || {};
@@ -22,7 +24,7 @@ export function SiteFooter() {
         <div className="max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-4 gap-10">
           <div>
             <img src={logoFooter.url} alt={settings.brandName} className="h-16 w-auto object-contain" />
-            <p className="mt-4 text-xs opacity-80 max-w-xs">Handcrafted cupcakes, donuts and desserts baked fresh daily. Made with love in our neighborhood bakery.</p>
+            <p className="mt-4 text-xs opacity-80 max-w-xs">{t("footerTagline")}</p>
             <div className="mt-4 space-y-1 text-xs opacity-80">
               {settings.supportEmail && <p className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" /> {settings.supportEmail}</p>}
               {settings.supportPhone && <p className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> {settings.supportPhone}</p>}
@@ -36,14 +38,14 @@ export function SiteFooter() {
             )}
           </div>
           <div>
-            <h4 className="font-display uppercase text-sm tracking-wider mb-4">Shop</h4>
+            <h4 className="font-display uppercase text-sm tracking-wider mb-4">{t("footerShop")}</h4>
             <ul className="space-y-2 text-xs opacity-80">
               {visibleCats.map((c) => <li key={c.id}><a href={`/${c.slug}`} className="hover:opacity-100">{c.label}</a></li>)}
             </ul>
           </div>
           {[
-            { title: "Company", items: ["About Us", "Careers", "Press", "Contact"] },
-            { title: "Help", items: ["Delivery", "Returns", "FAQ", "Support"] },
+            { title: t("footerCompany"), items: [t("aboutUs"), t("footerCareers"), t("footerPress"), t("footerContact")] },
+            { title: t("footerHelp"), items: [t("footerDelivery"), t("footerReturns"), t("footerFaq"), t("footerSupport")] },
           ].map(col => (
             <div key={col.title}>
               <h4 className="font-display uppercase text-sm tracking-wider mb-4">{col.title}</h4>
@@ -55,7 +57,7 @@ export function SiteFooter() {
         </div>
         <div className="border-t border-primary-foreground/10">
           <div className="max-w-7xl mx-auto px-6 py-4 flex flex-wrap justify-between items-center gap-4 text-[11px] opacity-70">
-            <span>Copyright © {new Date().getFullYear()} {settings.brandName}. All Rights Reserved</span>
+            <span>{t("footerCopyrightPrefix")} {new Date().getFullYear()} {settings.brandName}. {t("footerCopyrightSuffix")}</span>
             <div className="flex gap-2">
               {["VISA","AMEX","PayPal","GPay"].map(p => (
                 <span key={p} className="bg-background text-primary rounded px-2 py-1 text-[10px] font-semibold">{p}</span>
