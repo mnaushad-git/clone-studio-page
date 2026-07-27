@@ -348,7 +348,12 @@ function DeliveryPage() {
           onSelect={(id) => { applyAddress(id); setAddressModalOpen(false); toast.success("Address selected"); }}
           onAdd={(a) => {
             const id = addressStore.add({ ...a, isGift: false });
-            applyAddress(id);
+            setSelectedAddressId(id);
+            if (a.name) setName(a.name);
+            if (a.phone) setPhone(a.phone.replace(/^\+966\s?/, ""));
+            setArea(a.area || "");
+            setAddress(a.address || "");
+            setExtra(a.extra || "");
             setAddressModalOpen(false);
             toast.success("Address added");
           }}
