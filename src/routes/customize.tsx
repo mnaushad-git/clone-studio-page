@@ -12,6 +12,7 @@ import giftCardCream from "@/assets/gift-card-cream.jpg";
 import giftCardBrown from "@/assets/gift-card-brown.jpg";
 import { useStore, cart, promo, selectSubtotal, selectDiscount, selectTax, selectDeliveryFee, selectTotal } from "@/lib/store";
 import { featured, getProduct } from "@/lib/products";
+import { formatAttributes } from "@/lib/format-variant-attributes";
 import { useT, type TKey } from "@/lib/i18n";
 
 const GIFT_CARDS: { id: string; labelKey: TKey; image: string }[] = [
@@ -171,8 +172,8 @@ function CustomizePage() {
                       <img src={p?.image} alt={p?.name} className="w-24 h-24 rounded-lg object-cover" />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-display text-primary truncate">{p?.name}</h3>
-                        {(it.size || it.flavor) && (
-                          <p className="text-xs text-muted-foreground mt-1">{[it.size, it.flavor].filter(Boolean).join(" · ")}</p>
+                        {it.attributes && Object.keys(it.attributes).length > 0 && (
+                          <p className="text-xs text-muted-foreground mt-1">{formatAttributes(it.attributes)}</p>
                         )}
                         <div className="flex items-center justify-between mt-3">
                           <div className="flex items-center border border-border rounded-md">

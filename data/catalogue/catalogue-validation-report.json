@@ -1,0 +1,1481 @@
+{
+  "generated_at": "2026-07-27T19:27:31.903494+00:00",
+  "status": "pass",
+  "summary": {
+    "total_issues": 209,
+    "errors": 0,
+    "warnings": 209
+  },
+  "summary_by_category": {
+    "blocking": 0,
+    "business_confirmation": 32,
+    "odoo_verification": 52,
+    "content_completion": 73,
+    "merchandising": 52
+  },
+  "issues": [
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.swiss-frosting has no Arabic name",
+      "entity": "terrific_bites.product.swiss-frosting",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.swiss-frosting has no Arabic description",
+      "entity": "terrific_bites.product.swiss-frosting",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.swiss-frosting SKU TB-CUP-001 is generated and unconfirmed",
+      "entity": "terrific_bites.product.swiss-frosting",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.moose-cream has no Arabic name",
+      "entity": "terrific_bites.product.moose-cream",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.moose-cream has no Arabic description",
+      "entity": "terrific_bites.product.moose-cream",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.moose-cream SKU TB-CUP-002 is generated and unconfirmed",
+      "entity": "terrific_bites.product.moose-cream",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.butter-frosting has no Arabic name",
+      "entity": "terrific_bites.product.butter-frosting",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.butter-frosting has no Arabic description",
+      "entity": "terrific_bites.product.butter-frosting",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.butter-frosting SKU TB-CUP-003 is generated and unconfirmed",
+      "entity": "terrific_bites.product.butter-frosting",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.light-sponge has no Arabic name",
+      "entity": "terrific_bites.product.light-sponge",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.light-sponge has no Arabic description",
+      "entity": "terrific_bites.product.light-sponge",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.light-sponge SKU TB-CUP-004 is generated and unconfirmed",
+      "entity": "terrific_bites.product.light-sponge",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.buttercream-cake has no Arabic name",
+      "entity": "terrific_bites.product.buttercream-cake",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.buttercream-cake has no Arabic description",
+      "entity": "terrific_bites.product.buttercream-cake",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.buttercream-cake SKU TB-CAK-001 is generated and unconfirmed",
+      "entity": "terrific_bites.product.buttercream-cake",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.birthday-pair has no Arabic name",
+      "entity": "terrific_bites.product.birthday-pair",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.birthday-pair has no Arabic description",
+      "entity": "terrific_bites.product.birthday-pair",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.birthday-pair SKU TB-GIF-001 is generated and unconfirmed",
+      "entity": "terrific_bites.product.birthday-pair",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.butter-delight has no Arabic name",
+      "entity": "terrific_bites.product.butter-delight",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.butter-delight has no Arabic description",
+      "entity": "terrific_bites.product.butter-delight",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.butter-delight SKU TB-GIF-002 is generated and unconfirmed",
+      "entity": "terrific_bites.product.butter-delight",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.cream-cheese-donut has no Arabic name",
+      "entity": "terrific_bites.product.cream-cheese-donut",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.cream-cheese-donut has no Arabic description",
+      "entity": "terrific_bites.product.cream-cheese-donut",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.cream-cheese-donut SKU TB-DON-001 is generated and unconfirmed",
+      "entity": "terrific_bites.product.cream-cheese-donut",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.whisk-whimsy has no Arabic name",
+      "entity": "terrific_bites.product.whisk-whimsy",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.whisk-whimsy has no Arabic description",
+      "entity": "terrific_bites.product.whisk-whimsy",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.whisk-whimsy SKU TB-GIF-003 is generated and unconfirmed",
+      "entity": "terrific_bites.product.whisk-whimsy",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.sprinkle-1 has no Arabic name",
+      "entity": "terrific_bites.product.sprinkle-1",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.sprinkle-1 has no Arabic description",
+      "entity": "terrific_bites.product.sprinkle-1",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.sprinkle-1 SKU TB-CUP-005 is generated and unconfirmed",
+      "entity": "terrific_bites.product.sprinkle-1",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.sprinkle-2 has no Arabic name",
+      "entity": "terrific_bites.product.sprinkle-2",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.sprinkle-2 has no Arabic description",
+      "entity": "terrific_bites.product.sprinkle-2",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_en",
+      "message": "Product terrific_bites.product.sprinkle-2 has no English description",
+      "entity": "terrific_bites.product.sprinkle-2",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.sprinkle-2 SKU TB-CUP-006 is generated and unconfirmed",
+      "entity": "terrific_bites.product.sprinkle-2",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.sprinkle-3 has no Arabic name",
+      "entity": "terrific_bites.product.sprinkle-3",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.sprinkle-3 has no Arabic description",
+      "entity": "terrific_bites.product.sprinkle-3",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_en",
+      "message": "Product terrific_bites.product.sprinkle-3 has no English description",
+      "entity": "terrific_bites.product.sprinkle-3",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.sprinkle-3 SKU TB-CUP-007 is generated and unconfirmed",
+      "entity": "terrific_bites.product.sprinkle-3",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.sprinkle-4 has no Arabic name",
+      "entity": "terrific_bites.product.sprinkle-4",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.sprinkle-4 has no Arabic description",
+      "entity": "terrific_bites.product.sprinkle-4",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_en",
+      "message": "Product terrific_bites.product.sprinkle-4 has no English description",
+      "entity": "terrific_bites.product.sprinkle-4",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.sprinkle-4 SKU TB-CUP-008 is generated and unconfirmed",
+      "entity": "terrific_bites.product.sprinkle-4",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.choc-truffle has no Arabic name",
+      "entity": "terrific_bites.product.choc-truffle",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.choc-truffle has no Arabic description",
+      "entity": "terrific_bites.product.choc-truffle",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-truffle SKU TB-CHO-001 is generated and unconfirmed",
+      "entity": "terrific_bites.product.choc-truffle",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.choc-praline has no Arabic name",
+      "entity": "terrific_bites.product.choc-praline",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.choc-praline has no Arabic description",
+      "entity": "terrific_bites.product.choc-praline",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_en",
+      "message": "Product terrific_bites.product.choc-praline has no English description",
+      "entity": "terrific_bites.product.choc-praline",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-praline SKU TB-CHO-002 is generated and unconfirmed",
+      "entity": "terrific_bites.product.choc-praline",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.choc-ganache has no Arabic name",
+      "entity": "terrific_bites.product.choc-ganache",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.choc-ganache has no Arabic description",
+      "entity": "terrific_bites.product.choc-ganache",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_en",
+      "message": "Product terrific_bites.product.choc-ganache has no English description",
+      "entity": "terrific_bites.product.choc-ganache",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-ganache SKU TB-CHO-003 is generated and unconfirmed",
+      "entity": "terrific_bites.product.choc-ganache",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.choc-caramel has no Arabic name",
+      "entity": "terrific_bites.product.choc-caramel",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.choc-caramel has no Arabic description",
+      "entity": "terrific_bites.product.choc-caramel",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_en",
+      "message": "Product terrific_bites.product.choc-caramel has no English description",
+      "entity": "terrific_bites.product.choc-caramel",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-caramel SKU TB-CHO-004 is generated and unconfirmed",
+      "entity": "terrific_bites.product.choc-caramel",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.choc-mint has no Arabic name",
+      "entity": "terrific_bites.product.choc-mint",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.choc-mint has no Arabic description",
+      "entity": "terrific_bites.product.choc-mint",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_en",
+      "message": "Product terrific_bites.product.choc-mint has no English description",
+      "entity": "terrific_bites.product.choc-mint",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-mint SKU TB-CHO-005 is generated and unconfirmed",
+      "entity": "terrific_bites.product.choc-mint",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.choc-orange has no Arabic name",
+      "entity": "terrific_bites.product.choc-orange",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.choc-orange has no Arabic description",
+      "entity": "terrific_bites.product.choc-orange",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_en",
+      "message": "Product terrific_bites.product.choc-orange has no English description",
+      "entity": "terrific_bites.product.choc-orange",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-orange SKU TB-CHO-006 is generated and unconfirmed",
+      "entity": "terrific_bites.product.choc-orange",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.choc-almond has no Arabic name",
+      "entity": "terrific_bites.product.choc-almond",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.choc-almond has no Arabic description",
+      "entity": "terrific_bites.product.choc-almond",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_en",
+      "message": "Product terrific_bites.product.choc-almond has no English description",
+      "entity": "terrific_bites.product.choc-almond",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-almond SKU TB-CHO-007 is generated and unconfirmed",
+      "entity": "terrific_bites.product.choc-almond",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.choc-white has no Arabic name",
+      "entity": "terrific_bites.product.choc-white",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.choc-white has no Arabic description",
+      "entity": "terrific_bites.product.choc-white",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_en",
+      "message": "Product terrific_bites.product.choc-white has no English description",
+      "entity": "terrific_bites.product.choc-white",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-white SKU TB-CHO-008 is generated and unconfirmed",
+      "entity": "terrific_bites.product.choc-white",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.choc-berry has no Arabic name",
+      "entity": "terrific_bites.product.choc-berry",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.choc-berry has no Arabic description",
+      "entity": "terrific_bites.product.choc-berry",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_en",
+      "message": "Product terrific_bites.product.choc-berry has no English description",
+      "entity": "terrific_bites.product.choc-berry",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-berry SKU TB-CHO-009 is generated and unconfirmed",
+      "entity": "terrific_bites.product.choc-berry",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.extra-donut has no Arabic name",
+      "entity": "terrific_bites.product.extra-donut",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.extra-donut has no Arabic description",
+      "entity": "terrific_bites.product.extra-donut",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_en",
+      "message": "Product terrific_bites.product.extra-donut has no English description",
+      "entity": "terrific_bites.product.extra-donut",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.extra-donut SKU TB-EXT-001 is generated and unconfirmed",
+      "entity": "terrific_bites.product.extra-donut",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.extra-icecream has no Arabic name",
+      "entity": "terrific_bites.product.extra-icecream",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.extra-icecream has no Arabic description",
+      "entity": "terrific_bites.product.extra-icecream",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_en",
+      "message": "Product terrific_bites.product.extra-icecream has no English description",
+      "entity": "terrific_bites.product.extra-icecream",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.extra-icecream SKU TB-EXT-002 is generated and unconfirmed",
+      "entity": "terrific_bites.product.extra-icecream",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.extra-cheesecake has no Arabic name",
+      "entity": "terrific_bites.product.extra-cheesecake",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.extra-cheesecake has no Arabic description",
+      "entity": "terrific_bites.product.extra-cheesecake",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_en",
+      "message": "Product terrific_bites.product.extra-cheesecake has no English description",
+      "entity": "terrific_bites.product.extra-cheesecake",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.extra-cheesecake SKU TB-EXT-003 is generated and unconfirmed",
+      "entity": "terrific_bites.product.extra-cheesecake",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Product terrific_bites.product.extra-donuts-pair has no Arabic name",
+      "entity": "terrific_bites.product.extra-donuts-pair",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_ar",
+      "message": "Product terrific_bites.product.extra-donuts-pair has no Arabic description",
+      "entity": "terrific_bites.product.extra-donuts-pair",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_description_en",
+      "message": "Product terrific_bites.product.extra-donuts-pair has no English description",
+      "entity": "terrific_bites.product.extra-donuts-pair",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "sku_requires_confirmation",
+      "message": "Product terrific_bites.product.extra-donuts-pair SKU TB-EXT-004 is generated and unconfirmed",
+      "entity": "terrific_bites.product.extra-donuts-pair",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Category terrific_bites.category.cupcakes has no Arabic name",
+      "entity": "terrific_bites.category.cupcakes",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Category terrific_bites.category.cakes has no Arabic name",
+      "entity": "terrific_bites.category.cakes",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Category terrific_bites.category.chocolates has no Arabic name",
+      "entity": "terrific_bites.category.chocolates",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Category terrific_bites.category.donuts has no Arabic name",
+      "entity": "terrific_bites.category.donuts",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Category terrific_bites.category.gifts has no Arabic name",
+      "entity": "terrific_bites.category.gifts",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "missing_name_ar",
+      "message": "Category terrific_bites.category.extras has no Arabic name",
+      "entity": "terrific_bites.category.extras",
+      "category": "content_completion"
+    },
+    {
+      "severity": "warning",
+      "code": "category_code_requires_confirmation",
+      "message": "Category terrific_bites.category.cupcakes code CUP is generated and unconfirmed",
+      "entity": "terrific_bites.category.cupcakes",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "category_code_requires_confirmation",
+      "message": "Category terrific_bites.category.cakes code CAK is generated and unconfirmed",
+      "entity": "terrific_bites.category.cakes",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "category_code_requires_confirmation",
+      "message": "Category terrific_bites.category.chocolates code CHO is generated and unconfirmed",
+      "entity": "terrific_bites.category.chocolates",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "category_code_requires_confirmation",
+      "message": "Category terrific_bites.category.donuts code DON is generated and unconfirmed",
+      "entity": "terrific_bites.category.donuts",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "category_code_requires_confirmation",
+      "message": "Category terrific_bites.category.gifts code GIF is generated and unconfirmed",
+      "entity": "terrific_bites.category.gifts",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "category_code_requires_confirmation",
+      "message": "Category terrific_bites.category.extras code EXT is generated and unconfirmed",
+      "entity": "terrific_bites.category.extras",
+      "category": "business_confirmation"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.swiss-frosting has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.swiss-frosting",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.swiss-frosting has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.swiss-frosting",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.moose-cream has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.moose-cream",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.moose-cream has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.moose-cream",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.butter-frosting has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.butter-frosting",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.butter-frosting has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.butter-frosting",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.light-sponge has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.light-sponge",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.light-sponge has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.light-sponge",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.buttercream-cake has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.buttercream-cake",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.buttercream-cake has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.buttercream-cake",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.birthday-pair has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.birthday-pair",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.birthday-pair has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.birthday-pair",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.butter-delight has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.butter-delight",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.butter-delight has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.butter-delight",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.cream-cheese-donut has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.cream-cheese-donut",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.cream-cheese-donut has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.cream-cheese-donut",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.whisk-whimsy has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.whisk-whimsy",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.whisk-whimsy has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.whisk-whimsy",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.sprinkle-1 has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.sprinkle-1",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.sprinkle-1 has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.sprinkle-1",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.sprinkle-2 has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.sprinkle-2",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.sprinkle-2 has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.sprinkle-2",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.sprinkle-3 has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.sprinkle-3",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.sprinkle-3 has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.sprinkle-3",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.sprinkle-4 has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.sprinkle-4",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.sprinkle-4 has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.sprinkle-4",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-truffle has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.choc-truffle",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-truffle has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.choc-truffle",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-praline has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.choc-praline",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-praline has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.choc-praline",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-ganache has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.choc-ganache",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-ganache has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.choc-ganache",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-caramel has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.choc-caramel",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-caramel has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.choc-caramel",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-mint has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.choc-mint",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-mint has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.choc-mint",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-orange has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.choc-orange",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-orange has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.choc-orange",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-almond has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.choc-almond",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-almond has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.choc-almond",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-white has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.choc-white",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-white has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.choc-white",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-berry has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.choc-berry",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.choc-berry has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.choc-berry",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.extra-donut has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.extra-donut",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.extra-donut has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.extra-donut",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.extra-icecream has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.extra-icecream",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.extra-icecream has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.extra-icecream",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.extra-cheesecake has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.extra-cheesecake",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.extra-cheesecake has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.extra-cheesecake",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "tax_reference_requires_odoo_verification",
+      "message": "Product terrific_bites.product.extra-donuts-pair has no tax_reference — real Odoo account.tax mapping requires environment access",
+      "entity": "terrific_bites.product.extra-donuts-pair",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "unit_of_measure_requires_odoo_verification",
+      "message": "Product terrific_bites.product.extra-donuts-pair has no unit_of_measure — real Odoo uom.uom mapping requires environment access",
+      "entity": "terrific_bites.product.extra-donuts-pair",
+      "category": "odoo_verification"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.swiss-frosting display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.swiss-frosting",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.swiss-frosting has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.swiss-frosting",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.moose-cream display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.moose-cream",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.moose-cream has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.moose-cream",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.butter-frosting display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.butter-frosting",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.butter-frosting has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.butter-frosting",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.light-sponge display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.light-sponge",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.light-sponge has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.light-sponge",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.buttercream-cake display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.buttercream-cake",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.buttercream-cake has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.buttercream-cake",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.birthday-pair display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.birthday-pair",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.birthday-pair has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.birthday-pair",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.butter-delight display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.butter-delight",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.butter-delight has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.butter-delight",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.cream-cheese-donut display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.cream-cheese-donut",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.cream-cheese-donut has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.cream-cheese-donut",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.whisk-whimsy display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.whisk-whimsy",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.whisk-whimsy has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.whisk-whimsy",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.sprinkle-1 display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.sprinkle-1",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.sprinkle-1 has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.sprinkle-1",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.sprinkle-2 display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.sprinkle-2",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.sprinkle-2 has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.sprinkle-2",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.sprinkle-3 display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.sprinkle-3",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.sprinkle-3 has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.sprinkle-3",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.sprinkle-4 display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.sprinkle-4",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.sprinkle-4 has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.sprinkle-4",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-truffle display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.choc-truffle",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.choc-truffle has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.choc-truffle",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-praline display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.choc-praline",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.choc-praline has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.choc-praline",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-ganache display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.choc-ganache",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.choc-ganache has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.choc-ganache",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-caramel display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.choc-caramel",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.choc-caramel has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.choc-caramel",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-mint display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.choc-mint",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.choc-mint has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.choc-mint",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-orange display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.choc-orange",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.choc-orange has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.choc-orange",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-almond display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.choc-almond",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.choc-almond has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.choc-almond",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-white display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.choc-white",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.choc-white has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.choc-white",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.choc-berry display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.choc-berry",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.choc-berry has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.choc-berry",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.extra-donut display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.extra-donut",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.extra-donut has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.extra-donut",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.extra-icecream display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.extra-icecream",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.extra-icecream has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.extra-icecream",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.extra-cheesecake display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.extra-cheesecake",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.extra-cheesecake has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.extra-cheesecake",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "display_order_requires_confirmation",
+      "message": "Product terrific_bites.product.extra-donuts-pair display_order is generated from array position, not a business source",
+      "entity": "terrific_bites.product.extra-donuts-pair",
+      "category": "merchandising"
+    },
+    {
+      "severity": "warning",
+      "code": "is_bestseller_concept_undefined",
+      "message": "Product terrific_bites.product.extra-donuts-pair has no is_bestseller value — concept does not exist yet",
+      "entity": "terrific_bites.product.extra-donuts-pair",
+      "category": "merchandising"
+    }
+  ]
+}

@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { featured } from "@/lib/products";
+import { QueryState } from "@/components/QueryState";
+import { mapSummaryToProduct, useCatalogueHomepage } from "@/lib/catalogue-api";
 import { useT } from "@/lib/i18n";
 import hero from "@/assets/hero-cupcake.jpg";
 import catering from "@/assets/catering.jpg";
@@ -46,6 +47,17 @@ function SectionHead({ title, kicker, to, viewMoreLabel }: { title: string; kick
 
 function Index() {
   const t = useT();
+  const { data: homepage, isLoading, isError, refetch } = useCatalogueHomepage();
+
+  const heroProducts = homepage?.hero.map(mapSummaryToProduct) ?? [];
+  const giftsProducts = homepage?.gifts.map(mapSummaryToProduct) ?? [];
+  const divineProducts = homepage?.divine.map(mapSummaryToProduct) ?? [];
+  // "What's New" intentionally reuses the same hero slice as the Products rail — this
+  // preserves the current Storefront's existing (buggy) behaviour exactly rather than
+  // switching to the is_new-flagged `homepage.new` data; see docs/catalogue/
+  // catalogue-decisions.json D16, which explicitly defers fixing this to a later phase.
+  const newProducts = heroProducts;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
@@ -69,78 +81,80 @@ function Index() {
         <button aria-label="next" className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white/10 backdrop-blur flex items-center justify-center hover:bg-white/20"><ChevronRight className="h-5 w-5" /></button>
       </section>
 
-      {/* Products */}
-      <section className="max-w-7xl mx-auto px-6 py-16">
-        <SectionHead title={t("homeProductsTitle")} kicker={t("homeProductsKicker")} viewMoreLabel={t("viewMore")} />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {featured.hero.map((p) => (
-            <Link key={p.id} to="/product/$id" params={{ id: p.id }} className="group">
-              <div className="aspect-square overflow-hidden rounded-md bg-secondary">
-                <img src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-              </div>
-              <h3 className="mt-3 font-display text-sm text-primary uppercase tracking-wider">{p.name}</h3>
-              <p className="text-xs text-muted-foreground mt-1">SAR {p.price.toFixed(2)}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Gifts */}
-      <section className="max-w-7xl mx-auto px-6 py-8">
-        <SectionHead title={t("homeGiftsTitle")} kicker={t("homeGiftsKicker")} viewMoreLabel={t("viewMore")} />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {featured.gifts.map((g, i) => (
-            <Link to="/product/$id" params={{ id: g.id }} key={g.id} className="text-center group">
-              <div className="aspect-square rounded-full overflow-hidden flex items-center justify-center" style={{ background: gifts[i]?.bg }}>
-                <img src={g.image} alt={g.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-              </div>
-              <h3 className="mt-4 font-display text-sm text-primary uppercase tracking-wider">{g.name}</h3>
-              <p className="text-xs text-muted-foreground">SAR {g.price.toFixed(2)}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Divine treats */}
-      <section className="mt-16 py-16 bg-cream">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-10">
-            <h2 className="font-display text-3xl md:text-4xl text-primary">{t("homeDivineTitle")}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{t("homeDivineKicker")}</p>
+      <QueryState isLoading={isLoading} isError={isError} onRetry={() => refetch()}>
+        {/* Products */}
+        <section className="max-w-7xl mx-auto px-6 py-16">
+          <SectionHead title={t("homeProductsTitle")} kicker={t("homeProductsKicker")} viewMoreLabel={t("viewMore")} />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {heroProducts.map((p) => (
+              <Link key={p.id} to="/product/$id" params={{ id: p.id }} className="group">
+                <div className="aspect-square overflow-hidden rounded-md bg-secondary">
+                  <img src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                </div>
+                <h3 className="mt-3 font-display text-sm text-primary uppercase tracking-wider">{p.name}</h3>
+                <p className="text-xs text-muted-foreground mt-1">SAR {p.price.toFixed(2)}</p>
+              </Link>
+            ))}
           </div>
-          <div className="relative">
-            <button aria-label="prev" className="absolute -left-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white shadow flex items-center justify-center z-10"><ChevronLeft className="h-5 w-5" /></button>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {featured.divine.map((d) => (
-                <Link key={d.id} to="/product/$id" params={{ id: d.id }} className="group">
-                  <div className="aspect-square overflow-hidden rounded-md">
-                    <img src={d.image} alt={d.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-                  </div>
-                  <h3 className="mt-3 font-display text-sm text-primary uppercase tracking-wider">{d.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">SAR {d.price.toFixed(2)}</p>
-                </Link>
-              ))}
+        </section>
+
+        {/* Gifts */}
+        <section className="max-w-7xl mx-auto px-6 py-8">
+          <SectionHead title={t("homeGiftsTitle")} kicker={t("homeGiftsKicker")} viewMoreLabel={t("viewMore")} />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {giftsProducts.map((g, i) => (
+              <Link to="/product/$id" params={{ id: g.id }} key={g.id} className="text-center group">
+                <div className="aspect-square rounded-full overflow-hidden flex items-center justify-center" style={{ background: gifts[i]?.bg }}>
+                  <img src={g.image} alt={g.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                </div>
+                <h3 className="mt-4 font-display text-sm text-primary uppercase tracking-wider">{g.name}</h3>
+                <p className="text-xs text-muted-foreground">SAR {g.price.toFixed(2)}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* Divine treats */}
+        <section className="mt-16 py-16 bg-cream">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center mb-10">
+              <h2 className="font-display text-3xl md:text-4xl text-primary">{t("homeDivineTitle")}</h2>
+              <p className="mt-2 text-sm text-muted-foreground">{t("homeDivineKicker")}</p>
             </div>
-            <button aria-label="next" className="absolute -right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white shadow flex items-center justify-center z-10"><ChevronRight className="h-5 w-5" /></button>
-          </div>
-        </div>
-      </section>
-
-      {/* What's new */}
-      <section className="max-w-7xl mx-auto px-6 py-16">
-        <SectionHead title={t("homeNewTitle")} kicker={t("homeNewKicker")} viewMoreLabel={t("viewMore")} />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {featured.hero.map((p) => (
-            <Link to="/product/$id" params={{ id: p.id }} key={"new-" + p.id} className="group">
-              <div className="aspect-square overflow-hidden rounded-md bg-secondary">
-                <img src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+            <div className="relative">
+              <button aria-label="prev" className="absolute -left-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white shadow flex items-center justify-center z-10"><ChevronLeft className="h-5 w-5" /></button>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {divineProducts.map((d) => (
+                  <Link key={d.id} to="/product/$id" params={{ id: d.id }} className="group">
+                    <div className="aspect-square overflow-hidden rounded-md">
+                      <img src={d.image} alt={d.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                    </div>
+                    <h3 className="mt-3 font-display text-sm text-primary uppercase tracking-wider">{d.name}</h3>
+                    <p className="text-xs text-muted-foreground mt-1">SAR {d.price.toFixed(2)}</p>
+                  </Link>
+                ))}
               </div>
-              <h3 className="mt-3 font-display text-sm text-primary uppercase tracking-wider">{p.name}</h3>
-              <p className="text-xs text-muted-foreground mt-1">SAR {p.price.toFixed(2)}</p>
-            </Link>
-          ))}
-        </div>
-      </section>
+              <button aria-label="next" className="absolute -right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-white shadow flex items-center justify-center z-10"><ChevronRight className="h-5 w-5" /></button>
+            </div>
+          </div>
+        </section>
+
+        {/* What's new */}
+        <section className="max-w-7xl mx-auto px-6 py-16">
+          <SectionHead title={t("homeNewTitle")} kicker={t("homeNewKicker")} viewMoreLabel={t("viewMore")} />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {newProducts.map((p) => (
+              <Link to="/product/$id" params={{ id: p.id }} key={"new-" + p.id} className="group">
+                <div className="aspect-square overflow-hidden rounded-md bg-secondary">
+                  <img src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                </div>
+                <h3 className="mt-3 font-display text-sm text-primary uppercase tracking-wider">{p.name}</h3>
+                <p className="text-xs text-muted-foreground mt-1">SAR {p.price.toFixed(2)}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      </QueryState>
 
       {/* Event Catering */}
       <section className="grid md:grid-cols-2 items-stretch">

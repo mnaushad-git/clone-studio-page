@@ -1,0 +1,1369 @@
+{
+  "generated_at": "2026-07-28T13:46:27.268933+00:00",
+  "odoo_connection": "ok",
+  "unresolved_required_configuration": [
+    {
+      "decision_id": "D03",
+      "title": "Category codes: keep CUP / CAK / CHO / DON / GIF / EXT",
+      "status": "BUSINESS_CONFIRMATION_REQUIRED"
+    },
+    {
+      "decision_id": "D04",
+      "title": "Product SKU convention and sequence",
+      "status": "BUSINESS_CONFIRMATION_REQUIRED"
+    },
+    {
+      "decision_id": "D08",
+      "title": "Tax / VAT mapping and price tax-treatment",
+      "status": "BUSINESS_CONFIRMATION_REQUIRED"
+    },
+    {
+      "decision_id": "D10",
+      "title": "Odoo product type classification (Stockable / Consumable / Service)",
+      "status": "BUSINESS_CONFIRMATION_REQUIRED"
+    },
+    {
+      "decision_id": "D19",
+      "title": "Opening inventory quantity at first Odoo import",
+      "status": "BUSINESS_CONFIRMATION_REQUIRED"
+    }
+  ],
+  "action_counts": {
+    "BLOCKED": 32
+  },
+  "blocking_item_count": 32,
+  "field_mappings": {
+    "category": [
+      {
+        "canonical_field": "external_key",
+        "odoo_model": "ir.model.data",
+        "odoo_field": "name",
+        "classification": "REQUIRES_ODOO_CONFIGURATION",
+        "evidence": "INFERRED_MAPPING",
+        "notes": "Standard Odoo external-id pattern \u2014 see docs/integrations/odoo-external-key-strategy.md; no xml_id is created in this phase."
+      },
+      {
+        "canonical_field": "code",
+        "odoo_model": "product.category",
+        "odoo_field": null,
+        "classification": "NOT_SUPPORTED",
+        "evidence": "UNVERIFIED_ASSUMPTION",
+        "notes": "No standard Odoo field for a short category code (D03) \u2014 stays PostgreSQL-only unless a genuine integration need for it inside Odoo is identified."
+      },
+      {
+        "canonical_field": "slug",
+        "odoo_model": "product.category",
+        "odoo_field": null,
+        "classification": "NOT_SUPPORTED",
+        "evidence": "UNVERIFIED_ASSUMPTION",
+        "notes": "No standard Odoo field for a URL slug \u2014 PostgreSQL-only, matches D06."
+      },
+      {
+        "canonical_field": "name_en",
+        "odoo_model": "product.category",
+        "odoo_field": "name",
+        "classification": "STANDARD_FIELD_CONFIRMED",
+        "evidence": "VERIFIED_FACT",
+        "notes": "product.category.name is Odoo's standard category name field."
+      },
+      {
+        "canonical_field": "name_ar",
+        "odoo_model": "product.category",
+        "odoo_field": "name",
+        "classification": "REQUIRES_ODOO_CONFIGURATION",
+        "evidence": "INFERRED_MAPPING",
+        "notes": "Requires Arabic (ar_001/ar_SA) installed and activated as an Odoo language, then a translated `name` value via ir.translation \u2014 not a separate field. Not checked by fields_get; verified via the language-activation check instead (see D13)."
+      },
+      {
+        "canonical_field": "description_en",
+        "odoo_model": null,
+        "odoo_field": null,
+        "classification": "POSTGRESQL_ONLY",
+        "evidence": "VERIFIED_FACT",
+        "notes": "No standard product.category description field is used by this app's UI; treated as PostgreSQL/merchandising-owned like the rest of category copy."
+      },
+      {
+        "canonical_field": "description_ar",
+        "odoo_model": null,
+        "odoo_field": null,
+        "classification": "POSTGRESQL_ONLY",
+        "evidence": "VERIFIED_FACT",
+        "notes": "Same as description_en."
+      },
+      {
+        "canonical_field": "parent category",
+        "odoo_model": "product.category",
+        "odoo_field": "parent_id",
+        "classification": "STANDARD_FIELD_CONFIRMED",
+        "evidence": "VERIFIED_FACT",
+        "notes": "Not used today (D02: flat, 6 categories) \u2014 field exists in Odoo for future hierarchy."
+      },
+      {
+        "canonical_field": "active",
+        "odoo_model": "product.category",
+        "odoo_field": "active",
+        "classification": "NOT_SUPPORTED",
+        "evidence": "VERIFIED_FACT",
+        "notes": "Standard Odoo active flag. ('active' not found on product.category in fields_get)"
+      },
+      {
+        "canonical_field": "display order",
+        "odoo_model": null,
+        "odoo_field": null,
+        "classification": "POSTGRESQL_ONLY",
+        "evidence": "VERIFIED_FACT",
+        "notes": "Storefront display order is Admin-owned merchandising data, not an Odoo concept (final-data-ownership.md)."
+      }
+    ],
+    "product": [
+      {
+        "canonical_field": "external_key",
+        "odoo_model": "ir.model.data",
+        "odoo_field": "name",
+        "classification": "REQUIRES_ODOO_CONFIGURATION",
+        "evidence": "INFERRED_MAPPING",
+        "notes": "Same external-id strategy as categories \u2014 see identifier-mapping-register.md (D20)."
+      },
+      {
+        "canonical_field": "sku",
+        "odoo_model": "product.product",
+        "odoo_field": "default_code",
+        "classification": "STANDARD_FIELD_CONFIRMED",
+        "evidence": "VERIFIED_FACT",
+        "notes": "default_code ('Internal Reference') lives on the variant (product.product), not the template \u2014 1:1 for single-variant products, per-variant for buttercream-cake."
+      },
+      {
+        "canonical_field": "slug",
+        "odoo_model": null,
+        "odoo_field": null,
+        "classification": "POSTGRESQL_ONLY",
+        "evidence": "VERIFIED_FACT",
+        "notes": "No standard Odoo field for a URL slug \u2014 PostgreSQL-only, matches D06."
+      },
+      {
+        "canonical_field": "name_en",
+        "odoo_model": "product.template",
+        "odoo_field": "name",
+        "classification": "STANDARD_FIELD_CONFIRMED",
+        "evidence": "VERIFIED_FACT",
+        "notes": "product.template.name is the standard product name field."
+      },
+      {
+        "canonical_field": "name_ar",
+        "odoo_model": "product.template",
+        "odoo_field": "name",
+        "classification": "REQUIRES_ODOO_CONFIGURATION",
+        "evidence": "INFERRED_MAPPING",
+        "notes": "Same Arabic-translation caveat as category name_ar."
+      },
+      {
+        "canonical_field": "description_en",
+        "odoo_model": "product.template",
+        "odoo_field": "description_sale",
+        "classification": "STANDARD_FIELD_CONFIRMED",
+        "evidence": "VERIFIED_FACT",
+        "notes": "description_sale ('Sales Description') is the customer-facing field \u2014 description (internal notes) is the wrong target."
+      },
+      {
+        "canonical_field": "description_ar",
+        "odoo_model": "product.template",
+        "odoo_field": "description_sale",
+        "classification": "REQUIRES_ODOO_CONFIGURATION",
+        "evidence": "INFERRED_MAPPING",
+        "notes": "Same Arabic-translation caveat."
+      },
+      {
+        "canonical_field": "short description",
+        "odoo_model": null,
+        "odoo_field": null,
+        "classification": "POSTGRESQL_ONLY",
+        "evidence": "VERIFIED_FACT",
+        "notes": "No standard Odoo field distinct from description_sale for a short/teaser description \u2014 PostgreSQL/merchandising-owned."
+      },
+      {
+        "canonical_field": "category",
+        "odoo_model": "product.template",
+        "odoo_field": "categ_id",
+        "classification": "STANDARD_FIELD_CONFIRMED",
+        "evidence": "VERIFIED_FACT",
+        "notes": "Standard many2one to product.category."
+      },
+      {
+        "canonical_field": "product type",
+        "odoo_model": "product.template",
+        "odoo_field": "type",
+        "classification": "STANDARD_FIELD_CONFIRMED",
+        "evidence": "VERIFIED_FACT",
+        "notes": "Standard Odoo Consumable/Storable/Service classification (D10)."
+      },
+      {
+        "canonical_field": "unit of measure",
+        "odoo_model": "product.template",
+        "odoo_field": "uom_id",
+        "classification": "STANDARD_FIELD_CONFIRMED",
+        "evidence": "VERIFIED_FACT",
+        "notes": "Standard UoM field (D09)."
+      },
+      {
+        "canonical_field": "active",
+        "odoo_model": "product.template",
+        "odoo_field": "active",
+        "classification": "STANDARD_FIELD_CONFIRMED",
+        "evidence": "VERIFIED_FACT",
+        "notes": "Standard Odoo active flag."
+      },
+      {
+        "canonical_field": "sellable",
+        "odoo_model": "product.template",
+        "odoo_field": "sale_ok",
+        "classification": "STANDARD_FIELD_CONFIRMED",
+        "evidence": "VERIFIED_FACT",
+        "notes": "Standard 'Can be Sold' flag."
+      },
+      {
+        "canonical_field": "base sales price",
+        "odoo_model": "product.template",
+        "odoo_field": "list_price",
+        "classification": "STANDARD_FIELD_CONFIRMED",
+        "evidence": "VERIFIED_FACT",
+        "notes": "Standard template sales price \u2014 pricelist interaction is D08."
+      },
+      {
+        "canonical_field": "currency",
+        "odoo_model": "res.company",
+        "odoo_field": "currency_id",
+        "classification": "REQUIRES_ODOO_CONFIGURATION",
+        "evidence": "INFERRED_MAPPING",
+        "notes": "Company/pricelist currency setting, not a per-product field \u2014 verified via company_currency check (D07)."
+      },
+      {
+        "canonical_field": "tax mapping",
+        "odoo_model": "product.template",
+        "odoo_field": "taxes_id",
+        "classification": "STANDARD_FIELD_CONFIRMED",
+        "evidence": "VERIFIED_FACT",
+        "notes": "Standard many2many to account.tax \u2014 real record TBD (D08)."
+      },
+      {
+        "canonical_field": "primary image",
+        "odoo_model": "product.template",
+        "odoo_field": "image_1920",
+        "classification": "STANDARD_FIELD_CONFIRMED",
+        "evidence": "VERIFIED_FACT",
+        "notes": "Base64 image_1920; Odoo auto-derives smaller variants."
+      },
+      {
+        "canonical_field": "additional images",
+        "odoo_model": "product.image",
+        "odoo_field": null,
+        "classification": "REQUIRES_ODOO_CONFIGURATION",
+        "evidence": "INFERRED_MAPPING",
+        "notes": "Extra Product Media gallery model (Odoo 15+) \u2014 see product.image model-availability check; only buttercream-cake needs this (3 gallery thumbnails)."
+      },
+      {
+        "canonical_field": "product template ID",
+        "odoo_model": "product.template",
+        "odoo_field": "id",
+        "classification": "DERIVED",
+        "evidence": "INFERRED_MAPPING",
+        "notes": "Odoo's internal numeric id \u2014 stored alongside external_key, never used as the sync join key itself (numeric ids are not stable across a reimport)."
+      },
+      {
+        "canonical_field": "product variant ID",
+        "odoo_model": "product.product",
+        "odoo_field": "id",
+        "classification": "DERIVED",
+        "evidence": "INFERRED_MAPPING",
+        "notes": "Same caveat as product template ID."
+      }
+    ]
+  },
+  "categories": [
+    {
+      "entity_type": "category",
+      "external_key": "terrific_bites.category.cupcakes",
+      "identifier": "CUP",
+      "canonical_name": "Cupcakes",
+      "proposed_odoo_model": "product.category",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D03 (Category codes: keep CUP / CAK / CHO / DON / GIF / EXT) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Cupcakes",
+        "code": "CUP",
+        "slug": "cupcakes",
+        "active": true,
+        "display_order": 1
+      },
+      "omitted_postgresql_only_fields": [
+        "description_en",
+        "description_ar",
+        "display order"
+      ],
+      "confirmation_status": {
+        "code": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "category",
+      "external_key": "terrific_bites.category.cakes",
+      "identifier": "CAK",
+      "canonical_name": "Cakes",
+      "proposed_odoo_model": "product.category",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D03 (Category codes: keep CUP / CAK / CHO / DON / GIF / EXT) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Cakes",
+        "code": "CAK",
+        "slug": "cakes",
+        "active": true,
+        "display_order": 2
+      },
+      "omitted_postgresql_only_fields": [
+        "description_en",
+        "description_ar",
+        "display order"
+      ],
+      "confirmation_status": {
+        "code": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "category",
+      "external_key": "terrific_bites.category.chocolates",
+      "identifier": "CHO",
+      "canonical_name": "Chocolates",
+      "proposed_odoo_model": "product.category",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D03 (Category codes: keep CUP / CAK / CHO / DON / GIF / EXT) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Chocolates",
+        "code": "CHO",
+        "slug": "chocolates",
+        "active": true,
+        "display_order": 3
+      },
+      "omitted_postgresql_only_fields": [
+        "description_en",
+        "description_ar",
+        "display order"
+      ],
+      "confirmation_status": {
+        "code": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "category",
+      "external_key": "terrific_bites.category.donuts",
+      "identifier": "DON",
+      "canonical_name": "Donuts",
+      "proposed_odoo_model": "product.category",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D03 (Category codes: keep CUP / CAK / CHO / DON / GIF / EXT) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Donuts",
+        "code": "DON",
+        "slug": "donuts",
+        "active": true,
+        "display_order": 4
+      },
+      "omitted_postgresql_only_fields": [
+        "description_en",
+        "description_ar",
+        "display order"
+      ],
+      "confirmation_status": {
+        "code": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "category",
+      "external_key": "terrific_bites.category.gifts",
+      "identifier": "GIF",
+      "canonical_name": "Gifts",
+      "proposed_odoo_model": "product.category",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D03 (Category codes: keep CUP / CAK / CHO / DON / GIF / EXT) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Gifts",
+        "code": "GIF",
+        "slug": "gifts",
+        "active": true,
+        "display_order": 5
+      },
+      "omitted_postgresql_only_fields": [
+        "description_en",
+        "description_ar",
+        "display order"
+      ],
+      "confirmation_status": {
+        "code": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "category",
+      "external_key": "terrific_bites.category.extras",
+      "identifier": "EXT",
+      "canonical_name": "Extras",
+      "proposed_odoo_model": "product.category",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D03 (Category codes: keep CUP / CAK / CHO / DON / GIF / EXT) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Extras",
+        "code": "EXT",
+        "slug": "extras",
+        "active": true,
+        "display_order": 6
+      },
+      "omitted_postgresql_only_fields": [
+        "description_en",
+        "description_ar",
+        "display order"
+      ],
+      "confirmation_status": {
+        "code": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    }
+  ],
+  "products": [
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.swiss-frosting",
+      "identifier": "TB-CUP-001",
+      "canonical_name": "Swiss Frosting",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Swiss Frosting",
+        "sku": "TB-CUP-001",
+        "slug": "swiss-frosting",
+        "category_external_key": "terrific_bites.category.cupcakes",
+        "sales_price": 12.5,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.moose-cream",
+      "identifier": "TB-CUP-002",
+      "canonical_name": "Moose Cream",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Moose Cream",
+        "sku": "TB-CUP-002",
+        "slug": "moose-cream",
+        "category_external_key": "terrific_bites.category.cupcakes",
+        "sales_price": 14.0,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.butter-frosting",
+      "identifier": "TB-CUP-003",
+      "canonical_name": "Butter Frosting",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Butter Frosting",
+        "sku": "TB-CUP-003",
+        "slug": "butter-frosting",
+        "category_external_key": "terrific_bites.category.cupcakes",
+        "sales_price": 11.0,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.light-sponge",
+      "identifier": "TB-CUP-004",
+      "canonical_name": "Light Sponge",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Light Sponge",
+        "sku": "TB-CUP-004",
+        "slug": "light-sponge",
+        "category_external_key": "terrific_bites.category.cupcakes",
+        "sales_price": 9.5,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.buttercream-cake",
+      "identifier": "TB-CAK-001",
+      "canonical_name": "Buttercream Cake",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Buttercream Cake",
+        "sku": "TB-CAK-001",
+        "slug": "buttercream-cake",
+        "category_external_key": "terrific_bites.category.cakes",
+        "sales_price": 300,
+        "currency": "SAR",
+        "product_type": "variant_parent",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.birthday-pair",
+      "identifier": "TB-GIF-001",
+      "canonical_name": "Birthday Pair Cups",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Birthday Pair Cups",
+        "sku": "TB-GIF-001",
+        "slug": "birthday-pair",
+        "category_external_key": "terrific_bites.category.gifts",
+        "sales_price": 22,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.butter-delight",
+      "identifier": "TB-GIF-002",
+      "canonical_name": "Butter Frosting Delight",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Butter Frosting Delight",
+        "sku": "TB-GIF-002",
+        "slug": "butter-delight",
+        "category_external_key": "terrific_bites.category.gifts",
+        "sales_price": 18,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.cream-cheese-donut",
+      "identifier": "TB-DON-001",
+      "canonical_name": "Cream & Cheese Donut",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Cream & Cheese Donut",
+        "sku": "TB-DON-001",
+        "slug": "cream-cheese-donut",
+        "category_external_key": "terrific_bites.category.donuts",
+        "sales_price": 8,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.whisk-whimsy",
+      "identifier": "TB-GIF-003",
+      "canonical_name": "Whisk & Whimsy Cupcake",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Whisk & Whimsy Cupcake",
+        "sku": "TB-GIF-003",
+        "slug": "whisk-whimsy",
+        "category_external_key": "terrific_bites.category.gifts",
+        "sales_price": 15,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.sprinkle-1",
+      "identifier": "TB-CUP-005",
+      "canonical_name": "Sprinkle Cupcakes",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Sprinkle Cupcakes",
+        "sku": "TB-CUP-005",
+        "slug": "sprinkle-1",
+        "category_external_key": "terrific_bites.category.cupcakes",
+        "sales_price": 4.5,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.sprinkle-2",
+      "identifier": "TB-CUP-006",
+      "canonical_name": "Cherry Sprinkle",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Cherry Sprinkle",
+        "sku": "TB-CUP-006",
+        "slug": "sprinkle-2",
+        "category_external_key": "terrific_bites.category.cupcakes",
+        "sales_price": 4.5,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.sprinkle-3",
+      "identifier": "TB-CUP-007",
+      "canonical_name": "Pink Whip",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Pink Whip",
+        "sku": "TB-CUP-007",
+        "slug": "sprinkle-3",
+        "category_external_key": "terrific_bites.category.cupcakes",
+        "sales_price": 4.5,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.sprinkle-4",
+      "identifier": "TB-CUP-008",
+      "canonical_name": "Confetti Whip",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Confetti Whip",
+        "sku": "TB-CUP-008",
+        "slug": "sprinkle-4",
+        "category_external_key": "terrific_bites.category.cupcakes",
+        "sales_price": 4.5,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.choc-truffle",
+      "identifier": "TB-CHO-001",
+      "canonical_name": "Chocolate Truffle",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Chocolate Truffle",
+        "sku": "TB-CHO-001",
+        "slug": "choc-truffle",
+        "category_external_key": "terrific_bites.category.chocolates",
+        "sales_price": 6.99,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.choc-praline",
+      "identifier": "TB-CHO-002",
+      "canonical_name": "Hazelnut Praline",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Hazelnut Praline",
+        "sku": "TB-CHO-002",
+        "slug": "choc-praline",
+        "category_external_key": "terrific_bites.category.chocolates",
+        "sales_price": 7.5,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.choc-ganache",
+      "identifier": "TB-CHO-003",
+      "canonical_name": "Ganache Bites",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Ganache Bites",
+        "sku": "TB-CHO-003",
+        "slug": "choc-ganache",
+        "category_external_key": "terrific_bites.category.chocolates",
+        "sales_price": 8.25,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.choc-caramel",
+      "identifier": "TB-CHO-004",
+      "canonical_name": "Salted Caramel",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Salted Caramel",
+        "sku": "TB-CHO-004",
+        "slug": "choc-caramel",
+        "category_external_key": "terrific_bites.category.chocolates",
+        "sales_price": 7.25,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.choc-mint",
+      "identifier": "TB-CHO-005",
+      "canonical_name": "Mint Delight",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Mint Delight",
+        "sku": "TB-CHO-005",
+        "slug": "choc-mint",
+        "category_external_key": "terrific_bites.category.chocolates",
+        "sales_price": 6.5,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.choc-orange",
+      "identifier": "TB-CHO-006",
+      "canonical_name": "Orange Zest",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Orange Zest",
+        "sku": "TB-CHO-006",
+        "slug": "choc-orange",
+        "category_external_key": "terrific_bites.category.chocolates",
+        "sales_price": 6.75,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.choc-almond",
+      "identifier": "TB-CHO-007",
+      "canonical_name": "Roasted Almond",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Roasted Almond",
+        "sku": "TB-CHO-007",
+        "slug": "choc-almond",
+        "category_external_key": "terrific_bites.category.chocolates",
+        "sales_price": 7.99,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.choc-white",
+      "identifier": "TB-CHO-008",
+      "canonical_name": "White Dream",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "White Dream",
+        "sku": "TB-CHO-008",
+        "slug": "choc-white",
+        "category_external_key": "terrific_bites.category.chocolates",
+        "sales_price": 6.25,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.choc-berry",
+      "identifier": "TB-CHO-009",
+      "canonical_name": "Berry Truffle",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Berry Truffle",
+        "sku": "TB-CHO-009",
+        "slug": "choc-berry",
+        "category_external_key": "terrific_bites.category.chocolates",
+        "sales_price": 7.99,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.extra-donut",
+      "identifier": "TB-EXT-001",
+      "canonical_name": "Fanky Donut",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Fanky Donut",
+        "sku": "TB-EXT-001",
+        "slug": "extra-donut",
+        "category_external_key": "terrific_bites.category.extras",
+        "sales_price": 4.89,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.extra-icecream",
+      "identifier": "TB-EXT-002",
+      "canonical_name": "Icecream Cone",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Icecream Cone",
+        "sku": "TB-EXT-002",
+        "slug": "extra-icecream",
+        "category_external_key": "terrific_bites.category.extras",
+        "sales_price": 5.49,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.extra-cheesecake",
+      "identifier": "TB-EXT-003",
+      "canonical_name": "Mini Cheesecake",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Mini Cheesecake",
+        "sku": "TB-EXT-003",
+        "slug": "extra-cheesecake",
+        "category_external_key": "terrific_bites.category.extras",
+        "sales_price": 6.29,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    },
+    {
+      "entity_type": "product",
+      "external_key": "terrific_bites.product.extra-donuts-pair",
+      "identifier": "TB-EXT-004",
+      "canonical_name": "Donuts Pair",
+      "proposed_odoo_model": "product.template",
+      "existing_match": null,
+      "match_strategy": null,
+      "proposed_action": "BLOCKED",
+      "blocking_issues": [
+        "D04 (Product SKU convention and sequence) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D08 (Tax / VAT mapping and price tax-treatment) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D10 (Odoo product type classification (Stockable / Consumable / Service)) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED",
+        "D19 (Opening inventory quantity at first Odoo import) is BUSINESS_CONFIRMATION_REQUIRED, not APPROVED"
+      ],
+      "warnings": [],
+      "mapped_fields": {
+        "name_en": "Donuts Pair",
+        "sku": "TB-EXT-004",
+        "slug": "extra-donuts-pair",
+        "category_external_key": "terrific_bites.category.extras",
+        "sales_price": 7.89,
+        "currency": "SAR",
+        "product_type": "simple",
+        "active": true,
+        "sellable": true
+      },
+      "omitted_postgresql_only_fields": [
+        "slug",
+        "short description"
+      ],
+      "confirmation_status": {
+        "sku": "BUSINESS_CONFIRMATION_REQUIRED"
+      }
+    }
+  ]
+}

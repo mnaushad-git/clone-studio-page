@@ -1,32 +1,14 @@
-import prodSwiss from "@/assets/prod-swiss.jpg";
-import prodMoose from "@/assets/prod-moose.jpg";
-import prodButter from "@/assets/prod-butter.jpg";
-import prodLight from "@/assets/prod-light.jpg";
-import giftDonuts from "@/assets/gift-donuts.jpg";
-import giftButter from "@/assets/gift-butter.jpg";
-import giftCream from "@/assets/gift-cream.jpg";
-import giftWhisk from "@/assets/gift-whisk.jpg";
-import divine1 from "@/assets/divine-1.jpg";
-import divine2 from "@/assets/divine-2.jpg";
-import divine3 from "@/assets/divine-3.jpg";
-import divine4 from "@/assets/divine-4.jpg";
-import c1 from "@/assets/choc-1.jpg";
-import c2 from "@/assets/choc-2.jpg";
-import c3 from "@/assets/choc-3.jpg";
-import c4 from "@/assets/choc-4.jpg";
-import c5 from "@/assets/choc-5.jpg";
-import c6 from "@/assets/choc-6.jpg";
-import c7 from "@/assets/choc-7.jpg";
-import c8 from "@/assets/choc-8.jpg";
-import c9 from "@/assets/choc-9.jpg";
-import cakeMain from "@/assets/cake-main.jpg";
-import cakeT2 from "@/assets/cake-thumb-2.jpg";
-import cakeT3 from "@/assets/cake-thumb-3.jpg";
-import cakeT4 from "@/assets/cake-thumb-4.jpg";
-import extraDonut from "@/assets/extra-donut.jpg";
-import extraIcecream from "@/assets/extra-icecream.jpg";
-import extraCheesecake from "@/assets/extra-cheesecake.jpg";
-import extraDonutsPair from "@/assets/extra-donuts-pair.jpg";
+/**
+ * Catalogue vocabulary and a runtime product cache.
+ *
+ * Product data itself no longer lives here as static literals — it's fetched from the
+ * catalogue API (src/lib/catalogue-api.ts) and registered into the cache below as it
+ * arrives, so `getProduct`/`products`/`featured` keep working synchronously for call
+ * sites (cart, checkout, wishlist, admin) that aren't wired to the API directly in
+ * this phase. Category/occasion/recipient vocabulary stays static: it's a stable,
+ * already-approved taxonomy (matches data/catalogue/{categories,moments,recipients}.json
+ * 1:1), not mock product data.
+ */
 
 export type Category = "cupcakes" | "cakes" | "chocolates" | "donuts" | "gifts" | "extras";
 
@@ -51,106 +33,61 @@ export type Product = {
   thumbs?: string[];
   category: Category;
   tags?: string[];
-  sizes?: { label: string; sub?: string; delta?: number }[];
-  flavors?: string[];
+  // One entry per variant attribute axis this product's variants carry (any number —
+  // not just the legacy "size"/"flavor" pair), each axis's distinct values in
+  // first-seen order across the product's variants.
+  variantAxes?: { code: string; name: string; values: string[] }[];
+  // Exact price for one specific combination of selected values, keyed by
+  // variantComboKey() — replaces the old size-delta-additive approximation, which
+  // stops being a safe assumption once a product can have more than one
+  // price-bearing axis.
+  variantPriceByKey?: Record<string, number>;
   description?: string;
   isNew?: boolean;
   occasions?: Occasion[];
   recipients?: Recipient[];
 };
 
-export const products: Product[] = [
-  { id: "swiss-frosting", name: "Swiss Frosting", price: 12.5, image: prodSwiss, category: "cupcakes", isNew: true,
-    description: "Silky Swiss meringue buttercream on our signature vanilla sponge.",
-    occasions: ["Birthday", "Thank You"], recipients: ["For Her", "For Family"] },
-  { id: "moose-cream", name: "Moose Cream", price: 14.0, image: prodMoose, category: "cupcakes",
-    description: "Rich chocolate mousse crowned with cocoa curls.",
-    occasions: ["Birthday", "Congratulations"], recipients: ["For Him", "For Her"] },
-  { id: "butter-frosting", name: "Butter Frosting", price: 11.0, image: prodButter, category: "cupcakes",
-    description: "Classic American butter frosting on golden butter cake.",
-    occasions: ["Thank You", "Congratulations"], recipients: ["For Family"] },
-  { id: "light-sponge", name: "Light Sponge", price: 9.5, image: prodLight, category: "cupcakes",
-    description: "Airy sponge with a whisper of vanilla — light and delicate.",
-    occasions: ["Thank You"], recipients: ["For Her", "For Family"] },
-
-  { id: "buttercream-cake", name: "Buttercream Cake", price: 300, image: cakeMain,
-    thumbs: [cakeMain, cakeT2, cakeT3, cakeT4], category: "cakes",
-    sizes: [
-      { label: "6 INCH", sub: "3 Layers", delta: 0 },
-      { label: "9 INCH", sub: "3 Layers", delta: 80 },
-    ],
-    flavors: ["Vanilla", "Chocolate"],
-    description: "Three luscious layers of buttercream cake, finished with rainbow sprinkles and a cherry on top.",
-    occasions: ["Birthday", "Anniversary", "Wedding", "Graduation"], recipients: ["For Family", "For Her", "For Him"] },
-
-  { id: "birthday-pair", name: "Birthday Pair Cups", price: 22, image: giftDonuts, category: "gifts",
-    description: "A pair of celebration cupcakes ready to gift.",
-    occasions: ["Birthday", "Congratulations"], recipients: ["For Him", "For Her", "For Kids"] },
-  { id: "butter-delight", name: "Butter Frosting Delight", price: 18, image: giftButter, category: "gifts",
-    description: "Butter-frosted bites in a golden gift box.",
-    occasions: ["Anniversary", "Thank You"], recipients: ["For Her"] },
-  { id: "cream-cheese-donut", name: "Cream & Cheese Donut", price: 8, image: giftCream, category: "donuts",
-    description: "Fluffy donut filled with cream cheese frosting.",
-    occasions: ["Birthday"], recipients: ["For Kids"] },
-  { id: "whisk-whimsy", name: "Whisk & Whimsy Cupcake", price: 15, image: giftWhisk, category: "gifts",
-    description: "Whimsical cupcake decorated by hand.",
-    occasions: ["Birthday", "Graduation"], recipients: ["For Kids", "For Her"] },
-
-  { id: "sprinkle-1", name: "Sprinkle Cupcakes", price: 4.5, image: divine1, category: "cupcakes",
-    description: "Colorful sprinkle-topped cupcakes for any occasion.",
-    occasions: ["Birthday"], recipients: ["For Kids"] },
-  { id: "sprinkle-2", name: "Cherry Sprinkle", price: 4.5, image: divine2, category: "cupcakes",
-    occasions: ["Birthday"], recipients: ["For Kids", "For Her"] },
-  { id: "sprinkle-3", name: "Pink Whip", price: 4.5, image: divine3, category: "cupcakes",
-    occasions: ["Birthday", "Thank You"], recipients: ["For Her"] },
-  { id: "sprinkle-4", name: "Confetti Whip", price: 4.5, image: divine4, category: "cupcakes",
-    occasions: ["Birthday", "Congratulations"], recipients: ["For Kids"] },
-
-  { id: "choc-truffle", name: "Chocolate Truffle", price: 6.99, image: c1, category: "chocolates",
-    description: "Dark chocolate truffles rolled in cocoa.",
-    occasions: ["Anniversary", "Thank You"], recipients: ["For Her", "For Him"] },
-  { id: "choc-praline", name: "Hazelnut Praline", price: 7.5, image: c2, category: "chocolates",
-    occasions: ["Anniversary"], recipients: ["For Him"] },
-  { id: "choc-ganache", name: "Ganache Bites", price: 8.25, image: c3, category: "chocolates",
-    occasions: ["Anniversary", "Wedding"], recipients: ["For Her"] },
-  { id: "choc-caramel", name: "Salted Caramel", price: 7.25, image: c4, category: "chocolates",
-    occasions: ["Thank You"], recipients: ["For Him", "For Her"] },
-  { id: "choc-mint", name: "Mint Delight", price: 6.5, image: c5, category: "chocolates",
-    occasions: ["Thank You"], recipients: ["For Him"] },
-  { id: "choc-orange", name: "Orange Zest", price: 6.75, image: c6, category: "chocolates",
-    occasions: ["Congratulations"], recipients: ["For Her"] },
-  { id: "choc-almond", name: "Roasted Almond", price: 7.99, image: c7, category: "chocolates",
-    occasions: ["Anniversary"], recipients: ["For Him"] },
-  { id: "choc-white", name: "White Dream", price: 6.25, image: c8, category: "chocolates",
-    occasions: ["Wedding"], recipients: ["For Her"] },
-  { id: "choc-berry", name: "Berry Truffle", price: 7.99, image: c9, category: "chocolates",
-    occasions: ["Anniversary", "Thank You"], recipients: ["For Her"] },
-
-  { id: "extra-donut", name: "Fanky Donut", price: 4.89, image: extraDonut, category: "extras",
-    occasions: ["Birthday"], recipients: ["For Kids"] },
-  { id: "extra-icecream", name: "Icecream Cone", price: 5.49, image: extraIcecream, category: "extras",
-    occasions: ["Birthday"], recipients: ["For Kids"] },
-  { id: "extra-cheesecake", name: "Mini Cheesecake", price: 6.29, image: extraCheesecake, category: "extras",
-    occasions: ["Thank You"], recipients: ["For Family"] },
-  { id: "extra-donuts-pair", name: "Donuts Pair", price: 7.89, image: extraDonutsPair, category: "extras",
-    occasions: ["Birthday"], recipients: ["For Kids", "For Family"] },
-];
-
-export const productMap: Record<string, Product> = Object.fromEntries(
-  products.map((p) => [p.id, p])
-);
-
-export function getProduct(id: string): Product | undefined {
-  return productMap[id];
+/** Deterministic combination key for `Product.variantPriceByKey` — sorted by axis
+ * code so selection order never affects the lookup. */
+export function variantComboKey(selected: Record<string, string>): string {
+  return Object.entries(selected)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([code, value]) => `${code}=${value}`)
+    .join("|");
 }
 
+const productCache = new Map<string, Product>();
+
+/** Every product fetched so far this session — mutated in place (never reassigned)
+ * so existing `products.filter(...)`/`products.find(...)` call sites keep working
+ * unchanged as the cache grows.
+ */
+export const products: Product[] = [];
+
+/** Populated by catalogue-api.ts fetch functions as API responses arrive. */
+export function registerProducts(items: Product[]): void {
+  for (const item of items) {
+    const existingIndex = products.findIndex((p) => p.id === item.id);
+    if (existingIndex >= 0) products[existingIndex] = item;
+    else products.push(item);
+    productCache.set(item.id, item);
+  }
+}
+
+export function getProduct(id: string): Product | undefined {
+  return productCache.get(id);
+}
+
+/** Same slices as the old static `featured` object, now computed live off whatever's
+ * in the cache — kept only for the customize (gift builder) page, which isn't wired
+ * to the catalogue API directly in this phase. The homepage itself uses
+ * useCatalogueHomepage() instead (see src/routes/index.tsx).
+ */
 export const featured = {
-  hero: products.filter((p) => p.category === "cupcakes").slice(0, 4),
-  gifts: products.filter((p) => p.category === "gifts" || p.id === "cream-cheese-donut").slice(0, 4),
-  divine: products.filter((p) => p.id.startsWith("sprinkle-")),
-  chocolates: products.filter((p) => p.category === "chocolates"),
-  extras: products.filter((p) => p.category === "extras"),
-  new: products.filter((p) => p.isNew),
+  get extras() {
+    return products.filter((p) => p.category === "extras");
+  },
 };
 
 export const CATEGORY_LABEL: Record<Category, string> = {

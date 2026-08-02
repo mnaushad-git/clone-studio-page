@@ -6,7 +6,8 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductReviews } from "@/components/ProductReviews";
-import { getProduct, products } from "@/lib/products";
+import { getProduct, variantComboKey } from "@/lib/products";
+import { fetchProductDetail, mapDetailToProduct, mapSummaryToProduct, useCatalogueProducts } from "@/lib/catalogue-api";
 import { useAdmin } from "@/lib/admin-store";
 import { useT } from "@/lib/i18n";
 import {
@@ -20,10 +21,13 @@ import {
 
 export const Route = createFileRoute("/product/$id")({
   component: ProductPage,
-  loader: ({ params }) => {
-    const p = getProduct(params.id);
-    if (!p) throw notFound();
-    return { product: p };
+  loader: async ({ params }) => {
+    try {
+      const detail = await fetchProductDetail(params.id);
+      return { product: mapDetailToProduct(detail) };
+    } catch {
+      throw notFound();
+    }
   },
   head: ({ loaderData }) => ({
     meta: loaderData
@@ -51,16 +55,15 @@ function ProductPage() {
     image: override?.imageOverride || baseProduct.image,
     price: override?.priceOverride ?? baseProduct.price,
   };
+  const { data: categoryPage } = useCatalogueProducts({ category: baseProduct.category, limit: 8 });
+  const categoryProducts = categoryPage ? categoryPage.items.map(mapSummaryToProduct) : [];
   const fallbackThumbs = [
     product.image,
-    ...products
-      .filter((p) => p.category === baseProduct.category && p.id !== product.id)
-      .map((p) => p.image),
+    ...categoryProducts.filter((p) => p.id !== product.id).map((p) => p.image),
   ].slice(0, 4);
   const thumbs = baseProduct.thumbs ?? (fallbackThumbs.length > 1 ? fallbackThumbs : [product.image]);
   const [active, setActive] = useState(0);
-  const [sizeIdx, setSizeIdx] = useState(0);
-  const [flavorIdx, setFlavorIdx] = useState(0);
+  const [selectedIndices, setSelectedIndices] = useState<Record<string, number>>({});
   const [qty, setQty] = useState(1);
   const [tab, setTab] = useState(0);
   const [inscription, setInscription] = useState("");
@@ -72,8 +75,7 @@ function ProductPage() {
   useEffect(() => {
     recentlyViewed.track(product.id);
     setActive(0);
-    setSizeIdx(0);
-    setFlavorIdx(0);
+    setSelectedIndices({});
     setQty(1);
     setInscription("");
   }, [product.id]);
@@ -121,18 +123,39 @@ function ProductPage() {
     gifts: [],
     extras: [],
   };
-  const sizes = override?.sizes ?? baseProduct.sizes ?? sizeOverridesById[baseProduct.id] ?? defaultSizesByCategory[baseProduct.category];
-  const flavors = override?.flavors ?? baseProduct.flavors ?? (defaultFlavorsByCategory[baseProduct.category]?.length ? defaultFlavorsByCategory[baseProduct.category] : undefined);
-  const selectedSize = sizes?.[sizeIdx];
-  const selectedFlavor = flavors?.[flavorIdx];
-  const unitPrice = product.price + (selectedSize?.delta ?? 0);
+  // One selector axis per real catalogue variant attribute (any number, any name —
+  // ops/Odoo-defined). When a product has no real variants at all, fall back to a
+  // locally-synthesized "size"/"flavor" axis pair from category defaults — those have
+  // no backend variant behind them, so their delta stays zero (the value is still
+  // sent through as a label on the order for prep purposes) rather than promising a
+  // price the server would silently not honor (it falls back to the single
+  // default-variant price).
+  const realAxes = product.variantAxes;
+  const fallbackSizeOptions = sizeOverridesById[baseProduct.id] ?? defaultSizesByCategory[baseProduct.category];
+  const fallbackFlavorOptions = defaultFlavorsByCategory[baseProduct.category];
+  const fallbackAxes: { code: string; name: string; values: { label: string; sub?: string }[] }[] = [
+    ...(fallbackSizeOptions ? [{ code: "size", name: "Size", values: fallbackSizeOptions.map((s) => ({ label: s.label, sub: s.sub })) }] : []),
+    ...(fallbackFlavorOptions?.length ? [{ code: "flavor", name: "Flavor", values: fallbackFlavorOptions.map((f) => ({ label: f })) }] : []),
+  ];
+  const hasRealAxes = !!realAxes && realAxes.length > 0;
+  const axes: { code: string; name: string; values: { label: string; sub?: string }[] }[] = hasRealAxes
+    ? realAxes.map((a) => ({ ...a, values: a.values.map((v) => ({ label: v })) }))
+    : fallbackAxes;
+
+  const selectedAttributes: Record<string, string> = {};
+  for (const axis of axes) {
+    const value = axis.values[selectedIndices[axis.code] ?? 0];
+    if (value) selectedAttributes[axis.code] = value.label;
+  }
+  const unitPrice = hasRealAxes
+    ? (product.variantPriceByKey?.[variantComboKey(selectedAttributes)] ?? product.price)
+    : product.price;
 
   const addToCart = () => {
     cart.add({
       productId: product.id,
       qty,
-      size: selectedSize?.label,
-      flavor: selectedFlavor,
+      attributes: Object.keys(selectedAttributes).length > 0 ? selectedAttributes : undefined,
       inscription: inscription || undefined,
       unitPrice,
     });
@@ -149,7 +172,7 @@ function ProductPage() {
     toast.success(added ? t("productAddedToWishlistToast") : t("productRemovedFromWishlistToast"));
   };
 
-  const related = products.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
+  const related = categoryProducts.filter((p) => p.id !== product.id).slice(0, 4);
   const recent = recentIds
     .filter((id) => id !== product.id)
     .map((id) => getProduct(id))
@@ -221,36 +244,46 @@ function ProductPage() {
           )}
           {product.description && <p className="mt-2 text-sm text-muted-foreground">{product.description}</p>}
 
-          {sizes && (
-            <div className={`mt-6 grid gap-3 ${sizes.length >= 3 ? "grid-cols-3" : "grid-cols-2"}`}>
-              {sizes.map((s: { label: string; sub?: string; delta?: number }, i: number) => (
-                <button
-                  key={i}
-                  onClick={() => setSizeIdx(i)}
-                  className={`relative flex flex-col items-center justify-center gap-2 border rounded-md px-2 py-4 text-center ${sizeIdx === i ? "border-primary" : "border-border"}`}
-                >
-                  <span className={`h-4 w-4 rounded-full border ${sizeIdx === i ? "border-primary" : "border-muted-foreground/50"} flex items-center justify-center`}>
-                    {sizeIdx === i && <span className="h-2 w-2 rounded-full bg-primary" />}
-                  </span>
-                  <span className="block text-sm font-semibold tracking-wide">{s.label}</span>
-                  {s.sub && <span className="block text-[11px] text-muted-foreground uppercase tracking-wider">{s.sub}</span>}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {flavors && (
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              {flavors.map((f: string, i: number) => (
-                <button key={f} onClick={() => setFlavorIdx(i)} className={`flex items-center gap-3 border rounded-md p-3 uppercase text-sm ${flavorIdx === i ? "border-primary" : "border-border"}`}>
-                  <span className={`h-4 w-4 rounded-full border ${flavorIdx === i ? "border-primary" : "border-muted-foreground/50"} flex items-center justify-center`}>
-                    {flavorIdx === i && <span className="h-2 w-2 rounded-full bg-primary" />}
-                  </span>
-                  {f}
-                </button>
-              ))}
-            </div>
-          )}
+          {axes.map((axis, axisIdx) => {
+            const selectedIdx = selectedIndices[axis.code] ?? 0;
+            const isSizeStyle = axis.code === "size";
+            return (
+              <div key={axis.code} className={axisIdx === 0 ? "mt-6" : "mt-3"}>
+                {axis.code !== "size" && axis.code !== "flavor" && (
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{axis.name}</div>
+                )}
+                <div className={`grid gap-3 ${isSizeStyle ? (axis.values.length >= 3 ? "grid-cols-3" : "grid-cols-2") : "grid-cols-2"}`}>
+                  {axis.values.map((v, i) => {
+                    const isSelected = selectedIdx === i;
+                    return isSizeStyle ? (
+                      <button
+                        key={i}
+                        onClick={() => setSelectedIndices((s) => ({ ...s, [axis.code]: i }))}
+                        className={`relative flex flex-col items-center justify-center gap-2 border rounded-md px-2 py-4 text-center ${isSelected ? "border-primary" : "border-border"}`}
+                      >
+                        <span className={`h-4 w-4 rounded-full border ${isSelected ? "border-primary" : "border-muted-foreground/50"} flex items-center justify-center`}>
+                          {isSelected && <span className="h-2 w-2 rounded-full bg-primary" />}
+                        </span>
+                        <span className="block text-sm font-semibold tracking-wide">{v.label}</span>
+                        {v.sub && <span className="block text-[11px] text-muted-foreground uppercase tracking-wider">{v.sub}</span>}
+                      </button>
+                    ) : (
+                      <button
+                        key={v.label}
+                        onClick={() => setSelectedIndices((s) => ({ ...s, [axis.code]: i }))}
+                        className={`flex items-center gap-3 border rounded-md p-3 uppercase text-sm ${isSelected ? "border-primary" : "border-border"}`}
+                      >
+                        <span className={`h-4 w-4 rounded-full border ${isSelected ? "border-primary" : "border-muted-foreground/50"} flex items-center justify-center`}>
+                          {isSelected && <span className="h-2 w-2 rounded-full bg-primary" />}
+                        </span>
+                        {v.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
 
           <div className="mt-6 grid grid-cols-[auto_1fr_auto] gap-3">
             <div className="flex items-center border border-border rounded-md">

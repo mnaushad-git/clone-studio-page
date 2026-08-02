@@ -1,0 +1,11 @@
+{
+  "generated_at": "2026-07-29T06:38:10.830045+00:00",
+  "run_id": "85d566c5-1dbc-47e6-995e-91daef1a2664",
+  "run_mode": "APPLY",
+  "run_status": "SUCCEEDED",
+  "items_checked": 93,
+  "field_mismatches": [],
+  "postgresql_mapping_mismatches": [],
+  "errors": [],
+  "clean": true
+}

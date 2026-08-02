@@ -12,6 +12,7 @@ import {
 import { useAdmin } from "@/lib/admin-store";
 import { getProduct } from "@/lib/products";
 import { useT } from "@/lib/i18n";
+import { createOrder, payOrder, toLocalOrder, CheckoutApiError } from "@/lib/checkout-api";
 
 export const Route = createFileRoute("/payment")({
   component: PaymentPage,
@@ -63,6 +64,7 @@ function PaymentPage() {
   const cartItems = useStore((s) => s.cart);
   const currentPromo = useStore((s) => s.promo);
   const addressList = useStore((s) => s.addresses);
+  const user = useStore((s) => s.user);
   const subtotal = useStore(selectSubtotal);
   const discount = useStore(selectDiscount);
   const tax = useStore(selectTax);
@@ -103,10 +105,34 @@ function PaymentPage() {
     }
     setLoading(true);
     try {
-      await new Promise((r) => setTimeout(r, 1200));
-      orders.place({ address: lastAddress, method: methodLabel });
+      // Authoritative: the backend recomputes pricing from PostgreSQL and rejects the
+      // order (unavailable product, stale price, below minimum) before anything is
+      // charged or shown as confirmed — a client-tampered total can never go through.
+      const created = await createOrder({
+        cart: cartItems,
+        promoCode: currentPromo?.code ?? null,
+        customerName: user?.name ?? lastAddress?.name ?? "Guest",
+        customerEmail: user?.email,
+        customerPhone: user?.phone ?? lastAddress?.phone ?? "",
+        address: lastAddress,
+      });
+      // Stub provider (Feature 3) — always succeeds today; the request shape is the
+      // same one a real gateway confirmation would use, so swapping the provider later
+      // needs no change here.
+      const paid = await payOrder(created.id, methodLabel);
+      // The backend order is now the source of truth for the confirmation/tracking
+      // pages — see toLocalOrder()'s docstring for what this does and doesn't carry.
+      orders.recordFromBackend(toLocalOrder(paid));
       toast.success(t("checkoutToastPaymentConfirmed"));
       setTimeout(() => navigate({ to: "/success" }), 400);
+    } catch (err) {
+      if (err instanceof CheckoutApiError && err.status === 422) {
+        toast.error(t("checkoutToastPricesChanged"));
+      } else if (err instanceof CheckoutApiError && err.status === 402) {
+        toast.error(t("checkoutToastPaymentDeclined"));
+      } else {
+        toast.error(t("checkoutToastOrderFailed"));
+      }
     } finally {
       setLoading(false);
     }

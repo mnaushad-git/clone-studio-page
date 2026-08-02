@@ -1,0 +1,1079 @@
+{
+  "$schema_note": "Canonical product-merchandising seed data — Phase 2A analysis output. Not wired to any runtime code. See docs/catalogue/catalogue-ownership.md.",
+  "generated_at": "2026-07-27",
+  "notes": [
+    "homepage_products_rail and homepage_whats_new_rail currently render an IDENTICAL product list (both read featured.hero) due to a bug in src/routes/index.tsx — featured.new (the isNew-filtered slice) is computed but never used by the homepage. Preserved as-observed, not fixed, per Phase 2A scope.",
+    "featured.chocolates and featured.extras (src/lib/products.ts) are computed derived slices that are not rendered by any current homepage section — dead derived data, not modeled as homepage_sections membership here.",
+    "admin-store.ts's homepageSections config (ids: hero/categories/featured/divine/gifts/chocolates/extras/testimonials) is NOT read by src/routes/index.tsx at all — toggling it in /admin/content has zero storefront effect today. See docs/catalogue/catalogue-migration-plan.md."
+  ],
+  "product_merchandising": [
+    {
+      "product_external_key": "terrific_bites.product.swiss-frosting",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": true,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 1,
+      "display_order_generated": true,
+      "homepage_sections": [
+        "homepage_products_rail",
+        "homepage_whats_new_rail"
+      ],
+      "moments": [
+        "terrific_bites.moment.birthday",
+        "terrific_bites.moment.thank-you"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-her",
+        "terrific_bites.recipient.for-family"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.moose-cream",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 2,
+      "display_order_generated": true,
+      "homepage_sections": [
+        "homepage_products_rail",
+        "homepage_whats_new_rail"
+      ],
+      "moments": [
+        "terrific_bites.moment.birthday",
+        "terrific_bites.moment.congratulations"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-him",
+        "terrific_bites.recipient.for-her"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.butter-frosting",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 3,
+      "display_order_generated": true,
+      "homepage_sections": [
+        "homepage_products_rail",
+        "homepage_whats_new_rail"
+      ],
+      "moments": [
+        "terrific_bites.moment.thank-you",
+        "terrific_bites.moment.congratulations"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-family"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.light-sponge",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 4,
+      "display_order_generated": true,
+      "homepage_sections": [
+        "homepage_products_rail",
+        "homepage_whats_new_rail"
+      ],
+      "moments": [
+        "terrific_bites.moment.thank-you"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-her",
+        "terrific_bites.recipient.for-family"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.buttercream-cake",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 5,
+      "display_order_generated": true,
+      "homepage_sections": [],
+      "moments": [
+        "terrific_bites.moment.birthday",
+        "terrific_bites.moment.anniversary",
+        "terrific_bites.moment.wedding",
+        "terrific_bites.moment.graduation"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-family",
+        "terrific_bites.recipient.for-her",
+        "terrific_bites.recipient.for-him"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.birthday-pair",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 6,
+      "display_order_generated": true,
+      "homepage_sections": [
+        "homepage_gifts_rail"
+      ],
+      "moments": [
+        "terrific_bites.moment.birthday",
+        "terrific_bites.moment.congratulations"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-him",
+        "terrific_bites.recipient.for-her",
+        "terrific_bites.recipient.for-kids"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.butter-delight",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 7,
+      "display_order_generated": true,
+      "homepage_sections": [
+        "homepage_gifts_rail"
+      ],
+      "moments": [
+        "terrific_bites.moment.anniversary",
+        "terrific_bites.moment.thank-you"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-her"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.cream-cheese-donut",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 8,
+      "display_order_generated": true,
+      "homepage_sections": [
+        "homepage_gifts_rail"
+      ],
+      "moments": [
+        "terrific_bites.moment.birthday"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-kids"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.whisk-whimsy",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 9,
+      "display_order_generated": true,
+      "homepage_sections": [
+        "homepage_gifts_rail"
+      ],
+      "moments": [
+        "terrific_bites.moment.birthday",
+        "terrific_bites.moment.graduation"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-kids",
+        "terrific_bites.recipient.for-her"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.sprinkle-1",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 10,
+      "display_order_generated": true,
+      "homepage_sections": [
+        "homepage_divine_rail"
+      ],
+      "moments": [
+        "terrific_bites.moment.birthday"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-kids"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.sprinkle-2",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 11,
+      "display_order_generated": true,
+      "homepage_sections": [
+        "homepage_divine_rail"
+      ],
+      "moments": [
+        "terrific_bites.moment.birthday"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-kids",
+        "terrific_bites.recipient.for-her"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.sprinkle-3",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 12,
+      "display_order_generated": true,
+      "homepage_sections": [
+        "homepage_divine_rail"
+      ],
+      "moments": [
+        "terrific_bites.moment.birthday",
+        "terrific_bites.moment.thank-you"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-her"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.sprinkle-4",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 13,
+      "display_order_generated": true,
+      "homepage_sections": [
+        "homepage_divine_rail"
+      ],
+      "moments": [
+        "terrific_bites.moment.birthday",
+        "terrific_bites.moment.congratulations"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-kids"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.choc-truffle",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 14,
+      "display_order_generated": true,
+      "homepage_sections": [],
+      "moments": [
+        "terrific_bites.moment.anniversary",
+        "terrific_bites.moment.thank-you"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-her",
+        "terrific_bites.recipient.for-him"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.choc-praline",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 15,
+      "display_order_generated": true,
+      "homepage_sections": [],
+      "moments": [
+        "terrific_bites.moment.anniversary"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-him"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.choc-ganache",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 16,
+      "display_order_generated": true,
+      "homepage_sections": [],
+      "moments": [
+        "terrific_bites.moment.anniversary",
+        "terrific_bites.moment.wedding"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-her"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.choc-caramel",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 17,
+      "display_order_generated": true,
+      "homepage_sections": [],
+      "moments": [
+        "terrific_bites.moment.thank-you"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-him",
+        "terrific_bites.recipient.for-her"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.choc-mint",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 18,
+      "display_order_generated": true,
+      "homepage_sections": [],
+      "moments": [
+        "terrific_bites.moment.thank-you"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-him"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.choc-orange",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 19,
+      "display_order_generated": true,
+      "homepage_sections": [],
+      "moments": [
+        "terrific_bites.moment.congratulations"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-her"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.choc-almond",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 20,
+      "display_order_generated": true,
+      "homepage_sections": [],
+      "moments": [
+        "terrific_bites.moment.anniversary"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-him"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.choc-white",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 21,
+      "display_order_generated": true,
+      "homepage_sections": [],
+      "moments": [
+        "terrific_bites.moment.wedding"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-her"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.choc-berry",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 22,
+      "display_order_generated": true,
+      "homepage_sections": [],
+      "moments": [
+        "terrific_bites.moment.anniversary",
+        "terrific_bites.moment.thank-you"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-her"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.extra-donut",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 23,
+      "display_order_generated": true,
+      "homepage_sections": [],
+      "moments": [
+        "terrific_bites.moment.birthday"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-kids"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.extra-icecream",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 24,
+      "display_order_generated": true,
+      "homepage_sections": [],
+      "moments": [
+        "terrific_bites.moment.birthday"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-kids"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.extra-cheesecake",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 25,
+      "display_order_generated": true,
+      "homepage_sections": [],
+      "moments": [
+        "terrific_bites.moment.thank-you"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-family"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    },
+    {
+      "product_external_key": "terrific_bites.product.extra-donuts-pair",
+      "storefront_visible": true,
+      "featured": false,
+      "is_new": false,
+      "is_bestseller": null,
+      "badge_en": null,
+      "badge_ar": null,
+      "display_order": 26,
+      "display_order_generated": true,
+      "homepage_sections": [],
+      "moments": [
+        "terrific_bites.moment.birthday"
+      ],
+      "recipients": [
+        "terrific_bites.recipient.for-kids",
+        "terrific_bites.recipient.for-family"
+      ],
+      "marketing_title_en": null,
+      "marketing_title_ar": null,
+      "marketing_description_en": null,
+      "marketing_description_ar": null,
+      "seo_title_en": null,
+      "seo_title_ar": null,
+      "seo_description_en": null,
+      "seo_description_ar": null,
+      "storefront_image_override": null,
+      "mobile_image_override": null,
+      "source_references": [
+        "src/lib/admin-store.ts (ProductOverride type + productOverrideStore; seed productOverrides = {} — no product has an override today)",
+        "src/lib/products.ts (featured.hero/gifts/divine/chocolates/extras/new derived slices — computed at module load, not admin-configurable)",
+        "src/routes/index.tsx (homepage rail rendering — Products & What's New rails both render featured.hero due to a pre-existing bug; featured.chocolates and featured.extras are computed but never rendered anywhere)",
+        "src/routes/admin.products.tsx (admin editor writes to productOverrideStore only)"
+      ],
+      "requires_confirmation": [
+        "display_order_generated_from_array_position_not_business_source",
+        "is_bestseller_concept_does_not_exist_in_current_app",
+        "featured_flag_currently_unused_by_homepage_rendering_see_migration_plan"
+      ]
+    }
+  ]
+}

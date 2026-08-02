@@ -1,83 +1,145 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useStore } from "@/lib/store";
-import { useAdmin } from "@/lib/admin-store";
-import { products } from "@/lib/products";
-import { Stat, Card, Badge } from "@/components/admin/ui";
-import { TrendingUp, ShoppingBag, Users, Star } from "lucide-react";
+import { useDashboardSummary, useDashboardRecentOrders, useDashboardAlerts } from "@/lib/admin-api";
+import { Stat, Card, Badge, EmptyState } from "@/components/admin/ui";
+import { AlertTriangle, RefreshCw, ShoppingBag, TrendingUp } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/admin/")({ component: Dashboard });
 
+const STATUS_TONE: Record<string, "success" | "info" | "warn" | "danger" | "default"> = {
+  pending_payment: "warn",
+  paid: "info",
+  processing: "info",
+  delivered: "success",
+  cancelled: "danger",
+};
+
 function Dashboard() {
-  const orders = useStore((s) => s.orders);
-  const reviews = useStore((s) => s.reviews);
-  const users = useStore((s) => s.user);
-  const staff = useAdmin((s) => s.staff);
+  const summary = useDashboardSummary();
+  const recent = useDashboardRecentOrders();
+  const alerts = useDashboardAlerts();
 
-  const revenue = orders.reduce((sum, o) => sum + o.total, 0);
-  const avg = orders.length ? revenue / orders.length : 0;
-  const pending = orders.filter((o) => o.status !== "Delivered").length;
-  const avgRating = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : "—";
+  if (summary.isLoading) {
+    return <div className="text-sm text-stone-500 py-10 text-center">Loading dashboard…</div>;
+  }
+  if (summary.isError || !summary.data) {
+    return (
+      <Card>
+        <div className="text-sm text-red-600 flex items-center gap-2 py-4 justify-center">
+          <AlertTriangle className="h-4 w-4" /> Could not load the dashboard.{" "}
+          {summary.error?.message}
+        </div>
+      </Card>
+    );
+  }
 
-  // Simple sparkline data (last 7 buckets)
-  const now = Date.now();
-  const buckets = Array.from({ length: 7 }, (_, i) => {
-    const start = now - (6 - i) * 86400000;
-    const end = start + 86400000;
-    return orders.filter((o) => o.createdAt >= start && o.createdAt < end).reduce((s, o) => s + o.total, 0);
-  });
-  const maxBucket = Math.max(...buckets, 1);
+  const s = summary.data;
 
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Stat label="Total revenue" value={`SAR ${revenue.toFixed(2)}`} hint="All time" tone="up" />
-        <Stat label="Orders" value={orders.length} hint={`${pending} pending`} />
-        <Stat label="Avg order value" value={`SAR ${avg.toFixed(2)}`} />
-        <Stat label="Avg rating" value={avgRating} hint={`${reviews.length} reviews`} tone="up" />
+        <Stat
+          label="Orders today"
+          value={s.orders_today}
+          hint={`${s.pending_payment_orders_today} awaiting payment`}
+        />
+        <Stat label="Revenue today" value={`SAR ${s.revenue_today}`} tone="up" />
+        <Stat label="Paid orders today" value={s.paid_orders_today} tone="up" />
+        <Stat
+          label="Needs attention"
+          value={s.orders_requiring_attention}
+          hint={`${s.failed_odoo_sync} sync failed · ${s.failed_notifications} notify failed · ${s.stuck_orders} stuck`}
+          tone={s.orders_requiring_attention > 0 ? "down" : "default"}
+        />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Card title="Revenue — last 7 days" className="lg:col-span-2">
-          <div className="flex items-end gap-2 h-40">
-            {buckets.map((v, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                <div className="w-full bg-amber-100 rounded-t" style={{ height: `${(v / maxBucket) * 100}%`, minHeight: 4 }}>
-                  <div className="w-full h-full bg-gradient-to-t from-amber-500 to-amber-300 rounded-t" />
-                </div>
-                <div className="text-[10px] text-stone-500">Day {i + 1}</div>
-              </div>
+      {alerts.data && alerts.data.length > 0 && (
+        <Card title="Operational alerts">
+          <ul className="space-y-2">
+            {alerts.data.map((a) => (
+              <li
+                key={a.type}
+                className="flex items-center justify-between rounded-lg bg-amber-50 border border-amber-200 px-4 py-2.5 text-sm"
+              >
+                <span className="flex items-center gap-2 text-amber-800">
+                  <AlertTriangle className="h-4 w-4" /> {a.message}
+                </span>
+                <Badge tone="warn">{a.count}</Badge>
+              </li>
             ))}
-          </div>
-        </Card>
-
-        <Card title="Quick stats">
-          <ul className="space-y-3 text-sm">
-            <li className="flex items-center justify-between"><span className="flex items-center gap-2 text-stone-600"><ShoppingBag className="h-4 w-4" /> Catalog products</span><span className="font-medium">{products.length}</span></li>
-            <li className="flex items-center justify-between"><span className="flex items-center gap-2 text-stone-600"><Users className="h-4 w-4" /> Staff members</span><span className="font-medium">{staff.filter((s) => s.active).length}</span></li>
-            <li className="flex items-center justify-between"><span className="flex items-center gap-2 text-stone-600"><Star className="h-4 w-4" /> Reviews</span><span className="font-medium">{reviews.length}</span></li>
-            <li className="flex items-center justify-between"><span className="flex items-center gap-2 text-stone-600"><TrendingUp className="h-4 w-4" /> Registered customers</span><span className="font-medium">{users ? 1 : 0}</span></li>
           </ul>
         </Card>
-      </div>
+      )}
 
-      <Card title="Recent orders">
-        {orders.length === 0 ? (
-          <div className="text-sm text-stone-500 py-6 text-center">No orders yet. Place a demo order from the storefront to see it here.</div>
+      <Card
+        title="Recent orders"
+        action={
+          <button
+            onClick={() => recent.refetch()}
+            className="text-xs text-stone-500 hover:text-stone-800 flex items-center gap-1"
+          >
+            <RefreshCw className="h-3 w-3" /> Refresh
+          </button>
+        }
+      >
+        {!recent.data || recent.data.length === 0 ? (
+          <EmptyState
+            title="No orders yet"
+            hint="Real customer orders will appear here as they come in."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="text-left text-xs uppercase text-stone-500 border-b">
-                <tr><th className="py-2">Order</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th></tr>
+                <tr>
+                  <th className="py-2">Order</th>
+                  <th>Customer</th>
+                  <th>Phone</th>
+                  <th>Total</th>
+                  <th>Payment</th>
+                  <th>Status</th>
+                  <th>Odoo sync</th>
+                  <th>Created</th>
+                  <th></th>
+                </tr>
               </thead>
               <tbody>
-                {orders.slice(0, 6).map((o) => (
+                {recent.data.map((o) => (
                   <tr key={o.id} className="border-b last:border-0">
-                    <td className="py-2.5 font-mono text-xs">{o.id}</td>
-                    <td>{o.address?.name ?? "—"}</td>
-                    <td className="text-stone-500">{new Date(o.createdAt).toLocaleDateString()}</td>
-                    <td>SAR {o.total.toFixed(2)}</td>
+                    <td className="py-2.5 font-mono text-xs">{o.order_number}</td>
+                    <td>{o.customer_name}</td>
+                    <td className="text-stone-500">{o.customer_phone}</td>
+                    <td>SAR {o.total_amount}</td>
                     <td>
-                      <Badge tone={o.status === "Delivered" ? "success" : o.status === "Paid" ? "info" : "warn"}>{o.status}</Badge>
+                      <Badge tone={o.payment_status === "paid" ? "success" : "warn"}>
+                        {o.payment_status}
+                      </Badge>
+                    </td>
+                    <td>
+                      <Badge tone={STATUS_TONE[o.status] ?? "default"}>{o.status}</Badge>
+                    </td>
+                    <td>
+                      <Badge
+                        tone={
+                          o.odoo_sync_status === "synced"
+                            ? "success"
+                            : o.odoo_sync_status === "failed"
+                              ? "danger"
+                              : "default"
+                        }
+                      >
+                        {o.odoo_sync_status}
+                      </Badge>
+                    </td>
+                    <td className="text-stone-500">{new Date(o.created_at).toLocaleString()}</td>
+                    <td>
+                      <Link
+                        to="/admin/orders/$orderId"
+                        params={{ orderId: o.id }}
+                        className="text-xs text-primary hover:underline flex items-center gap-1"
+                      >
+                        <ShoppingBag className="h-3 w-3" /> Open
+                      </Link>
                     </td>
                   </tr>
                 ))}
@@ -85,6 +147,14 @@ function Dashboard() {
             </table>
           </div>
         )}
+      </Card>
+
+      <Card title="This session">
+        <div className="flex items-center gap-2 text-sm text-stone-600">
+          <TrendingUp className="h-4 w-4" />
+          Dashboard data is live from PostgreSQL via FastAPI — refresh anytime with the button
+          above.
+        </div>
       </Card>
     </div>
   );

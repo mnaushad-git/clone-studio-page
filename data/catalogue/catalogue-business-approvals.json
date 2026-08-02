@@ -1,0 +1,206 @@
+{
+  "$schema_note": "Phase 5 machine-readable business approval gate. One entry per business decision that must be resolved before app.scripts.import_odoo_catalogue --apply is permitted to write to Odoo. This file records approvals; it is never written to by any script — check_catalogue_import_approvals.py only reads it. See docs/integrations/odoo-import-approval-gate.md for the enforcement mechanism and docs/catalogue/catalogue-decisions.json for the full 22-decision business record this file's decision_ids are drawn from (D03/D04/D08/D09/D10/D19).",
+  "phase_6_note": "Phase 6 (2026-07-29) recorded explicit business sign-off for D03, D04, D08, D10, D19 (D09 was already APPROVED). All six blocking decisions are now APPROVED with non-null approved_value, satisfying the approval gate for app.scripts.import_odoo_catalogue --apply.",
+  "generated_at": "2026-07-28T00:00:00+00:00",
+  "allowed_status_values": ["PROPOSED", "APPROVED", "REJECTED", "REQUIRES_CLARIFICATION"],
+  "decisions": [
+    {
+      "decision_id": "D03",
+      "title": "Category codes",
+      "proposed_value": {
+        "codes": ["CUP", "CAK", "CHO", "DON", "GIF", "EXT"],
+        "mapping": {
+          "CUP": "Cupcakes",
+          "CAK": "Cakes",
+          "CHO": "Chocolates",
+          "DON": "Donuts",
+          "GIF": "Gifts",
+          "EXT": "Extras"
+        }
+      },
+      "approved_value": {
+        "codes": ["CUP", "CAK", "CHO", "DON", "GIF", "EXT"],
+        "mapping": {
+          "CUP": "Cupcakes",
+          "CAK": "Cakes",
+          "CHO": "Chocolates",
+          "DON": "Donuts",
+          "GIF": "Gifts",
+          "EXT": "Extras"
+        }
+      },
+      "status": "APPROVED",
+      "approved_by": "Business owner — Phase 6 kickoff approval (D03)",
+      "approved_at": "2026-07-29T00:00:00+00:00",
+      "approval_notes": "APPROVED in Phase 6 kickoff instructions: keep the existing generated codes CUP/CAK/CHO/DON/GIF/EXT exactly as Phase 2A produced them. Carried forward from data/catalogue/catalogue-decisions.json D03. Noted legibility risk (GIF collides with the image-format acronym, CAK/CHO/DON are truncations) was flagged but not acted on — not a defect.",
+      "evidence": {
+        "source_document": "docs/catalogue/category-approval-register.md",
+        "source_decision_record": "data/catalogue/catalogue-decisions.json#D03",
+        "odoo_verification": "docs/integrations/odoo-environment-verification.md — zero conflicting product.category records found; only Odoo's 4 stock default categories (Deliveries, Expenses, Goods, Services) exist on the target instance."
+      },
+      "blocks_import": true
+    },
+    {
+      "decision_id": "D04",
+      "title": "Product SKUs",
+      "proposed_value": {
+        "convention": "TB-<CATEGORY-CODE>-<THREE-DIGIT-SEQUENCE>",
+        "sku_count": 26,
+        "source_register": "docs/catalogue/sku-approval-register.md",
+        "permanent_after_import": true
+      },
+      "approved_value": {
+        "convention": "TB-<CATEGORY-CODE>-<THREE-DIGIT-SEQUENCE>",
+        "sku_count": 26,
+        "source_register": "docs/catalogue/sku-approval-register.md",
+        "permanent_after_import": true
+      },
+      "status": "APPROVED",
+      "approved_by": "Business owner — Phase 6 kickoff approval (D04)",
+      "approved_at": "2026-07-29T00:00:00+00:00",
+      "approval_notes": "APPROVED in Phase 6 kickoff instructions: the existing 26 generated SKUs (TB-<CATEGORY-CODE>-<THREE-DIGIT-SEQUENCE>) are approved as-is. Carried forward from data/catalogue/catalogue-decisions.json D04. All 26 SKUs are listed in docs/catalogue/sku-approval-register.md, all distinct (0 duplicates per backend/scripts/validate_catalogue.py). Sequence is source-array order; no launch-date/price-rank/popularity data exists to derive an alternative ordering. SKUs become product.product.default_code and are treated as permanent.",
+      "evidence": {
+        "source_document": "docs/catalogue/sku-approval-register.md",
+        "source_decision_record": "data/catalogue/catalogue-decisions.json#D04",
+        "odoo_verification": "docs/integrations/odoo-environment-verification.md — zero product.template default_code conflicts found for any of the 26 SKUs against the target instance."
+      },
+      "blocks_import": true
+    },
+    {
+      "decision_id": "D08",
+      "title": "Tax and price treatment",
+      "proposed_value": {
+        "odoo_sales_tax_record": null,
+        "prices_include_vat_canonically": null,
+        "list_price_vat_treatment": null,
+        "storefront_display_vat_treatment": null,
+        "checkout_adds_vat_separately": null,
+        "known_contradiction": "PDP (src/routes/product.$id.tsx ~line 200) states 'All prices include VAT'; src/lib/store.ts selectTax()/selectTotal() adds 5% VAT on top of the cart subtotal as a separate line at checkout. This is a genuine, code-verified contradiction (D21), not resolved by this entry."
+      },
+      "approved_value": {
+        "odoo_sales_tax_record": null,
+        "prices_include_vat_canonically": true,
+        "list_price_vat_treatment": "VAT_INCLUSIVE",
+        "storefront_display_vat_treatment": "DISPLAY_STORED_PRICE_AS_IS_NO_ADDITIONAL_VAT",
+        "checkout_adds_vat_separately": false,
+        "known_contradiction": "RESOLVED for the MVP: canonical catalogue prices are treated as VAT-inclusive. The Storefront must display the stored price as-is (the PDP's 'All prices include VAT' copy is correct) and checkout must not add a separate VAT line on top of it (fixes the D21 contradiction in src/lib/store.ts selectTax()/selectTotal()). No Odoo account.tax record is created or configured in this phase — odoo_sales_tax_record intentionally stays null by design, not as an open question."
+      },
+      "status": "APPROVED",
+      "approved_by": "Business owner — Phase 6 kickoff approval (D08)",
+      "approved_at": "2026-07-29T00:00:00+00:00",
+      "approval_notes": "APPROVED in Phase 6 kickoff instructions: prices are VAT-inclusive for the MVP; do not create/configure Odoo tax records this phase. Carried forward from data/catalogue/catalogue-decisions.json D08/D21. Odoo-side tax setup (zero account.tax records exist on terrific_dev despite l10n_sa/l10n_sa_withholding_tax/l10n_gcc_invoice being installed; res.company(id=1).account_price_include='tax_excluded') remains unresolved but is explicitly out of scope for this phase — no Odoo write in this phase touches tax at all.",
+      "evidence": {
+        "source_document": "docs/catalogue/catalogue-decision-pack.md",
+        "source_decision_record": "data/catalogue/catalogue-decisions.json#D08 and #D21",
+        "odoo_verification": "docs/integrations/odoo-operations-runbook.md — account.tax search_count returns 0 (both filtered to type_tax_use='sale' and unfiltered) on terrific_dev as of 2026-07-28."
+      },
+      "blocks_import": true
+    },
+    {
+      "decision_id": "D09",
+      "title": "Unit of measure",
+      "proposed_value": {
+        "odoo_uom_id": 1,
+        "odoo_uom_name": "Units",
+        "uom_category": "Reference Unit of Measure (relative_uom_id=false, relative_factor=1.0 — a base/reference unit)",
+        "apply_to": "all 26 products",
+        "verification_timestamp": "2026-07-28T11:16:22.954325+00:00"
+      },
+      "approved_value": {
+        "odoo_uom_id": 1,
+        "odoo_uom_name": "Units",
+        "uom_category": "Reference Unit of Measure",
+        "verification_timestamp": "2026-07-28T11:16:22.954325+00:00"
+      },
+      "status": "APPROVED",
+      "approved_by": "catalogue-decisions.json D09 (Phase 4B live verification)",
+      "approved_at": "2026-07-28T11:16:22.954325+00:00",
+      "approval_notes": "Already APPROVED in data/catalogue/catalogue-decisions.json prior to this phase — no product in the 26-product catalogue needs a different UoM (buttercream-cake's size options are variants of one cake, not a quantity/UoM difference). This entry records that pre-existing approval and its live Odoo evidence; it is not a new approval granted by this file.",
+      "evidence": {
+        "source_document": "docs/catalogue/odoo-configuration-checklist.md",
+        "source_decision_record": "data/catalogue/catalogue-decisions.json#D09",
+        "odoo_verification": "data/odoo/odoo-environment-report.json — uom.uom id=1, name='Units', relative_factor=1.0, relative_uom_id=false, active=true, verified live against terrific_dev 2026-07-28."
+      },
+      "blocks_import": false
+    },
+    {
+      "decision_id": "D10",
+      "title": "Product type",
+      "proposed_value": {
+        "odoo_product_type": "consu",
+        "apply_to": "all 26 physical catalogue items",
+        "excluded_types": ["service", "combo"],
+        "install_inventory_this_phase": false
+      },
+      "approved_value": {
+        "odoo_product_type": "consu",
+        "apply_to": "all 26 physical catalogue items",
+        "excluded_types": ["service", "combo"],
+        "install_inventory_this_phase": false
+      },
+      "status": "APPROVED",
+      "approved_by": "Business owner — Phase 6 kickoff approval (D10)",
+      "approved_at": "2026-07-29T00:00:00+00:00",
+      "approval_notes": "APPROVED in Phase 6 kickoff instructions: use Odoo product type consu for all physical products. Carried forward from data/catalogue/catalogue-decisions.json D10. Live-verified 2026-07-28: product.template.type selection on the target instance is exactly ['consu', 'service', 'combo'] — there is no 'Storable Product' option because the Inventory/stock module is not installed. Installing Inventory remains explicitly out of scope for this phase.",
+      "evidence": {
+        "source_document": "docs/catalogue/odoo-configuration-checklist.md",
+        "source_decision_record": "data/catalogue/catalogue-decisions.json#D10",
+        "odoo_verification": "data/odoo/odoo-environment-report.json — product_type_values: ['consu', 'service', 'combo']; stock.quant and stock.warehouse both BLOCKED/NOT_APPLICABLE (Inventory app not installed)."
+      },
+      "blocks_import": true
+    },
+    {
+      "decision_id": "D19",
+      "title": "Opening inventory and availability",
+      "proposed_value": {
+        "import_stock_quantities": false,
+        "create_stock_quant_records": false,
+        "auto_install_inventory": false,
+        "products_marked_sellable_and_active": true,
+        "postgresql_availability_status": "UNKNOWN until an inventory strategy is introduced"
+      },
+      "approved_value": {
+        "import_stock_quantities": false,
+        "create_stock_quant_records": false,
+        "auto_install_inventory": false,
+        "products_marked_sellable_and_active": true,
+        "postgresql_availability_status": "Managed in PostgreSQL without inventory import for the MVP — no fake stock quantities; availability is a PostgreSQL-owned concept, independent of Odoo stock"
+      },
+      "status": "APPROVED",
+      "approved_by": "Business owner — Phase 6 kickoff approval (D19)",
+      "approved_at": "2026-07-29T00:00:00+00:00",
+      "approval_notes": "APPROVED in Phase 6 kickoff instructions: do not import or manage inventory for the MVP; availability stays PostgreSQL-managed with no fabricated quantities. Carried forward from data/catalogue/catalogue-decisions.json D19. No fabricated quantity will ever be written — stock.quant and stock.warehouse are both unavailable on the target instance (Inventory app not installed) regardless of this decision.",
+      "evidence": {
+        "source_document": "docs/catalogue/odoo-configuration-checklist.md",
+        "source_decision_record": "data/catalogue/catalogue-decisions.json#D19",
+        "odoo_verification": "data/odoo/odoo-environment-report.json — model_stock.quant: BLOCKED ('Model not installed'); model_stock.warehouse: NOT_APPLICABLE."
+      },
+      "blocks_import": true
+    },
+    {
+      "decision_id": "D20",
+      "title": "Odoo native product-attribute/variant modeling activation",
+      "proposed_value": {
+        "write_surface": "product.attribute / product.attribute.value / product.template.attribute.line (create_variant='always')",
+        "affected_products": "variant_parent products (26 total: buttercream-cake plus 25 more added in the 'real variant pricing' rollout)",
+        "risk": "Creates new Odoo master data (attributes are shared across products, not 1:1 like categories/templates) — a matching bug could duplicate a shared attribute across multiple --apply runs.",
+        "safeguard": "plan_attributes()/plan_variants() re-run their live exact-name match on every invocation (never cached across runs); run_reconcile is extended with a duplicate-attribute-name detection check; unlink/archive on any attribute-family model is never on the write allowlist."
+      },
+      "approved_value": {
+        "write_surface": "product.attribute / product.attribute.value / product.template.attribute.line (create_variant='always')",
+        "affected_products": "26 variant_parent products",
+        "verification_timestamp": "2026-08-02T06:34:36.566865+00:00"
+      },
+      "status": "APPROVED",
+      "approved_by": "mnaushad.aws@gmail.com — reviewed --validate/--plan output against terrific_dev before approval",
+      "approved_at": "2026-08-02T06:34:36.566865+00:00",
+      "approval_notes": "APPROVED 2026-08-02 after running --validate (clean) and --plan against the live terrific_dev Odoo instance and reviewing the generated plan (6 PRODUCT_ATTRIBUTE, 15 PRODUCT_ATTRIBUTE_VALUE, 55 PRODUCT_VARIANT items, all correctly scoped to the 25-product real-variant-pricing batch plus buttercream-cake). blocks_import stays false (see D09's precedent) so this gates only PRODUCT_ATTRIBUTE/PRODUCT_ATTRIBUTE_VALUE/PRODUCT_VARIANT plan items (via VARIANT_BLOCKING_DECISION_IDS in odoo_import_planning.py) — existing category/template --apply runs were never blocked by this decision being unresolved.",
+      "evidence": {
+        "source_document": "docs/integrations/odoo-catalogue-variant-model.md",
+        "source_decision_record": null,
+        "odoo_verification": "Plan reviewed 2026-08-02: action_counts {MATCH: 32, BLOCKED: 76 (70 ATTRIBUTE_NOT_RESOLVED cascades + 6 gated by this decision)} against terrific_dev prior to approval."
+      },
+      "blocks_import": false
+    }
+  ]
+}

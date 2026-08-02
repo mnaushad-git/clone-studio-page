@@ -1,14 +1,16 @@
 import { useSyncExternalStore } from "react";
-import { getProduct } from "./products";
+import { getProduct, variantComboKey } from "./products";
 import { getAdminState } from "./admin-store";
+import type { DeliveryOptionsOut } from "./admin-api";
 
 export type CartItem = {
   lineId: string;
   productId: string;
   qty: number;
   unitPrice: number;
-  size?: string;
-  flavor?: string;
+  // code -> selected value_label_en, e.g. {size: "9 INCH", flavor: "Chocolate"} — any
+  // number of axes, not just the legacy size/flavor pair.
+  attributes?: Record<string, string>;
   inscription?: string;
 };
 
@@ -34,7 +36,14 @@ export const ORDER_STATUSES: OrderStatus[] = ["Processing", "Paid", "Delivered"]
 
 export type Order = {
   id: string;
-  items: { productId: string; name: string; qty: number; unitPrice: number; size?: string; flavor?: string; inscription?: string }[];
+  items: {
+    productId: string;
+    name: string;
+    qty: number;
+    unitPrice: number;
+    attributes?: Record<string, string>;
+    inscription?: string;
+  }[];
   subtotal: number;
   discount: number;
   pointsRedeemed?: number;
@@ -72,8 +81,21 @@ export type Review = {
   verified?: boolean;
 };
 
-export type City = { country: string; countryCode: string; city: string; slug: string; currency: string; sameDayCutoffHour: number };
-export type LoyaltyEntry = { id: string; type: "earn" | "redeem"; points: number; note: string; at: number };
+export type City = {
+  country: string;
+  countryCode: string;
+  city: string;
+  slug: string;
+  currency: string;
+  sameDayCutoffHour: number;
+};
+export type LoyaltyEntry = {
+  id: string;
+  type: "earn" | "redeem";
+  points: number;
+  note: string;
+  at: number;
+};
 export const RIYADH_AREAS = [
   "Al Aarid",
   "Al Aqiq",
@@ -184,11 +206,52 @@ export const POINTS_PER_DOLLAR = 1;
 export const POINTS_REDEEM_RATE = 20; // 20 pts = SAR 1
 
 const seededReviews: Review[] = [
-  { id: "r1", productId: "buttercream-cake", author: "Sara M.", rating: 5, title: "Absolutely divine!", body: "Ordered this for my daughter's birthday — everyone raved about it. Moist, beautifully decorated, and delivered on time.", createdAt: Date.now() - 86400000 * 3, verified: true },
-  { id: "r2", productId: "buttercream-cake", author: "Ahmed K.", rating: 4, body: "Great taste and presentation. A little sweet for my liking but overall lovely.", createdAt: Date.now() - 86400000 * 8, verified: true },
-  { id: "r3", productId: "choc-truffle", author: "Nadia F.", rating: 5, title: "Melt in your mouth", body: "Rich, silky, and perfectly bittersweet. Will order again.", createdAt: Date.now() - 86400000 * 12, verified: true },
-  { id: "r4", productId: "swiss-frosting", author: "Layla H.", rating: 5, body: "Best cupcakes I've had in a long time. The frosting is not too sweet.", createdAt: Date.now() - 86400000 * 5, verified: true },
-  { id: "r5", productId: "moose-cream", author: "Omar S.", rating: 4, body: "Very chocolatey and rich. Portion could be a bit bigger.", createdAt: Date.now() - 86400000 * 2 },
+  {
+    id: "r1",
+    productId: "buttercream-cake",
+    author: "Sara M.",
+    rating: 5,
+    title: "Absolutely divine!",
+    body: "Ordered this for my daughter's birthday — everyone raved about it. Moist, beautifully decorated, and delivered on time.",
+    createdAt: Date.now() - 86400000 * 3,
+    verified: true,
+  },
+  {
+    id: "r2",
+    productId: "buttercream-cake",
+    author: "Ahmed K.",
+    rating: 4,
+    body: "Great taste and presentation. A little sweet for my liking but overall lovely.",
+    createdAt: Date.now() - 86400000 * 8,
+    verified: true,
+  },
+  {
+    id: "r3",
+    productId: "choc-truffle",
+    author: "Nadia F.",
+    rating: 5,
+    title: "Melt in your mouth",
+    body: "Rich, silky, and perfectly bittersweet. Will order again.",
+    createdAt: Date.now() - 86400000 * 12,
+    verified: true,
+  },
+  {
+    id: "r4",
+    productId: "swiss-frosting",
+    author: "Layla H.",
+    rating: 5,
+    body: "Best cupcakes I've had in a long time. The frosting is not too sweet.",
+    createdAt: Date.now() - 86400000 * 5,
+    verified: true,
+  },
+  {
+    id: "r5",
+    productId: "moose-cream",
+    author: "Omar S.",
+    rating: 4,
+    body: "Very chocolatey and rich. Portion could be a bit bigger.",
+    createdAt: Date.now() - 86400000 * 2,
+  },
 ];
 
 const initial: State = {
@@ -202,7 +265,14 @@ const initial: State = {
   wishlist: [],
   reviews: seededReviews,
   recentlyViewed: [],
-  location: { country: "Saudi Arabia", countryCode: "SA", city: "Riyadh", slug: "sa-riyadh", currency: "SAR", sameDayCutoffHour: 15 },
+  location: {
+    country: "Saudi Arabia",
+    countryCode: "SA",
+    city: "Riyadh",
+    slug: "sa-riyadh",
+    currency: "SAR",
+    sameDayCutoffHour: 15,
+  },
   loyaltyPoints: 0,
   loyaltyHistory: [],
   recipientConfirmations: [],
@@ -227,10 +297,7 @@ function load(): State {
     parsed.redeemedPoints = parsed.redeemedPoints ?? 0;
     const savedReviews = parsed.reviews ?? [];
     const seededIds = new Set(seededReviews.map((r) => r.id));
-    parsed.reviews = [
-      ...seededReviews,
-      ...savedReviews.filter((r) => !seededIds.has(r.id)),
-    ];
+    parsed.reviews = [...seededReviews, ...savedReviews.filter((r) => !seededIds.has(r.id))];
     return parsed;
   } catch {
     return initial;
@@ -242,7 +309,11 @@ const listeners = new Set<() => void>();
 
 function persist() {
   if (!isBrowser) return;
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // Storage unavailable (private browsing, quota exceeded) — state stays in-memory only.
+  }
 }
 
 function emit() {
@@ -256,25 +327,47 @@ function subscribe(fn: () => void) {
 }
 
 export function useStore<T>(selector: (s: State) => T): T {
-  return useSyncExternalStore(subscribe, () => selector(state), () => selector(initial));
+  return useSyncExternalStore(
+    subscribe,
+    () => selector(state),
+    () => selector(initial),
+  );
 }
 
+// ---------- Delivery options (server-authoritative — GET /api/v1/checkout/delivery-options) ----------
+// Populated by <DeliveryOptionsSync> in src/routes/__root.tsx via useDeliveryOptions()
+// (src/lib/admin-api.ts). Falls back to these defaults only until the first fetch
+// resolves — the backend (app/services/checkout/pricing_service.py) is always what
+// actually prices an order; this cache only drives the pre-checkout display estimate.
+let deliveryOptionsCache: DeliveryOptionsOut | null = null;
+
+export function primeDeliveryOptions(options: DeliveryOptionsOut) {
+  deliveryOptionsCache = options;
+  emit();
+}
+
+const DELIVERY_FEE_FALLBACK = 15;
+const FREE_DELIVERY_THRESHOLD_FALLBACK = 0;
+const MIN_ORDER_FALLBACK = 30;
+
 // ---------- Cart ----------
-const PROMOS: Record<string, number> = { WELCOME10: 10, SWEET15: 15, TB20: 20 };
 
 export const cart = {
   add(input: {
     productId: string;
     qty?: number;
-    size?: string;
-    flavor?: string;
+    attributes?: Record<string, string>;
     inscription?: string;
     unitPrice?: number;
   }) {
     const p = getProduct(input.productId);
     if (!p) return;
-    const unitPrice = input.unitPrice ?? (p.price + (p.sizes?.find((s) => s.label === input.size)?.delta ?? 0));
-    const key = [input.productId, input.size ?? "", input.flavor ?? "", input.inscription ?? ""].join("|");
+    const attributes = input.attributes ?? {};
+    const unitPrice =
+      input.unitPrice ?? p.variantPriceByKey?.[variantComboKey(attributes)] ?? p.price;
+    // Deterministic regardless of key insertion order, so identical combinations
+    // always collapse to one cart line.
+    const key = [input.productId, variantComboKey(attributes), input.inscription ?? ""].join("|");
     const existing = state.cart.find((c) => c.lineId === key);
     if (existing) {
       existing.qty += input.qty ?? 1;
@@ -289,8 +382,7 @@ export const cart = {
             productId: input.productId,
             qty: input.qty ?? 1,
             unitPrice,
-            size: input.size,
-            flavor: input.flavor,
+            attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
             inscription: input.inscription,
           },
         ],
@@ -318,23 +410,18 @@ export const cart = {
 };
 
 export const promo = {
-  apply(code: string): { ok: boolean; error?: string } | boolean {
+  /** Promo codes are now Admin-Portal/PostgreSQL-owned (promo_codes table) and only
+   * ever actually validated/priced server-side, at order creation
+   * (app/services/checkout/pricing_service.py) — there is no public "preview a
+   * promo" endpoint. This just remembers the code the customer typed so it's sent
+   * with the order; the real discount (and any "invalid code" rejection) only
+   * appears once the order is placed. percent stays 0 so the pre-checkout summary
+   * doesn't show a discount it can't yet confirm.
+   */
+  apply(code: string): boolean {
     const c = code.trim().toUpperCase();
     if (!c) return false;
-    const admin = getAdminState();
-    const found = admin.promos.find((p) => p.code.toUpperCase() === c && p.active);
-    if (found) {
-      const sub = selectSubtotal(state);
-      if (found.minSubtotal && sub < found.minSubtotal) return false;
-      if (found.usageLimit && found.used >= found.usageLimit) return false;
-      const percent = found.type === "percent" ? found.value : +(((found.value / Math.max(1, sub)) * 100).toFixed(2));
-      state = { ...state, promo: { code: c, percent } };
-      emit();
-      return true;
-    }
-    const legacy = PROMOS[c];
-    if (!legacy) return false;
-    state = { ...state, promo: { code: c, percent: legacy } };
+    state = { ...state, promo: { code: c, percent: 0 } };
     emit();
     return true;
   },
@@ -360,14 +447,34 @@ export const location = {
 export const loyalty = {
   earn(points: number, note: string) {
     if (points <= 0) return;
-    const entry: LoyaltyEntry = { id: "l-" + Math.random().toString(36).slice(2, 8), type: "earn", points, note, at: Date.now() };
-    state = { ...state, loyaltyPoints: state.loyaltyPoints + points, loyaltyHistory: [entry, ...state.loyaltyHistory] };
+    const entry: LoyaltyEntry = {
+      id: "l-" + Math.random().toString(36).slice(2, 8),
+      type: "earn",
+      points,
+      note,
+      at: Date.now(),
+    };
+    state = {
+      ...state,
+      loyaltyPoints: state.loyaltyPoints + points,
+      loyaltyHistory: [entry, ...state.loyaltyHistory],
+    };
     emit();
   },
   redeem(points: number, note: string) {
     if (points <= 0 || points > state.loyaltyPoints) return false;
-    const entry: LoyaltyEntry = { id: "l-" + Math.random().toString(36).slice(2, 8), type: "redeem", points, note, at: Date.now() };
-    state = { ...state, loyaltyPoints: state.loyaltyPoints - points, loyaltyHistory: [entry, ...state.loyaltyHistory] };
+    const entry: LoyaltyEntry = {
+      id: "l-" + Math.random().toString(36).slice(2, 8),
+      type: "redeem",
+      points,
+      note,
+      at: Date.now(),
+    };
+    state = {
+      ...state,
+      loyaltyPoints: state.loyaltyPoints - points,
+      loyaltyHistory: [entry, ...state.loyaltyHistory],
+    };
     emit();
     return true;
   },
@@ -400,17 +507,25 @@ export function selectDiscount(s: State): number {
 export function selectDeliveryFee(s: State): number {
   const sub = selectSubtotal(s) - selectDiscount(s);
   if (sub <= 0) return 0;
-  const a = getAdminState();
-  const threshold = a.settings.freeDeliveryThreshold ?? 0;
+  const threshold = deliveryOptionsCache
+    ? Number(deliveryOptionsCache.free_delivery_threshold)
+    : FREE_DELIVERY_THRESHOLD_FALLBACK;
   if (threshold > 0 && sub >= threshold) return 0;
-  return a.settings.defaultDeliveryFee ?? 15;
+  return deliveryOptionsCache
+    ? Number(deliveryOptionsCache.flat_delivery_fee)
+    : DELIVERY_FEE_FALLBACK;
 }
+// Prices are VAT-inclusive (catalogue-decisions.json D08/D21, approved Phase 6): the
+// stored/displayed price already includes VAT, so checkout must never add a separate
+// VAT amount on top. selectTax() reports the VAT portion already folded into the
+// subtotal — informational only, never added by selectTotal().
 export function selectTax(s: State): number {
   const rate = (getAdminState().settings.taxRate ?? 5) / 100;
-  return +(Math.max(0, selectSubtotal(s) - selectDiscount(s)) * rate).toFixed(2);
+  const net = Math.max(0, selectSubtotal(s) - selectDiscount(s));
+  return +((net * rate) / (1 + rate)).toFixed(2);
 }
 export function selectTotal(s: State): number {
-  return +(Math.max(0, selectSubtotal(s) - selectDiscount(s)) + selectTax(s) + selectDeliveryFee(s)).toFixed(2);
+  return +(Math.max(0, selectSubtotal(s) - selectDiscount(s)) + selectDeliveryFee(s)).toFixed(2);
 }
 export function selectCartCount(s: State): number {
   return s.cart.reduce((n, i) => n + i.qty, 0);
@@ -435,13 +550,17 @@ export function selectPointsRedeemRate(): number {
   return getAdminState().loyalty.redeemRate || POINTS_REDEEM_RATE;
 }
 export function selectMinOrder(): number {
-  return getAdminState().settings.minOrder ?? 0;
+  return deliveryOptionsCache
+    ? Number(deliveryOptionsCache.minimum_order_amount)
+    : MIN_ORDER_FALLBACK;
 }
 
 // ---------- Auth ----------
 export const auth = {
   signIn(user: User) {
-    const clean = Object.fromEntries(Object.entries(user).filter(([, v]) => v !== undefined)) as Partial<User>;
+    const clean = Object.fromEntries(
+      Object.entries(user).filter(([, v]) => v !== undefined),
+    ) as Partial<User>;
     state = { ...state, user: { ...(state.user ?? {}), ...clean } };
     emit();
   },
@@ -450,7 +569,9 @@ export const auth = {
     emit();
   },
   updateProfile(patch: Partial<User>) {
-    const clean = Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== undefined)) as Partial<User>;
+    const clean = Object.fromEntries(
+      Object.entries(patch).filter(([, v]) => v !== undefined),
+    ) as Partial<User>;
     state = { ...state, user: { ...(state.user ?? {}), ...clean } };
     emit();
   },
@@ -473,7 +594,8 @@ export const addresses = {
     let list = state.addresses.filter((a) => a.id !== id);
     if (wasDefault) {
       const firstSelf = list.find((a) => !a.isGift);
-      if (firstSelf) list = list.map((a) => (a.id === firstSelf.id ? { ...a, isDefault: true } : a));
+      if (firstSelf)
+        list = list.map((a) => (a.id === firstSelf.id ? { ...a, isDefault: true } : a));
     }
     state = { ...state, addresses: list };
     emit();
@@ -500,7 +622,9 @@ export const wishlist = {
     const has = state.wishlist.includes(productId);
     state = {
       ...state,
-      wishlist: has ? state.wishlist.filter((id) => id !== productId) : [...state.wishlist, productId],
+      wishlist: has
+        ? state.wishlist.filter((id) => id !== productId)
+        : [...state.wishlist, productId],
     };
     emit();
     return !has;
@@ -522,7 +646,15 @@ export const wishlist = {
 
 // ---------- Reviews ----------
 export const reviews = {
-  add(input: { productId: string; author: string; rating: number; title?: string; body: string; photos?: string[]; verified?: boolean }) {
+  add(input: {
+    productId: string;
+    author: string;
+    rating: number;
+    title?: string;
+    body: string;
+    photos?: string[];
+    verified?: boolean;
+  }) {
     const r: Review = {
       id: "rv-" + Math.random().toString(36).slice(2, 8),
       createdAt: Date.now(),
@@ -536,7 +668,6 @@ export const reviews = {
     state = { ...state, reviews: state.reviews.filter((r) => r.id !== id) };
     emit();
   },
-
 };
 
 // ---------- Recently Viewed ----------
@@ -572,75 +703,15 @@ export const recipientConfirm = {
 };
 
 // ---------- Orders ----------
-const COURIERS = [
-  { name: "Youssef Ali", phone: "+966 55 000 0011" },
-  { name: "Karim Nasser", phone: "+966 55 000 0022" },
-  { name: "Reem Hassan", phone: "+966 55 000 0033" },
-];
-
 export const orders = {
-  place(input: { address: Address | null; method: string }): Order {
-    const items = state.cart.map((c) => {
-      const p = getProduct(c.productId);
-      return {
-        productId: c.productId,
-        name: p?.name ?? c.productId,
-        qty: c.qty,
-        unitPrice: c.unitPrice,
-        size: c.size,
-        flavor: c.flavor,
-        inscription: c.inscription,
-      };
-    });
-    const subtotal = selectSubtotal(state);
-    const discount = selectDiscount(state);
-    const promoDisc = selectPromoDiscount(state);
-    const pointsDisc = selectPointsDiscount(state);
-    const tax = selectTax(state);
-    const deliveryFee = selectDeliveryFee(state);
-    const total = selectTotal(state);
-    const now = Date.now();
-    const orderId = "TB-" + Math.random().toString(36).slice(2, 8).toUpperCase();
-    const netForPoints = Math.max(0, subtotal - promoDisc);
-    const pointsEarned = Math.floor(netForPoints * POINTS_PER_DOLLAR);
-    const pointsRedeemed = state.redeemedPoints || 0;
-    const courier = COURIERS[Math.floor(Math.random() * COURIERS.length)];
-    const trackingToken = "tk-" + orderId.toLowerCase().replace(/[^a-z0-9]/g, "");
-    const recipientConfirmationToken = input.address?.isGift ? "gc-" + Math.random().toString(36).slice(2, 10) : undefined;
-
-    const order: Order = {
-      id: orderId,
-      items,
-      subtotal,
-      discount,
-      pointsRedeemed: pointsRedeemed || undefined,
-      pointsRedeemedValue: pointsDisc || undefined,
-      tax,
-      deliveryFee,
-      total,
-      address: input.address,
-      method: input.method,
-      createdAt: now,
-      status: "Processing",
-      statusHistory: [{ status: "Processing", at: now }],
-      pointsEarned,
-      trackingToken,
-      recipientConfirmationToken,
-      courier,
-    };
-
-    const newHistory: LoyaltyEntry[] = [];
-    if (pointsRedeemed > 0) {
-      newHistory.push({ id: "l-" + Math.random().toString(36).slice(2, 8), type: "redeem", points: pointsRedeemed, note: `Redeemed on ${orderId}`, at: now });
-    }
-    if (pointsEarned > 0) {
-      newHistory.push({ id: "l-" + Math.random().toString(36).slice(2, 8), type: "earn", points: pointsEarned, note: `Earned from ${orderId}`, at: now + 1 });
-    }
-
-    const newRecipientConfirmations = recipientConfirmationToken
-      ? [{ token: recipientConfirmationToken, orderId, confirmed: false } as RecipientConfirmation, ...state.recipientConfirmations]
-      : state.recipientConfirmations;
-
+  /** Records an order already priced, created, and paid by the backend (the
+   * authoritative source — see src/lib/checkout-api.ts's toLocalOrder()) as this
+   * session's current order, and clears the cart the same way the old client-side
+   * `place()` did. Loyalty points aren't touched: the backend doesn't track earning
+   * or redeeming them yet, so fabricating a points change here would be showing the
+   * customer a number that was never actually applied to their charge.
+   */
+  recordFromBackend(order: Order): Order {
     state = {
       ...state,
       orders: [order, ...state.orders],
@@ -648,9 +719,6 @@ export const orders = {
       promo: null,
       redeemedPoints: 0,
       lastOrderId: order.id,
-      loyaltyPoints: state.loyaltyPoints - pointsRedeemed + pointsEarned,
-      loyaltyHistory: [...newHistory, ...state.loyaltyHistory],
-      recipientConfirmations: newRecipientConfirmations,
     };
     emit();
     return order;

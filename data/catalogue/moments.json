@@ -1,0 +1,108 @@
+{
+  "$schema_note": "Canonical 'moments' (occasion) seed data — Phase 2A analysis output. Not wired to any runtime code. Mirrors src/lib/products.ts OCCASIONS tuple. Not an Odoo product category — kept as a separate PostgreSQL/Admin-owned entity per docs/architecture/data-ownership.md.",
+  "generated_at": "2026-07-27",
+  "moments": [
+    {
+      "external_key": "terrific_bites.moment.birthday",
+      "slug": "birthday",
+      "name_en": "Birthday",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "accent_emoji": "🎂",
+      "active": true,
+      "display_order": 1,
+      "source_references": [
+        "src/lib/products.ts:33-40 (OCCASIONS tuple)",
+        "src/routes/moments.index.tsx (listing tile)",
+        "src/routes/moments.$slug.tsx:17 (OCCASION_HERO — subtitle/blurb i18n keys + emoji)"
+      ],
+      "requires_confirmation": ["name_ar_missing", "description_en_missing", "description_ar_missing"]
+    },
+    {
+      "external_key": "terrific_bites.moment.anniversary",
+      "slug": "anniversary",
+      "name_en": "Anniversary",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "accent_emoji": "💐",
+      "active": true,
+      "display_order": 2,
+      "source_references": [
+        "src/lib/products.ts:33-40 (OCCASIONS tuple)",
+        "src/routes/moments.index.tsx (listing tile)",
+        "src/routes/moments.$slug.tsx:18 (OCCASION_HERO)"
+      ],
+      "requires_confirmation": ["name_ar_missing", "description_en_missing", "description_ar_missing"]
+    },
+    {
+      "external_key": "terrific_bites.moment.wedding",
+      "slug": "wedding",
+      "name_en": "Wedding",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "accent_emoji": "💍",
+      "active": true,
+      "display_order": 3,
+      "source_references": [
+        "src/lib/products.ts:33-40 (OCCASIONS tuple)",
+        "src/routes/moments.index.tsx (listing tile)",
+        "src/routes/moments.$slug.tsx:19 (OCCASION_HERO)"
+      ],
+      "requires_confirmation": ["name_ar_missing", "description_en_missing", "description_ar_missing"]
+    },
+    {
+      "external_key": "terrific_bites.moment.graduation",
+      "slug": "graduation",
+      "name_en": "Graduation",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "accent_emoji": "🎓",
+      "active": true,
+      "display_order": 4,
+      "source_references": [
+        "src/lib/products.ts:33-40 (OCCASIONS tuple)",
+        "src/routes/moments.index.tsx (listing tile)",
+        "src/routes/moments.$slug.tsx:20 (OCCASION_HERO)"
+      ],
+      "requires_confirmation": ["name_ar_missing", "description_en_missing", "description_ar_missing"]
+    },
+    {
+      "external_key": "terrific_bites.moment.congratulations",
+      "slug": "congratulations",
+      "name_en": "Congratulations",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "accent_emoji": "🎉",
+      "active": true,
+      "display_order": 5,
+      "source_references": [
+        "src/lib/products.ts:33-40 (OCCASIONS tuple)",
+        "src/routes/moments.index.tsx (listing tile)",
+        "src/routes/moments.$slug.tsx:21 (OCCASION_HERO)"
+      ],
+      "requires_confirmation": ["name_ar_missing", "description_en_missing", "description_ar_missing"]
+    },
+    {
+      "external_key": "terrific_bites.moment.thank-you",
+      "slug": "thank-you",
+      "name_en": "Thank You",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "accent_emoji": "💌",
+      "active": true,
+      "display_order": 6,
+      "source_references": [
+        "src/lib/products.ts:33-40 (OCCASIONS tuple)",
+        "src/routes/moments.index.tsx (listing tile)",
+        "src/routes/moments.$slug.tsx:22 (OCCASION_HERO)"
+      ],
+      "requires_confirmation": ["name_ar_missing", "description_en_missing", "description_ar_missing"]
+    }
+  ]
+}

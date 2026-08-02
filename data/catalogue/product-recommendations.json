@@ -1,0 +1,19 @@
+{
+  "$schema_note": "Canonical product-recommendation seed data — Phase 2A analysis output. Intentionally EMPTY. See notes below and docs/catalogue/catalogue-decisions-required.md.",
+  "generated_at": "2026-07-27",
+  "notes": [
+    "No curated/persisted product-recommendation dataset exists anywhere in the current codebase. src/routes/product.$id.tsx computes 'related products' at render time as `products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4)` — a same-category fallback, not stored data.",
+    "'Recently viewed' (src/lib/store.ts recentlyViewed, capped at 12) is a per-browser localStorage list of product ids the customer viewed, not a recommendation relationship between products — it is customer session data, out of catalogue scope.",
+    "Per the 'do not invent business data' rule (Phase 2A instructions) and 'no fake business values' more broadly, this file ships with zero entries rather than materializing the current same-category fallback as if it were curated data. The recommended next step (see catalogue-migration-plan.md) is to keep the same-category fallback as the API's default recommendation strategy until/unless a real curated recommendations feature is scoped.",
+    "Schema below is provided so the shape is ready for future population, whether by admin curation or a future recommendation-engine sync."
+  ],
+  "schema": {
+    "product_external_key": "string — the product recommendations are shown for",
+    "recommended_product_external_key": "string — the recommended product",
+    "rank": "integer — 1-based display order within the recommendation list",
+    "reason": "string|null — e.g. 'same_category', 'frequently_bought_together', 'admin_curated'",
+    "source_references": "string[]",
+    "requires_confirmation": "string[]"
+  },
+  "product_recommendations": []
+}

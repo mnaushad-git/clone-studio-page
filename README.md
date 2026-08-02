@@ -21,6 +21,13 @@ npm i
 npm run dev
 ```
 
+## Backend
+
+The FastAPI backend lives in [backend/](backend/) — see
+[backend/README.md](backend/README.md) for local run instructions and
+[docs/architecture/](docs/architecture/) for the target architecture. The
+frontend above is not yet wired to it.
+
 ## Built with
 
 - TanStack Start

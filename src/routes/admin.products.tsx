@@ -1,227 +1,278 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { products, CATEGORY_LABEL, type Category } from "@/lib/products";
-import { useAdmin, productOverrideStore, type ProductSizeOption } from "@/lib/admin-store";
-import { Card, Badge, Button, Input, Select, Toggle, Modal, Field } from "@/components/admin/ui";
-import { Pencil, Plus, Trash2, RotateCcw } from "lucide-react";
+import { toast } from "sonner";
+import {
+  useAdminProducts,
+  useAdminProduct,
+  useUpdateProductMerchandising,
+  useSyncRuns,
+  useTriggerCatalogueSync,
+  type AdminProductMerchandisingUpdate,
+} from "@/lib/admin-api";
+import { resolveImageUrl } from "@/lib/catalogue-api";
+import {
+  Card,
+  Badge,
+  Button,
+  Input,
+  Select,
+  Toggle,
+  Modal,
+  Field,
+  EmptyState,
+} from "@/components/admin/ui";
+import { Pencil } from "lucide-react";
 
 export const Route = createFileRoute("/admin/products")({ component: ProductsPage });
 
 function ProductsPage() {
-  const overrides = useAdmin((s) => s.productOverrides);
-  const [q, setQ] = useState("");
-  const [cat, setCat] = useState<string>("all");
-  const [editing, setEditing] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [active, setActive] = useState<string>("");
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  const rows = products.filter((p) => {
-    if (cat !== "all" && p.category !== cat) return false;
-    if (q && !p.name.toLowerCase().includes(q.toLowerCase())) return false;
-    return true;
+  const { data, isLoading, isError, error } = useAdminProducts({
+    search: search || undefined,
+    active: active === "" ? undefined : active === "true",
+    limit: 50,
   });
+  const { data: syncRuns } = useSyncRuns(1);
+  const triggerSync = useTriggerCatalogueSync();
+  const lastRun = syncRuns?.items[0];
 
-  const editingProduct = editing ? products.find((p) => p.id === editing) : null;
-  const editingOverride = editing ? overrides[editing] : undefined;
+  async function handleSyncNow() {
+    try {
+      const result = await triggerSync.mutateAsync(false);
+      if (result.worker_dispatched) {
+        toast.success(result.message);
+      } else {
+        toast.info(result.message);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to trigger sync.");
+    }
+  }
 
   return (
     <Card
-      title={`Products (${rows.length})`}
+      title={data ? `Products (${data.total})` : "Products"}
       action={
-        <div className="flex gap-2">
-          <Input placeholder="Search products…" value={q} onChange={(e) => setQ(e.target.value)} className="w-56" />
-          <Select value={cat} onChange={(e) => setCat(e.target.value)} className="w-36">
-            <option value="all">All categories</option>
-            {Object.entries(CATEGORY_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            placeholder="Search name or SKU…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-56"
+          />
+          <Select value={active} onChange={(e) => setActive(e.target.value)} className="w-32">
+            <option value="">All</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
           </Select>
+          <div className="flex items-center gap-2 border-l pl-2 ml-1">
+            {lastRun && (
+              <span className="text-xs text-stone-500">
+                Last Odoo sync:{" "}
+                {lastRun.status === "RUNNING"
+                  ? "running…"
+                  : new Date(lastRun.completed_at ?? lastRun.started_at).toLocaleString()}
+                {lastRun.status === "FAILED" && (
+                  <span className="ml-1">
+                    <Badge tone="warn">Failed</Badge>
+                  </span>
+                )}
+                {lastRun.status === "PARTIALLY_COMPLETED" && (
+                  <span className="ml-1">
+                    <Badge tone="warn">Partial</Badge>
+                  </span>
+                )}
+              </span>
+            )}
+            <Button
+              variant="ghost"
+              disabled={triggerSync.isPending || lastRun?.status === "RUNNING"}
+              onClick={handleSyncNow}
+            >
+              Sync now
+            </Button>
+          </div>
         </div>
       }
     >
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="text-left text-xs uppercase text-stone-500 border-b">
-            <tr><th className="py-2">Product</th><th>Category</th><th>Price (SAR)</th><th>Stock</th><th>Featured</th><th>Visible</th><th></th></tr>
-          </thead>
-          <tbody>
-            {rows.map((p) => {
-              const o = overrides[p.id];
-              const price = o?.priceOverride ?? p.price;
-              return (
+      {isLoading && (
+        <div className="text-sm text-stone-500 py-6 text-center">Loading products…</div>
+      )}
+      {isError && <div className="text-sm text-red-600 py-6 text-center">{error?.message}</div>}
+      {!isLoading && data && data.items.length === 0 && (
+        <EmptyState title="No products match" hint="Try clearing search or filters." />
+      )}
+      {!isLoading && data && data.items.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="text-left text-xs uppercase text-stone-500 border-b">
+              <tr>
+                <th className="py-2">Product</th>
+                <th>SKU</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Active</th>
+                <th>Featured</th>
+                <th>Bestseller</th>
+                <th>New</th>
+                <th>Odoo</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.items.map((p) => (
                 <tr key={p.id} className="border-b last:border-0 hover:bg-stone-50">
                   <td className="py-2">
                     <div className="flex items-center gap-3">
-                      <img src={p.image} alt={p.name} className="h-10 w-10 rounded object-cover" />
-                      <div>
-                        <div className="font-medium">{p.name}</div>
-                        <div className="text-xs text-stone-500">{p.id}</div>
-                      </div>
+                      {p.primary_image_url && (
+                        <img
+                          src={resolveImageUrl(p.primary_image_url)}
+                          alt=""
+                          className="h-10 w-10 rounded object-cover"
+                        />
+                      )}
+                      <div className="font-medium">{p.name_en}</div>
                     </div>
                   </td>
-                  <td><Badge>{CATEGORY_LABEL[p.category as Category]}</Badge></td>
-                  <td>{price.toFixed(2)} {o?.priceOverride ? <Badge tone="info">override</Badge> : null}</td>
-                  <td>{o?.stock ?? "—"}</td>
-                  <td><Toggle checked={o?.featured ?? false} onChange={(v) => productOverrideStore.set(p.id, { featured: v })} /></td>
-                  <td><Toggle checked={o?.visible ?? true} onChange={(v) => productOverrideStore.set(p.id, { visible: v })} /></td>
-                  <td><Button variant="ghost" onClick={() => setEditing(p.id)}><Pencil className="h-4 w-4" /></Button></td>
+                  <td className="font-mono text-xs">{p.sku}</td>
+                  <td>
+                    <Badge>{p.category_name}</Badge>
+                  </td>
+                  <td>{p.price ? `SAR ${p.price}` : "—"}</td>
+                  <td>
+                    <Badge tone={p.active ? "success" : "default"}>
+                      {p.active ? "Active" : "Inactive"}
+                    </Badge>
+                  </td>
+                  <td>{p.featured ? <Badge tone="info">Featured</Badge> : "—"}</td>
+                  <td>{p.is_bestseller ? <Badge tone="warn">Bestseller</Badge> : "—"}</td>
+                  <td>{p.is_new ? <Badge tone="success">New</Badge> : "—"}</td>
+                  <td>
+                    <Badge tone={p.odoo_mapped ? "success" : "default"}>
+                      {p.odoo_mapped ? "Mapped" : "Unmapped"}
+                    </Badge>
+                  </td>
+                  <td>
+                    <Button variant="ghost" onClick={() => setEditingId(p.id)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      <Modal
-        open={!!editing}
-        onClose={() => setEditing(null)}
-        title={editingProduct ? `Edit — ${editingProduct.name}` : ""}
-        footer={<Button onClick={() => setEditing(null)}>Done</Button>}
-      >
-        {editingProduct && (
-          <ProductEditor
-            productId={editingProduct.id}
-            baseName={editingProduct.name}
-            baseCategory={editingProduct.category as Category}
-            baseImage={editingProduct.image}
-            basePrice={editingProduct.price}
-            baseDescription={editingProduct.description}
-            override={editingOverride}
-          />
-        )}
-      </Modal>
+      {editingId && (
+        <MerchandisingEditor productId={editingId} onClose={() => setEditingId(null)} />
+      )}
     </Card>
   );
 }
 
-function ProductEditor({
-  productId,
-  baseName,
-  baseCategory,
-  baseImage,
-  basePrice,
-  baseDescription,
-  override,
-}: {
-  productId: string;
-  baseName: string;
-  baseCategory: Category;
-  baseImage: string;
-  basePrice: number;
-  baseDescription?: string;
-  override: ReturnType<typeof useAdmin<Record<string, any>>> extends any ? any : never;
-}) {
-  const set = (patch: Record<string, unknown>) => productOverrideStore.set(productId, patch);
-  const sizes: ProductSizeOption[] = override?.sizes ?? [];
-  const flavors: string[] = override?.flavors ?? [];
+function MerchandisingEditor({ productId, onClose }: { productId: string; onClose: () => void }) {
+  const { data: product, isLoading } = useAdminProduct(productId);
+  const update = useUpdateProductMerchandising();
+  const [form, setForm] = useState<AdminProductMerchandisingUpdate | null>(null);
 
-  const updateSize = (i: number, patch: Partial<ProductSizeOption>) => {
-    const next = sizes.map((s, idx) => (idx === i ? { ...s, ...patch } : s));
-    set({ sizes: next });
-  };
-  const addSize = () => set({ sizes: [...sizes, { label: "NEW SIZE", delta: 0 }] });
-  const removeSize = (i: number) => set({ sizes: sizes.filter((_, idx) => idx !== i) });
-  const resetSizes = () => set({ sizes: undefined });
+  const merch = form ?? product?.merchandising ?? null;
 
-  const updateFlavor = (i: number, v: string) => set({ flavors: flavors.map((f, idx) => (idx === i ? v : f)) });
-  const addFlavor = () => set({ flavors: [...flavors, "New Flavor"] });
-  const removeFlavor = (i: number) => set({ flavors: flavors.filter((_, idx) => idx !== i) });
-  const resetFlavors = () => set({ flavors: undefined });
+  function patch(fields: AdminProductMerchandisingUpdate) {
+    setForm({ ...(merch ?? {}), ...fields });
+  }
+
+  async function save() {
+    if (!form) return onClose();
+    try {
+      await update.mutateAsync({ productId, updates: form });
+      toast.success("Merchandising updated.");
+      onClose();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update.");
+    }
+  }
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center gap-3">
-        <img src={override?.imageOverride || baseImage} alt="" className="h-16 w-16 rounded object-cover" />
-        <div>
-          <div className="font-medium">{override?.nameOverride || baseName}</div>
-          <div className="text-xs text-stone-500">{CATEGORY_LABEL[baseCategory]} · base SAR {basePrice.toFixed(2)}</div>
+    <Modal
+      open
+      onClose={onClose}
+      title={product ? `Merchandising — ${product.name_en}` : "Loading…"}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={save} disabled={update.isPending}>
+            Save
+          </Button>
+        </>
+      }
+    >
+      {isLoading || !product || !merch ? (
+        <div className="text-sm text-stone-500 py-6 text-center">Loading…</div>
+      ) : (
+        <div className="space-y-4">
+          <div className="text-xs text-stone-500">
+            SKU {product.sku} · {product.category_name} — identity, price, and Odoo mapping are
+            managed in Odoo and read-only here.
+          </div>
+          <div className="flex flex-wrap gap-6">
+            <Toggle
+              checked={merch.featured ?? false}
+              onChange={(v) => patch({ featured: v })}
+              label="Featured"
+            />
+            <Toggle
+              checked={merch.is_new ?? false}
+              onChange={(v) => patch({ is_new: v })}
+              label="New"
+            />
+            <Toggle
+              checked={merch.is_bestseller ?? false}
+              onChange={(v) => patch({ is_bestseller: v })}
+              label="Bestseller"
+            />
+            <Toggle
+              checked={merch.storefront_visible ?? true}
+              onChange={(v) => patch({ storefront_visible: v })}
+              label="Visible on storefront"
+            />
+          </div>
+          <Field label="Display order">
+            <Input
+              type="number"
+              value={merch.display_order ?? 0}
+              onChange={(e) => patch({ display_order: Number(e.target.value) })}
+            />
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Badge (English)">
+              <Input
+                value={merch.badge_en ?? ""}
+                onChange={(e) => patch({ badge_en: e.target.value || null })}
+              />
+            </Field>
+            <Field label="Badge (Arabic)">
+              <Input
+                value={merch.badge_ar ?? ""}
+                onChange={(e) => patch({ badge_ar: e.target.value || null })}
+              />
+            </Field>
+          </div>
+          {product.moment_names.length > 0 && (
+            <div className="text-xs text-stone-500">Moments: {product.moment_names.join(", ")}</div>
+          )}
+          {product.recipient_names.length > 0 && (
+            <div className="text-xs text-stone-500">
+              Recipients: {product.recipient_names.join(", ")}
+            </div>
+          )}
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Display name override">
-          <Input defaultValue={override?.nameOverride ?? ""} placeholder={baseName} onBlur={(e) => set({ nameOverride: e.target.value || undefined })} />
-        </Field>
-        <Field label="Image URL override" hint="Public URL to replace product image">
-          <Input defaultValue={override?.imageOverride ?? ""} placeholder="https://…" onBlur={(e) => set({ imageOverride: e.target.value || undefined })} />
-        </Field>
-        <Field label="Price override (SAR)" hint="Leave blank to keep base price">
-          <Input type="number" step="0.01" defaultValue={override?.priceOverride ?? ""} onBlur={(e) => set({ priceOverride: e.target.value ? Number(e.target.value) : undefined })} />
-        </Field>
-        <Field label="Stock quantity">
-          <Input type="number" defaultValue={override?.stock ?? ""} onBlur={(e) => set({ stock: e.target.value ? Number(e.target.value) : undefined })} />
-        </Field>
-        <Field label="Max qty per order">
-          <Input type="number" defaultValue={override?.maxQty ?? ""} onBlur={(e) => set({ maxQty: e.target.value ? Number(e.target.value) : undefined })} />
-        </Field>
-        <Field label="Badge label" hint="e.g. New, Bestseller, Limited">
-          <Input defaultValue={override?.badge ?? ""} onBlur={(e) => set({ badge: e.target.value || undefined })} />
-        </Field>
-      </div>
-
-      <Field label="Description override" hint="Shown on the product page">
-        <textarea
-          defaultValue={override?.descriptionOverride ?? ""}
-          placeholder={baseDescription ?? "Product description"}
-          onBlur={(e) => set({ descriptionOverride: e.target.value || undefined })}
-          className="w-full min-h-[70px] px-3 py-2 rounded-lg border border-stone-300 focus:border-stone-900 focus:outline-none text-sm"
-        />
-      </Field>
-
-      <Field label="Tags (comma-separated)" hint="Used for filters and recommendations">
-        <Input
-          defaultValue={(override?.tags ?? []).join(", ")}
-          onBlur={(e) => set({ tags: e.target.value ? e.target.value.split(",").map((t) => t.trim()).filter(Boolean) : undefined })}
-        />
-      </Field>
-
-      <div className="border rounded-lg p-3">
-        <div className="flex items-center justify-between mb-2">
-          <div className="font-medium text-sm">Size options</div>
-          <div className="flex gap-2">
-            <Button variant="ghost" onClick={resetSizes}><RotateCcw className="h-3 w-3 mr-1" />Use defaults</Button>
-            <Button variant="outline" onClick={addSize}><Plus className="h-3 w-3 mr-1" />Add size</Button>
-          </div>
-        </div>
-        {sizes.length === 0 ? (
-          <div className="text-xs text-stone-500">Using category defaults. Click "Add size" to customize.</div>
-        ) : (
-          <div className="space-y-2">
-            {sizes.map((s, i) => (
-              <div key={i} className="grid grid-cols-[1fr_1fr_110px_auto] gap-2 items-center">
-                <Input defaultValue={s.label} placeholder="LABEL" onBlur={(e) => updateSize(i, { label: e.target.value })} />
-                <Input defaultValue={s.sub ?? ""} placeholder="Subtext (optional)" onBlur={(e) => updateSize(i, { sub: e.target.value || undefined })} />
-                <Input type="number" step="0.01" defaultValue={s.delta ?? 0} placeholder="Δ price" onBlur={(e) => updateSize(i, { delta: Number(e.target.value) || 0 })} />
-                <Button variant="ghost" onClick={() => removeSize(i)}><Trash2 className="h-3 w-3" /></Button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="border rounded-lg p-3">
-        <div className="flex items-center justify-between mb-2">
-          <div className="font-medium text-sm">Flavor options</div>
-          <div className="flex gap-2">
-            <Button variant="ghost" onClick={resetFlavors}><RotateCcw className="h-3 w-3 mr-1" />Use defaults</Button>
-            <Button variant="outline" onClick={addFlavor}><Plus className="h-3 w-3 mr-1" />Add flavor</Button>
-          </div>
-        </div>
-        {flavors.length === 0 ? (
-          <div className="text-xs text-stone-500">Using category defaults. Click "Add flavor" to customize.</div>
-        ) : (
-          <div className="space-y-2">
-            {flavors.map((f, i) => (
-              <div key={i} className="flex gap-2 items-center">
-                <Input defaultValue={f} onBlur={(e) => updateFlavor(i, e.target.value)} />
-                <Button variant="ghost" onClick={() => removeFlavor(i)}><Trash2 className="h-3 w-3" /></Button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-6 border-t pt-4">
-        <Toggle checked={override?.visible ?? true} onChange={(v) => set({ visible: v })} label="Visible on storefront" />
-        <Toggle checked={override?.featured ?? false} onChange={(v) => set({ featured: v })} label="Featured on homepage" />
-        <Toggle checked={override?.allowInscription ?? baseCategory === "cakes"} onChange={(v) => set({ allowInscription: v })} label="Allow inscription" />
-      </div>
-    </div>
+      )}
+    </Modal>
   );
 }

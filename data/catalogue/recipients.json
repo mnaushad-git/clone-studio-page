@@ -1,0 +1,70 @@
+{
+  "$schema_note": "Canonical 'recipients' seed data — Phase 2A analysis output. Not wired to any runtime code. Mirrors src/lib/products.ts RECIPIENTS tuple. Not an Odoo product category — kept as a separate PostgreSQL/Admin-owned entity per docs/architecture/data-ownership.md.",
+  "generated_at": "2026-07-27",
+  "recipients": [
+    {
+      "external_key": "terrific_bites.recipient.for-him",
+      "slug": "for-him",
+      "name_en": "For Him",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "active": true,
+      "display_order": 1,
+      "source_references": [
+        "src/lib/products.ts:43-44 (RECIPIENTS tuple)",
+        "src/routes/recipients.index.tsx (listing tile)",
+        "src/routes/recipients.$slug.tsx (filtered listing)"
+      ],
+      "requires_confirmation": ["name_ar_missing", "description_en_missing", "description_ar_missing"]
+    },
+    {
+      "external_key": "terrific_bites.recipient.for-her",
+      "slug": "for-her",
+      "name_en": "For Her",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "active": true,
+      "display_order": 2,
+      "source_references": [
+        "src/lib/products.ts:43-44 (RECIPIENTS tuple)",
+        "src/routes/recipients.index.tsx (listing tile)",
+        "src/routes/recipients.$slug.tsx (filtered listing)"
+      ],
+      "requires_confirmation": ["name_ar_missing", "description_en_missing", "description_ar_missing"]
+    },
+    {
+      "external_key": "terrific_bites.recipient.for-kids",
+      "slug": "for-kids",
+      "name_en": "For Kids",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "active": true,
+      "display_order": 3,
+      "source_references": [
+        "src/lib/products.ts:43-44 (RECIPIENTS tuple)",
+        "src/routes/recipients.index.tsx (listing tile)",
+        "src/routes/recipients.$slug.tsx (filtered listing)"
+      ],
+      "requires_confirmation": ["name_ar_missing", "description_en_missing", "description_ar_missing"]
+    },
+    {
+      "external_key": "terrific_bites.recipient.for-family",
+      "slug": "for-family",
+      "name_en": "For Family",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "active": true,
+      "display_order": 4,
+      "source_references": [
+        "src/lib/products.ts:43-44 (RECIPIENTS tuple)",
+        "src/routes/recipients.index.tsx (listing tile)",
+        "src/routes/recipients.$slug.tsx (filtered listing)"
+      ],
+      "requires_confirmation": ["name_ar_missing", "description_en_missing", "description_ar_missing"]
+    }
+  ]
+}

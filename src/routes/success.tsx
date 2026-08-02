@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
 import { CheckCircle2, Download, Home, MapPin, Truck, ShoppingBag } from "lucide-react";
 import jsPDF from "jspdf";
-import { useStore, orders as orderStore } from "@/lib/store";
+import { useStore } from "@/lib/store";
 import { SiteHeader } from "@/components/SiteHeader";
 import { OrderStatusTimeline } from "@/components/OrderStatusTimeline";
+import { formatAttributes } from "@/lib/format-variant-attributes";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/success")({
@@ -26,14 +26,6 @@ function SuccessPage() {
   const t = useT();
   const lastOrderId = useStore((s) => s.lastOrderId);
   const order = useStore((s) => s.orders.find((o) => o.id === s.lastOrderId) ?? null);
-
-  useEffect(() => {
-    if (order && order.status === "Processing") {
-      const timer = setTimeout(() => orderStore.setStatus(order.id, "Paid"), 600);
-      return () => clearTimeout(timer);
-    }
-  }, [order?.id, order?.status]);
-
 
   const downloadInvoice = () => {
     if (!order) return;
@@ -75,7 +67,8 @@ function SuccessPage() {
     doc.setFont("helvetica", "normal");
 
     order.items.forEach((it) => {
-      doc.text(it.name + (it.size ? ` (${it.size})` : ""), 40, y);
+      const variant = formatAttributes(it.attributes);
+      doc.text(it.name + (variant ? ` (${variant})` : ""), 40, y);
       doc.text(String(it.qty), 320, y);
       doc.text(`SAR ${it.unitPrice.toFixed(2)}`, 400, y);
       doc.text(`SAR ${(it.qty * it.unitPrice).toFixed(2)}`, w - 40, y, { align: "right" });
@@ -147,14 +140,6 @@ function SuccessPage() {
         <div className="bg-white rounded-2xl shadow-sm p-6 mt-6">
           <div className="flex items-center justify-between mb-2">
             <h2 className="font-semibold">{t("checkoutOrderStatus")}</h2>
-            {order.status !== "Delivered" && (
-              <button
-                onClick={() => orderStore.advance(order.id)}
-                className="text-xs text-primary hover:underline"
-              >
-                {t("checkoutMarkAs")} {order.status === "Processing" ? t("checkoutStatusPaid") : t("checkoutStatusDelivered")}
-              </button>
-            )}
           </div>
           <OrderStatusTimeline order={order} />
           {order.trackingToken && (
@@ -184,7 +169,7 @@ function SuccessPage() {
                 <div>
                   <p className="font-medium">{it.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {t("checkoutQty")} {it.qty}{it.size ? ` · ${it.size}` : ""}{it.flavor ? ` · ${it.flavor}` : ""}
+                    {t("checkoutQty")} {it.qty}{formatAttributes(it.attributes) ? ` · ${formatAttributes(it.attributes)}` : ""}
                   </p>
                   {it.inscription && <p className="text-xs italic text-muted-foreground">"{it.inscription}"</p>}
                 </div>

@@ -40,6 +40,9 @@ export const checkout = {
     checkoutToastChooseMethod: "Please choose a payment method",
     checkoutToastFixFields: "Please fix the highlighted fields",
     checkoutToastPaymentConfirmed: "Payment confirmed! Your order is on its way.",
+    checkoutToastOrderFailed: "We couldn't place your order. Please try again.",
+    checkoutToastPricesChanged: "Prices may have changed — please review your cart and try again.",
+    checkoutToastPaymentDeclined: "Your payment was declined. Please try another payment method.",
 
     // payment.tsx — validation
     checkoutValidationNameOnCard: "Enter the name on card",
@@ -106,6 +109,7 @@ export const checkout = {
     checkoutDetailsPrivacy: "Your details won't be shared back with the sender.",
 
     // track.$id.tsx
+    checkoutLoading: "Loading your order…",
     checkoutOrderNotFound: "Order not found",
     checkoutTrackingLinkInvalid: "This tracking link is invalid or the order isn't in this device's history.",
     checkoutToastLinkCopied: "Tracking link copied",
@@ -162,6 +166,9 @@ export const checkout = {
     checkoutToastChooseMethod: "يرجى اختيار وسيلة الدفع",
     checkoutToastFixFields: "يرجى تصحيح الحقول المُشار إليها",
     checkoutToastPaymentConfirmed: "تم تأكيد الدفع بنجاح! طلبك في طريقه إليك.",
+    checkoutToastOrderFailed: "تعذر إتمام طلبك. يرجى المحاولة مرة أخرى.",
+    checkoutToastPricesChanged: "قد تكون الأسعار قد تغيّرت — يرجى مراجعة سلتك والمحاولة مرة أخرى.",
+    checkoutToastPaymentDeclined: "تم رفض عملية الدفع. يرجى تجربة طريقة دفع أخرى.",
 
     // payment.tsx — validation
     checkoutValidationNameOnCard: "يرجى إدخال الاسم المكتوب على البطاقة",
@@ -228,6 +235,7 @@ export const checkout = {
     checkoutDetailsPrivacy: "لن تتم مشاركة بياناتك مع المُرسِل.",
 
     // track.$id.tsx
+    checkoutLoading: "جارٍ تحميل طلبك…",
     checkoutOrderNotFound: "الطلب غير موجود",
     checkoutTrackingLinkInvalid: "رابط التتبع غير صالح، أو أن الطلب غير موجود ضمن سجل هذا الجهاز.",
     checkoutToastLinkCopied: "تم نسخ رابط التتبع",

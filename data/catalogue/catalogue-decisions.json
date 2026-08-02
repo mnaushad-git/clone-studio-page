@@ -1,0 +1,479 @@
+{
+  "$schema_note": "Phase 2B deliverable — Catalogue Decision Resolution and Import Readiness. Resolves the 13 open items from docs/catalogue/catalogue-decisions-required.md plus items newly discovered while resolving them, against the 20 MVP-default instructions issued for this phase. This file does NOT change any of the six Phase 2A canonical seed files (categories.json, products.json, product-merchandising.json, moments.json, recipients.json, product-recommendations.json) — see docs/catalogue/catalogue-decision-pack.md 'Canonical seed file changes' section for why none of them qualified for an in-place update under this phase's rules. Phase 4B (2026-07-28) added live evidence from a real Odoo 19 instance (terrific_dev) to D07/D08/D09/D10/D19's rationale/approved_value fields only — D09 is now APPROVED on that evidence (Odoo-verification-only decision, fully satisfied); D08/D10/D19 remain BUSINESS_CONFIRMATION_REQUIRED since business sign-off is independently required and was not obtained in this phase. D03/D04/D15/D16/D21 were left untouched per explicit instruction not to approve them without existing business sign-off.",
+  "generated_at": "2026-07-27",
+  "phase_5_note": "Phase 5 (2026-07-28/29) added data/catalogue/catalogue-business-approvals.json, a machine-readable copy of exactly the six decisions that gate an Odoo write (D03/D04/D08/D09/D10/D19), checked automatically by app.scripts.check_catalogue_import_approvals before import_odoo_catalogue --apply is permitted to run. This file (catalogue-decisions.json) remains the authoritative business-rationale record; no decision's status or approved_value was changed by Phase 5 — see docs/integrations/odoo-import-approval-gate.md.",
+  "phase_6_note": "Phase 6 (2026-07-29) recorded explicit business sign-off for D03, D04, D08, D10, D19 (D09 was already APPROVED) — all six decisions blocking the Odoo write are now APPROVED with a non-null approved_value here and in data/catalogue/catalogue-business-approvals.json. D21 (VAT contradiction) is resolved as a consequence of D08's approval. D15/D16 remain open (non-blocking for import).",
+  "allowed_status_values": [
+    "PROPOSED",
+    "APPROVED",
+    "REJECTED",
+    "ODOO_VERIFICATION_REQUIRED",
+    "BUSINESS_CONFIRMATION_REQUIRED"
+  ],
+  "decisions": [
+    {
+      "decision_id": "D01",
+      "title": "Canonical product count: 26, not 28",
+      "category": "Technical implementation decision",
+      "issue": "docs/current-state/mock-data.md and docs/architecture/implementation-roadmap.md both state '28 products'. Direct inspection of src/lib/products.ts (grep -c '{ id:') confirms 26 product literals exist today.",
+      "options": [
+        "Treat 26 (live repo) as ground truth; mark 28 obsolete in this phase's docs, correct the other two docs later",
+        "Treat 28 as ground truth and investigate where 2 products were removed"
+      ],
+      "recommendation": "Use 26 as the baseline. There is no evidence anywhere (git history, changelog, admin store) of 2 removed products; '28' is simply a stale figure that was never re-verified.",
+      "rationale": "Direct repository inspection is authoritative over prior documentation per this phase's instructions. Re-litigating a non-issue would add no value.",
+      "blocks_odoo_import": false,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": false,
+      "requires_odoo_verification": false,
+      "status": "APPROVED",
+      "approved_value": 26
+    },
+    {
+      "decision_id": "D02",
+      "title": "Category structure: flat, 6 categories, no hierarchy",
+      "category": "Architecture decision",
+      "issue": "The same 6 category slugs are declared independently in 3 places in the current app (products.ts, admin-store.ts, ShopGrid.tsx). None imply a parent/child relationship. categories.json includes a parent_external_key field for forward-compatibility, null for all 6.",
+      "options": [
+        "Keep flat (6 top-level categories, no parents)",
+        "Introduce a category hierarchy now (e.g. group Cupcakes/Cakes under a 'Bakery' parent)"
+      ],
+      "recommendation": "Keep flat. Nothing in the current UI, navigation, or admin tooling implies or requires a hierarchy, and inventing one would be new business data, not a data-modeling correction.",
+      "rationale": "Per MVP principle: retain the six categories unless there is a clear structural defect. No defect exists — this is a genuine flat catalogue today.",
+      "blocks_odoo_import": false,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": false,
+      "requires_odoo_verification": false,
+      "status": "APPROVED",
+      "approved_value": "flat; 6 categories; parent_external_key = null for all"
+    },
+    {
+      "decision_id": "D03",
+      "title": "Category codes: keep CUP / CAK / CHO / DON / GIF / EXT",
+      "category": "Business decision",
+      "issue": "Category codes are generated (Phase 2A), not business-assigned. Any change cascades into every one of the 26 SKUs, since the SKU convention is TB-<CODE>-<SEQ>. Original decisions-required.md #2 flags this as blocking.",
+      "options": [
+        "Keep the existing generated 3-letter codes (CUP/CAK/CHO/DON/GIF/EXT) exactly as Phase 2A produced them",
+        "Rename to 4-5 letter codes for clarity (e.g. CAKE/CHOC/DONUT/GIFT/EXTRA), matching the illustrative style in this phase's own instructions",
+        "Ask the business to propose entirely different codes"
+      ],
+      "recommendation": "Keep the existing codes as-is. They are already threaded through all 26 canonical SKUs, satisfy 'short/stable/uppercase', and changing them now is pure rework with no structural defect driving it — consistent with the MVP principle to avoid unnecessary complexity.",
+      "rationale": "Noted risk, not acted on: GIF collides with the image-file-format acronym and CAK/CHO/DON are truncations that could be misread (e.g. as initials). This is a legibility nit, not a defect, and is cheap to change later (before Odoo import) if the business prefers longer codes — but not worth unilateral rework now. Flagged here so it is not silently carried forward without the reasoning being visible.",
+      "blocks_odoo_import": true,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": true,
+      "requires_odoo_verification": false,
+      "status": "APPROVED",
+      "approved_value": {
+        "codes": ["CUP", "CAK", "CHO", "DON", "GIF", "EXT"],
+        "mapping": {
+          "CUP": "Cupcakes",
+          "CAK": "Cakes",
+          "CHO": "Chocolates",
+          "DON": "Donuts",
+          "GIF": "Gifts",
+          "EXT": "Extras"
+        }
+      },
+      "phase_6_approval": "APPROVED 2026-07-29 — see data/catalogue/catalogue-business-approvals.json#D03"
+    },
+    {
+      "decision_id": "D04",
+      "title": "Product SKU convention and sequence",
+      "category": "Business decision",
+      "issue": "All 26 SKUs are generated (TB-<CATEGORY-CODE>-<3-digit-sequence>, sequence = array position within category), not business-assigned. Needs sign-off on both the convention and whether sequence should encode something meaningful (e.g. launch order, price rank) instead of current catalogue-array order.",
+      "options": [
+        "Accept convention + current array-order sequence as final",
+        "Re-sequence by another rule (e.g. price descending, alphabetical, launch date) before approval",
+        "Change the convention itself (e.g. no category code in the SKU, pure running number)"
+      ],
+      "recommendation": "Accept the convention and current sequence as-is. Array order has no hidden business meaning to preserve or violate; a generated, deterministic sequence is sufficient for an MVP SKU and is simpler than inventing an ordering principle (e.g. 'launch date') that doesn't exist in the source data.",
+      "rationale": "Per MVP principle: use stable external keys and SKUs, avoid unnecessary complexity. The full 26-row table is produced in sku-approval-register.md for sign-off.",
+      "blocks_odoo_import": true,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": true,
+      "requires_odoo_verification": false,
+      "status": "APPROVED",
+      "approved_value": {
+        "convention": "TB-<CATEGORY-CODE>-<THREE-DIGIT-SEQUENCE>",
+        "sku_count": 26,
+        "source_register": "docs/catalogue/sku-approval-register.md",
+        "permanent_after_import": true
+      },
+      "phase_6_approval": "APPROVED 2026-07-29 — see data/catalogue/catalogue-business-approvals.json#D04"
+    },
+    {
+      "decision_id": "D05",
+      "title": "External key convention",
+      "category": "Technical implementation decision",
+      "issue": "external_key needs a stable, permanent-after-import cross-system identifier namespace for both products and categories.",
+      "options": [
+        "terrific_bites.product.<slug> / terrific_bites.category.<slug> (as already generated in Phase 2A)",
+        "A different namespace/module prefix"
+      ],
+      "recommendation": "Accept the existing convention exactly as generated. It is already applied consistently across all 6 categories and 26 products, is a pure technical identifier with no commercial content, and matches this phase's own specified convention.",
+      "rationale": "A deterministically-generated technical identifier following an already-specified convention — safe to treat as final now rather than re-opening later, per this phase's instruction that external keys are 'technical integration identifiers and should be treated as permanent after import.'",
+      "blocks_odoo_import": false,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": false,
+      "requires_odoo_verification": false,
+      "status": "APPROVED",
+      "approved_value": "terrific_bites.product.<slug> / terrific_bites.category.<slug>"
+    },
+    {
+      "decision_id": "D06",
+      "title": "Product and category slugs",
+      "category": "Technical implementation decision",
+      "issue": "Slugs must be preserved where valid/unique, or generated deterministically where missing/invalid.",
+      "options": [
+        "Reuse the existing frontend product id (already kebab-case, already the live /product/$id route param) as-is",
+        "Re-mint new slugs from product names"
+      ],
+      "recommendation": "Reuse existing ids as slugs. All 26 are already valid kebab-case and unique; none are missing or invalid. No regeneration needed.",
+      "rationale": "Confirmed by direct inspection (current-catalogue-audit.md): no duplicate ids, no non-kebab-case ids. Re-minting would be pure risk with no benefit.",
+      "blocks_odoo_import": false,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": false,
+      "requires_odoo_verification": false,
+      "status": "APPROVED",
+      "approved_value": "slug = existing products.ts product id, unchanged, for all 26 products and all 6 categories"
+    },
+    {
+      "decision_id": "D07",
+      "title": "Currency",
+      "category": "Technical implementation decision",
+      "issue": "Confirm all 26 products use one currency and that no conversion is applied.",
+      "options": [
+        "Confirm SAR for all 26, no conversion",
+        "Investigate further for hidden multi-currency cases"
+      ],
+      "recommendation": "Confirmed: every product's currency field is 'SAR' (the only currency ever rendered in the UI, verified by direct inspection of products.json and the storefront's price rendering). No conversion applied or needed.",
+      "rationale": "Directly observable fact, not a judgment call. No multi-currency/multi-city concept exists anywhere in the current app (also carried forward as implementation-roadmap.md open question #8, out of scope here).",
+      "blocks_odoo_import": false,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": false,
+      "requires_odoo_verification": true,
+      "status": "APPROVED",
+      "approved_value": "SAR for all 26 products. Live-verified 2026-07-28 against terrific_dev (Odoo 19.0-20260720): res.company id=1 currency_id=SAR (id 151), single company, single currency (see data/odoo/odoo-environment-report.json company_currency/multi_company checks) — the remaining verification caveat is now closed."
+    },
+    {
+      "decision_id": "D08",
+      "title": "Tax / VAT mapping and price tax-treatment",
+      "category": "Odoo configuration decision",
+      "issue": "No per-product or per-category tax class exists today — only one site-wide 5% VAT rate (admin-store.settings.taxRate) applied at checkout. Odoo needs a real account.tax record mapped per product template. Separately: does the displayed product price already include this VAT, or is VAT added on top?",
+      "options": [
+        "Introduce one logical tax reference (e.g. STANDARD_SALES_VAT) now, map to a real Odoo account.tax id only when the target instance is known",
+        "Leave tax_reference null in the canonical catalogue entirely until the Odoo instance is chosen",
+        "Model per-category or per-product tax classes now (e.g. distinct treatment for catering/corporate orders)"
+      ],
+      "recommendation": "Introduce the logical placeholder tax_reference = STANDARD_SALES_VAT for all 26 products (single site-wide rate today, no evidence of a second tax treatment anywhere in the app), and explicitly mark the real Odoo account.tax id as ODOO_VERIFICATION_REQUIRED. Do not invent per-category tax classes — no catering/corporate-specific product exists in the current 26-product catalogue to justify one.",
+      "rationale": "This does not change any canonical seed file in this phase (tax_reference stays null in products.json — see catalogue-decision-pack.md); STANDARD_SALES_VAT is documented here as the recommended logical label for when that field is populated. Separately and more urgently: src/routes/product.$id.tsx line ~200 renders the literal copy 'All prices include VAT' directly under the price, while src/lib/store.ts's selectTax()/selectTotal() computes tax as 5% ADDED ON TOP of the cart subtotal (VAT-exclusive behavior) and displays it as a separate 'Tax' line in the cart, delivery, and payment pages. This is a genuine, code-verified contradiction, not a hypothetical — see D21. Live-verified 2026-07-28 (Phase 4B) against terrific_dev: zero account.tax records exist on the target instance (search_count on account.tax returns 0, both filtered to type_tax_use='sale' and unfiltered) despite the Saudi fiscal-localization modules (l10n_sa, l10n_sa_withholding_tax, l10n_gcc_invoice) being installed — the Fiscal Localization/chart-of-accounts setup wizard has not been completed on this instance, so there is currently no real Odoo tax record to map STANDARD_SALES_VAT onto even once the rate is confirmed. Separately, res.company(id=1).account_price_include = 'tax_excluded' — this is Odoo's own default company-level accounting setting on this instance (not a Terrific-Bites-specific configuration decision), and it is noted here only as supporting context for D21, not as a resolution of it. Still BUSINESS_CONFIRMATION_REQUIRED and now also blocked on Odoo-side Accounting/tax setup independent of the business question.",
+      "blocks_odoo_import": true,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": true,
+      "requires_odoo_verification": true,
+      "status": "APPROVED",
+      "approved_value": {
+        "odoo_sales_tax_record": null,
+        "prices_include_vat_canonically": true,
+        "list_price_vat_treatment": "VAT_INCLUSIVE",
+        "storefront_display_vat_treatment": "DISPLAY_STORED_PRICE_AS_IS_NO_ADDITIONAL_VAT",
+        "checkout_adds_vat_separately": false
+      },
+      "phase_6_approval": "APPROVED 2026-07-29 — prices are VAT-inclusive for the MVP; Storefront displays the stored price; checkout must not add VAT again; no Odoo tax records created/configured this phase. Also resolves D21's contradiction (see below). See data/catalogue/catalogue-business-approvals.json#D08"
+    },
+    {
+      "decision_id": "D09",
+      "title": "Unit of measure",
+      "category": "Odoo configuration decision",
+      "issue": "No UoM concept exists anywhere in the current app. Odoo requires one per product template.",
+      "options": [
+        "Default 'Unit'/'Each' for all 26 products",
+        "Model per-product/per-category UoM variation now"
+      ],
+      "recommendation": "Default to 'Unit' for all 26. No catering, bulk, or quantity-based product was found in the audited 26-product catalogue (every product is a single sellable item — even buttercream-cake's 6\"/9\" options are size variants of one cake, not a quantity/UoM difference).",
+      "rationale": "Simplest correct default per MVP principle. The exact Odoo uom.uom record id ('Units', 'PCE', etc. — naming varies by Odoo localization) must still be verified against the real target instance. Live-verified 2026-07-28 (Phase 4B) against terrific_dev: uom.uom id=1, name='Units', relative_factor=1.0, relative_uom_id=false (a base/reference unit, not derived from another), active=true. This is the real record to use — no catering/bulk product in the 26-product catalogue needs a different UoM, and 'Units' is confirmed present and usable. Odoo-side verification requirement is now satisfied; no business confirmation was ever required for this decision.",
+      "blocks_odoo_import": true,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": false,
+      "requires_odoo_verification": true,
+      "status": "APPROVED",
+      "approved_value": "uom.uom id=1, name='Units' on the terrific_dev instance (verified 2026-07-28) — use for all 26 products"
+    },
+    {
+      "decision_id": "D10",
+      "title": "Odoo product type classification (Stockable / Consumable / Service)",
+      "category": "Odoo configuration decision",
+      "issue": "The current products.json product_type field ('simple'/'variant_parent') describes variant structure, not Odoo's Stockable/Consumable/Service inventory-tracking classification, which every product.template needs at import.",
+      "options": [
+        "Classify all 26 as Consumable (no real-time on-hand/valuation tracking)",
+        "Classify all 26 as Stockable (full inventory tracking from day one)",
+        "Classify all 26 as Service (no physical goods tracking at all)"
+      ],
+      "recommendation": "Consumable for all 26. These are physical bakery goods (not services) but the current app has zero inventory/stock concept (ProductOverride.stock schema field exists, seed always unset) — Stockable would imply a warehouse/valuation workflow that doesn't exist yet and isn't needed for an MVP launch.",
+      "rationale": "Simplest classification consistent with current reality; can be upgraded to Stockable later per-product if the business wants real quantity-on-hand tracking in Odoo without any SKU/external-key change. Live-verified 2026-07-28 (Phase 4B) against terrific_dev: product.template's `type` field selection is confirmed as exactly ['consu', 'service', 'combo'] on this instance — there is no 'Storable Product' value available at all, because the Inventory/stock module is not installed (stock.quant and stock.warehouse both return 'model not installed'; ir.module.module confirms 'stock' is absent from the 104 installed modules). This doesn't resolve the business question, but it does mean Consumable ('consu') is not just the recommended choice but currently the only physical-goods option this instance offers — Stockable would require installing the Inventory app first, a separate ops action. Still BUSINESS_CONFIRMATION_REQUIRED.",
+      "blocks_odoo_import": true,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": true,
+      "requires_odoo_verification": false,
+      "status": "APPROVED",
+      "approved_value": {
+        "odoo_product_type": "consu",
+        "apply_to": "all 26 physical catalogue items",
+        "excluded_types": ["service", "combo"],
+        "install_inventory_this_phase": false
+      },
+      "phase_6_approval": "APPROVED 2026-07-29 — see data/catalogue/catalogue-business-approvals.json#D10"
+    },
+    {
+      "decision_id": "D11",
+      "title": "Product variants scope",
+      "category": "Architecture decision",
+      "issue": "Only buttercream-cake has genuine per-product variant data (sizes/flavors) in products.ts. Every other product's size/flavor picker is a shared category-level default computed client-side, not per-product data.",
+      "options": [
+        "Promote category-level defaults into real per-product Odoo variants for all 26",
+        "Model variants only where genuine per-product structural data exists today (buttercream-cake only); one template + one default variant for the other 25"
+      ],
+      "recommendation": "Model variants only for buttercream-cake (Size x Flavor attribute lines generating product.product variants). The other 25 get one product.template with a single default product.product variant.",
+      "rationale": "Per MVP principle: avoid product variants unless the existing catalogue actually contains selectable variants. Promoting the category-level defaults would fabricate 25 sets of product-specific data that don't actually exist — every cupcake would appear to have independently-authored size data that is in fact one shared UI default.",
+      "blocks_odoo_import": false,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": false,
+      "requires_odoo_verification": true,
+      "status": "APPROVED",
+      "approved_value": "1 template + 1 default variant for 25/26 products; buttercream-cake = 1 template with Size (6in/9in) x Flavor (Vanilla/Chocolate) attribute-driven variants. Whether each buttercream-cake variant needs its own default_code (SKU) is ODOO_VERIFICATION_REQUIRED."
+    },
+    {
+      "decision_id": "D12",
+      "title": "Product images for Odoo import",
+      "category": "Technical implementation decision",
+      "issue": "Each product needs its verified primary image imported to Odoo's image_1920 field without disturbing the existing bundled asset files.",
+      "options": [
+        "Import the existing primary_image file as-is; keep original_path as migration-manifest provenance",
+        "Re-host/rename/compress images before import"
+      ],
+      "recommendation": "Import the existing verified primary image for each of the 26 products as-is. Do not move, rename, compress, or replace any image file in this phase.",
+      "rationale": "All 28 unique files referenced by the 26 products (26 primary + 3 buttercream-cake gallery thumbnails, minus overlap) were checked against disk and hashed in Phase 2A (image-inventory.md) — 0 missing files. Two pre-existing, non-blocking cosmetic gaps carried forward unmodified: (1) 'extras' category has no dedicated nav tile image (falls back to the gifts tile), (2) gift-cream.jpg (a gifts-styled filename) is actually the image for a donuts-category product (cream-cheese-donut) — filename/organization inconsistency only, no functional impact. 4 unused image files (rel-1..4.jpg) are left in place per this phase's do-not-remove-existing-assets rule.",
+      "blocks_odoo_import": false,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": false,
+      "requires_odoo_verification": true,
+      "status": "APPROVED",
+      "approved_value": "Import primary_image.original_path file contents to product.template.image_1920 unmodified; retain original_path in the migration manifest as provenance. Odoo version determines availability of a native 'extra images' gallery field (product.image, Odoo 15+) for buttercream-cake's 3 additional images — ODOO_VERIFICATION_REQUIRED."
+    },
+    {
+      "decision_id": "D13",
+      "title": "Arabic and missing English content",
+      "category": "Business decision",
+      "issue": "All 26 products, all 6 categories, all 6 moments, and all 4 recipients have zero Arabic content. Additionally 15/26 products have no English description at all.",
+      "options": [
+        "Auto-translate or generate filler text now to close the gap",
+        "Leave all Arabic fields null and all missing English descriptions null; treat as a content-completion project separate from technical integration"
+      ],
+      "recommendation": "Leave all Arabic fields null and all missing English descriptions null. Do not fabricate translations or copy.",
+      "rationale": "Per explicit instruction: do not invent Arabic translations, do not create business data without marking it proposed. This is a translation/copywriting project for the content/marketing team, not a data-modeling gap, and should not block the English technical integration — but it does block true bilingual parity before an Arabic-market launch.",
+      "blocks_odoo_import": false,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": false,
+      "requires_odoo_verification": false,
+      "status": "PROPOSED",
+      "approved_value": null
+    },
+    {
+      "decision_id": "D14",
+      "title": "Product recommendations strategy",
+      "category": "Architecture decision",
+      "issue": "No curated/persisted product-recommendation dataset exists anywhere in the app. The PDP's 'Related products' section is a same-category filter computed at render time, not stored data. product-recommendations.json ships empty by design.",
+      "options": [
+        "Keep the same-category fallback as the API's default recommendation strategy for the MVP",
+        "Scope and build a real curation/recommendation-engine feature now"
+      ],
+      "recommendation": "Keep the same-category fallback as the default strategy. Do not fabricate curated recommendation data, and do not treat this as an Odoo-import blocker.",
+      "rationale": "Matches current (real) behavior exactly, preserving the storefront's visible output. A future admin-curated or engine-driven recommendation feature can be layered on later without any catalogue-import rework, since product_recommendations is an independent table with its own FK relationships.",
+      "blocks_odoo_import": false,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": false,
+      "requires_odoo_verification": false,
+      "status": "APPROVED",
+      "approved_value": "same-category fallback, computed by the future catalogue API; product_recommendations table/file stays empty until a curation feature is explicitly scoped"
+    },
+    {
+      "decision_id": "D15",
+      "title": "'is_bestseller' concept",
+      "category": "Business decision",
+      "issue": "No such flag exists anywhere in the current app (unlike is_new, which does exist and is preserved). Needs a decision on whether to introduce it and, if so, how it is computed.",
+      "options": [
+        "Introduce is_bestseller now as an admin-managed manual flag, default null/false for all products",
+        "Introduce it as an order-volume-derived computed flag (requires order history, which doesn't exist yet)",
+        "Do not introduce the concept for the MVP at all"
+      ],
+      "recommendation": "Keep is_bestseller as a nullable PostgreSQL/Admin-owned merchandising field (already modeled this way in product-merchandising.json, value null for all 26), but do not compute or assign it in this phase. Whether to introduce it at all, and whether manually-set or order-volume-derived, is a merchandising decision for a later phase once real order data exists.",
+      "rationale": "Per MVP principle: do not create business data without marking it proposed. Introducing a manually-curated badge with no criteria would just be arbitrary data entry disguised as a feature.",
+      "blocks_odoo_import": false,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": true,
+      "requires_odoo_verification": false,
+      "status": "BUSINESS_CONFIRMATION_REQUIRED",
+      "approved_value": null
+    },
+    {
+      "decision_id": "D16",
+      "title": "Homepage rail / homepage_sections redesign",
+      "category": "Architecture decision",
+      "issue": "admin-store.ts's homepageSections config has zero effect on the real homepage. The real rails are hardcoded featured.* slices in products.ts. A confirmed bug: the 'What's New' rail renders featured.hero a second time instead of the isNew-filtered featured.new slice, so it duplicates the 'Products' rail byte-for-byte.",
+      "options": [
+        "Wire the existing admin-store homepageSections config shape to the real homepage for the first time (closing the gap as-is)",
+        "Redesign the config shape as part of a future merchandising module, rather than lifting the current (never-functional) shape verbatim",
+        "Fix the 'What's New' bug silently as part of this or a future phase"
+      ],
+      "recommendation": "Document both issues precisely (done, see current-catalogue-audit.md and product-merchandising.json's notes) and defer the actual redesign/fix decision to the merchandising/content implementation phase. Do not fix silently.",
+      "rationale": "Per explicit phase constraint: do not fix the homepage or Admin Portal issues in this phase. Whether the fix is 'wire it for real' vs. 'redesign' vs. 'correct the What's New bug' is itself a product decision (bug-for-bug preservation vs. visible behavior change) requiring sign-off before Frontend Cutover (migration-plan Step F), not before catalogue readiness.",
+      "blocks_odoo_import": false,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": true,
+      "requires_odoo_verification": false,
+      "status": "PROPOSED",
+      "approved_value": null
+    },
+    {
+      "decision_id": "D17",
+      "title": "Admin ProductOverride field split (Odoo-owned vs. PostgreSQL/Admin-owned)",
+      "category": "Architecture decision",
+      "issue": "The current ProductOverride schema conflates Odoo-owned commercial fields (priceOverride, stock) with PostgreSQL/Admin-owned merchandising fields (visible, featured, badge, nameOverride, descriptionOverride) in one undifferentiated object.",
+      "options": [
+        "Split into product (Odoo-synced) vs. product_merchandising (Admin-owned) tables, per data-ownership.md",
+        "Keep the current conflated shape for the MVP and split later"
+      ],
+      "recommendation": "Adopt the split now (already the design in postgresql-field-mapping-draft.md and data-ownership.md §4). Odoo-owned, Admin-must-not-permanently-override: SKU, ERP product identity, base price, tax, inventory, ERP active status. PostgreSQL/Admin-owned: storefront visibility, badge, featured flag, display order, homepage sections, moments, recipients, marketing text overrides, SEO, storefront-specific image overrides.",
+      "rationale": "This directly resolves the exact defect the Phase 2A audit found (admin-store.ts's ProductOverride conflating both kinds of fields) and follows an already-approved architecture rule (CLAUDE.md rule 9 / data-ownership.md), so it is safe to finalize now rather than re-litigate.",
+      "blocks_odoo_import": false,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": false,
+      "requires_odoo_verification": false,
+      "status": "APPROVED",
+      "approved_value": "see docs/catalogue/final-data-ownership.md for the complete field-by-field split"
+    },
+    {
+      "decision_id": "D18",
+      "title": "Product reviews and ratings",
+      "category": "Architecture decision",
+      "issue": "store.ts's 5 seeded reviews and the review-derived average rating are mock-only; no real review source exists. Reviews belong to a separate 'reviews' domain, not catalogue.",
+      "options": [
+        "Import mock ratings/reviews into Odoo as if they were real data",
+        "Treat all existing reviews as mock-only, not imported anywhere, with a future PostgreSQL-owned review model recommended"
+      ],
+      "recommendation": "Treat existing mock ratings/reviews as mock-only. Do not import them into Odoo. Recommend a future PostgreSQL-owned review domain if reviews remain in scope for launch.",
+      "rationale": "Odoo has no natural concept of storefront product reviews and importing fabricated review data would violate the no-fake-business-data principle. This is explicitly out of catalogue scope per data-ownership.md's domain boundaries.",
+      "blocks_odoo_import": false,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": false,
+      "requires_odoo_verification": false,
+      "status": "APPROVED",
+      "approved_value": "reviews/ratings are out of catalogue scope entirely; no Odoo or catalogue-table representation in this phase"
+    },
+    {
+      "decision_id": "D19",
+      "title": "Opening inventory quantity at first Odoo import",
+      "category": "Odoo configuration decision",
+      "issue": "No inventory/stock concept exists anywhere in the current app (ProductOverride.stock schema field exists, seed always unset). The first Odoo import must decide what stock.quant (if any) to create for each of the 26 products.",
+      "options": [
+        "Import with zero opening quantity for all products (safest default, no fabricated stock)",
+        "Use whatever quantity already exists in the target Odoo instance, if products are pre-existing there",
+        "Have the business supply an explicit opening quantity per product before import"
+      ],
+      "recommendation": "Do not fabricate a quantity. Treat the exact opening inventory figure as an operational decision the business must supply (or explicitly choose zero) at the time of the real Odoo import, once a target instance is selected.",
+      "rationale": "Per explicit instruction: do not create fake inventory quantities. This has zero bearing on catalogue schema or frontend readiness — it only matters at the actual Odoo-import step (migration-plan Step B). Live-verified 2026-07-28 (Phase 4B) against terrific_dev: stock.quant and stock.warehouse are both unavailable ('model not installed' — the Inventory/stock app is not installed on this instance at all, confirmed via both the capability checklist and a direct ir.module.module search). This means opening-inventory quantities cannot be created on this instance today regardless of which business option is chosen — installing the Inventory app is a prerequisite ops action that comes before this decision can be operationalized, independent of the business sign-off itself. Still BUSINESS_CONFIRMATION_REQUIRED.",
+      "blocks_odoo_import": true,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": true,
+      "requires_odoo_verification": true,
+      "status": "APPROVED",
+      "approved_value": {
+        "import_stock_quantities": false,
+        "create_stock_quant_records": false,
+        "auto_install_inventory": false,
+        "products_marked_sellable_and_active": true,
+        "postgresql_availability_status": "Managed in PostgreSQL without inventory import for the MVP — no fake stock quantities"
+      },
+      "phase_6_approval": "APPROVED 2026-07-29 — do not import or manage inventory for the MVP; availability remains PostgreSQL-managed without fake quantities. See data/catalogue/catalogue-business-approvals.json#D19"
+    },
+    {
+      "decision_id": "D20",
+      "title": "Primary product identifier mapping / Odoo external-id strategy",
+      "category": "Technical implementation decision",
+      "issue": "A final mapping is needed from current frontend product id through to the proposed Odoo product-template identifier, for import tooling to consume.",
+      "options": [
+        "Use external_key as the Odoo ir.model.data external-id 'name' (xml_id = <module>.<name>), matching the already-approved external-key convention",
+        "Mint a separate, unrelated identifier just for the Odoo external-id"
+      ],
+      "recommendation": "Use external_key directly as the ir.model.data external-id name, under a module namespace of terrific_bites (e.g. xml_id = terrific_bites.product_swiss-frosting). This is the standard, idempotent Odoo import/re-import pattern and requires no separate identifier.",
+      "rationale": "Reuses an identifier already approved in D05; the complete row-by-row table is produced in identifier-mapping-register.md.",
+      "blocks_odoo_import": false,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": false,
+      "requires_odoo_verification": false,
+      "status": "APPROVED",
+      "approved_value": "ir.model.data xml_id = terrific_bites.<external_key's trailing segment>, one row per product/category — see identifier-mapping-register.md"
+    },
+    {
+      "decision_id": "D21",
+      "title": "[Newly discovered] Price VAT-inclusive vs. VAT-exclusive contradiction",
+      "category": "Business decision",
+      "issue": "src/routes/product.$id.tsx renders the literal copy 'All prices include VAT' directly beneath every product's price. But src/lib/store.ts's selectTax()/selectTotal() computes tax as 5% ADDED ON TOP of the cart subtotal (not backed out of it), and every one of CartDrawer.tsx, delivery.tsx, payment.tsx, and customize.tsx displays that computed tax as a separate line item. These two behaviors are mutually inconsistent: the PDP claims the price already includes VAT, while checkout math treats the same price as VAT-exclusive and adds VAT again.",
+      "options": [
+        "Confirm prices are VAT-exclusive (checkout math is correct) and remove/correct the misleading PDP copy in a future UI phase",
+        "Confirm prices are VAT-inclusive (PDP copy is correct) and fix the checkout math to back VAT out of the subtotal instead of adding it on top",
+        "Leave unresolved and flag as a blocking business confirmation before checkout/pricing work begins"
+      ],
+      "recommendation": "Flag as a blocking business confirmation for checkout/pricing design, but not for catalogue import — Odoo's list_price is stored as a plain number regardless of which interpretation wins, and the ambiguity does not change any of the 26 sales_price values already captured in products.json.",
+      "rationale": "This is exactly the ambiguity this phase's instructions anticipated for tax-inclusive/exclusive pricing, except it is not merely 'unprovable from the code' — it is a proven, code-level contradiction between two different parts of the same app. Recorded here as newly discovered during Phase 2B rather than left as a Phase 2A blind spot.",
+      "blocks_odoo_import": false,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": true,
+      "requires_odoo_verification": false,
+      "status": "APPROVED",
+      "approved_value": "Prices are VAT-inclusive (option 2): the PDP copy is correct, and checkout math must not add a separate VAT line on top of the stored price.",
+      "phase_6_approval": "APPROVED 2026-07-29 as part of D08 — resolves this contradiction. Storefront/checkout must stop adding a separate VAT line; see data/catalogue/catalogue-business-approvals.json#D08."
+    },
+    {
+      "decision_id": "D22",
+      "title": "[Newly discovered] 'Donuts' category has only 1 of 26 products",
+      "category": "Business decision",
+      "issue": "Category product counts are uneven: Chocolates has 9 products, Cupcakes has 8, Extras has 4, Gifts has 3, Cakes and Donuts have 1 each. A storefront category with a single SKU is unusual but not, on its own, a data-modeling defect.",
+      "options": [
+        "Leave as-is — this reflects the real current assortment, not a data error",
+        "Fold 'Donuts' into another category or flag for assortment expansion as a merchandising/business initiative"
+      ],
+      "recommendation": "Leave as-is for the catalogue baseline. This is an assortment-breadth observation for the business, not a structural defect requiring category-model rework.",
+      "rationale": "Per MVP principle: retain existing categories unless there is a clear structural defect. An imbalanced but valid category is not a defect. Recorded purely so it isn't mistaken for an oversight later.",
+      "blocks_odoo_import": false,
+      "blocks_postgresql_schema": false,
+      "blocks_frontend_integration": false,
+      "requires_business_confirmation": false,
+      "requires_odoo_verification": false,
+      "status": "PROPOSED",
+      "approved_value": null
+    }
+  ]
+}

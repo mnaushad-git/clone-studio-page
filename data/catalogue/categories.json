@@ -1,0 +1,169 @@
+{
+  "$schema_note": "Canonical category seed data — Phase 2A analysis output. Not wired to any runtime code. See docs/catalogue/category-model.md.",
+  "generated_at": "2026-07-27",
+  "categories": [
+    {
+      "external_key": "terrific_bites.category.cupcakes",
+      "code": "CUP",
+      "code_generated": true,
+      "code_requires_confirmation": true,
+      "slug": "cupcakes",
+      "name_en": "Cupcakes",
+      "name_ar": null,
+      "description_en": "Handcrafted cupcakes in Swiss, butter and mousse frostings.",
+      "description_ar": null,
+      "parent_external_key": null,
+      "active": true,
+      "display_order": 1,
+      "source_references": [
+        "src/lib/products.ts:31 (Category union type)",
+        "src/lib/products.ts:156-163 (CATEGORY_LABEL)",
+        "src/lib/admin-store.ts:214-221 (categories seed, id c1, order 1)",
+        "src/components/ShopGrid.tsx:17-25 (CATEGORIES, independent copy)",
+        "src/components/MegaMenu.tsx:12-14 (CAT_IMG, reuses hero-cupcake.jpg for cupcakes tile)",
+        "src/routes/cupcakes.tsx (route + SEO description)"
+      ],
+      "requires_confirmation": [
+        "code_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.category.cakes",
+      "code": "CAK",
+      "code_generated": true,
+      "code_requires_confirmation": true,
+      "slug": "cakes",
+      "name_en": "Cakes",
+      "name_ar": null,
+      "description_en": "Layered celebration cakes, buttercream classics and made-to-order designs.",
+      "description_ar": null,
+      "parent_external_key": null,
+      "active": true,
+      "display_order": 2,
+      "source_references": [
+        "src/lib/products.ts:31 (Category union type)",
+        "src/lib/products.ts:156-163 (CATEGORY_LABEL)",
+        "src/lib/admin-store.ts:214-221 (categories seed, id c2, order 2)",
+        "src/components/ShopGrid.tsx:17-25 (CATEGORIES, independent copy)",
+        "src/components/MegaMenu.tsx:12-14 (CAT_IMG uses cake-main.jpg)",
+        "src/routes/cakes.tsx (route + SEO description)"
+      ],
+      "requires_confirmation": [
+        "code_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.category.chocolates",
+      "code": "CHO",
+      "code_generated": true,
+      "code_requires_confirmation": true,
+      "slug": "chocolates",
+      "name_en": "Chocolates",
+      "name_ar": null,
+      "description_en": "Handmade truffles, pralines and ganache bites.",
+      "description_ar": null,
+      "parent_external_key": null,
+      "active": true,
+      "display_order": 3,
+      "source_references": [
+        "src/lib/products.ts:31 (Category union type)",
+        "src/lib/products.ts:156-163 (CATEGORY_LABEL)",
+        "src/lib/admin-store.ts:214-221 (categories seed, id c3, order 3)",
+        "src/components/ShopGrid.tsx:17-25 (CATEGORIES, independent copy)",
+        "src/components/MegaMenu.tsx:12-14 (CAT_IMG uses choc-1.jpg)",
+        "src/routes/chocolates.tsx (route + SEO description)"
+      ],
+      "requires_confirmation": [
+        "code_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.category.donuts",
+      "code": "DON",
+      "code_generated": true,
+      "code_requires_confirmation": true,
+      "slug": "donuts",
+      "name_en": "Donuts",
+      "name_ar": null,
+      "description_en": "Fluffy filled and glazed donuts baked daily.",
+      "description_ar": null,
+      "parent_external_key": null,
+      "active": true,
+      "display_order": 4,
+      "source_references": [
+        "src/lib/products.ts:31 (Category union type)",
+        "src/lib/products.ts:156-163 (CATEGORY_LABEL)",
+        "src/lib/admin-store.ts:214-221 (categories seed, id c4, order 4)",
+        "src/components/ShopGrid.tsx:17-25 (CATEGORIES, independent copy)",
+        "src/components/MegaMenu.tsx:12-14 (CAT_IMG uses donuts-hero.jpg)",
+        "src/routes/donuts.tsx (route + SEO description)"
+      ],
+      "requires_confirmation": [
+        "code_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.category.gifts",
+      "code": "GIF",
+      "code_generated": true,
+      "code_requires_confirmation": true,
+      "slug": "gifts",
+      "name_en": "Gifts",
+      "name_ar": null,
+      "description_en": "Curated dessert gift boxes for every occasion.",
+      "description_ar": null,
+      "parent_external_key": null,
+      "active": true,
+      "display_order": 5,
+      "source_references": [
+        "src/lib/products.ts:31 (Category union type)",
+        "src/lib/products.ts:156-163 (CATEGORY_LABEL)",
+        "src/lib/admin-store.ts:214-221 (categories seed, id c5, order 5)",
+        "src/components/ShopGrid.tsx:17-25 (CATEGORIES, independent copy)",
+        "src/components/MegaMenu.tsx:12-14 (CAT_IMG uses gift-donuts.jpg)",
+        "src/routes/gifts.tsx (route + SEO description)"
+      ],
+      "requires_confirmation": [
+        "code_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.category.extras",
+      "code": "EXT",
+      "code_generated": true,
+      "code_requires_confirmation": true,
+      "slug": "extras",
+      "name_en": "Extras",
+      "name_ar": null,
+      "description_en": "Little add-ons — mini cheesecakes, donut pairs, ice cream cones and more.",
+      "description_ar": null,
+      "parent_external_key": null,
+      "active": true,
+      "display_order": 6,
+      "source_references": [
+        "src/lib/products.ts:31 (Category union type)",
+        "src/lib/products.ts:156-163 (CATEGORY_LABEL)",
+        "src/lib/admin-store.ts:214-221 (categories seed, id c6, order 6)",
+        "src/components/ShopGrid.tsx:17-25 (CATEGORIES, independent copy)",
+        "src/components/MegaMenu.tsx:12-14 (CAT_IMG: 'extras' has no dedicated image, reuses gift-donuts.jpg via fallback — a presentational gap, not a data gap)",
+        "src/routes/extras.tsx (route + SEO description)"
+      ],
+      "requires_confirmation": [
+        "code_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing",
+        "no_dedicated_category_tile_image"
+      ]
+    }
+  ]
+}

@@ -4,15 +4,16 @@ import { ChevronDown, ChevronRight, Search, X } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ProductCard } from "@/components/ProductCard";
+import { QueryState } from "@/components/QueryState";
 import { useT, type TKey } from "@/lib/i18n";
-import {
-  products,
-  type Category,
-  type Occasion,
-  type Recipient,
-  OCCASIONS,
-  RECIPIENTS,
-} from "@/lib/products";
+import { type Category, type Occasion, type Recipient, OCCASIONS, RECIPIENTS } from "@/lib/products";
+import { mapSummaryToProduct, useCatalogueProducts } from "@/lib/catalogue-api";
+
+// Every active product, fetched once and filtered/sorted client-side below — the
+// catalogue is small (26 SKUs) and this preserves ShopGrid's existing filter UX
+// (category counts, price buckets, occasion/recipient checkboxes, search, sort)
+// exactly, now sourced from the catalogue API instead of a static import.
+const CATALOGUE_PAGE_SIZE = 100;
 
 const CATEGORIES: { key: Category | "all"; labelKey: TKey }[] = [
   { key: "all", labelKey: "shopCategoryAll" },
@@ -78,6 +79,14 @@ export function ShopGrid({
   const [query, setQuery] = useState("");
   const t = useT();
 
+  const {
+    data: page,
+    isLoading,
+    isError,
+    refetch,
+  } = useCatalogueProducts({ limit: CATALOGUE_PAGE_SIZE });
+  const products = useMemo(() => (page ? page.items.map(mapSummaryToProduct) : []), [page]);
+
   const filtered = useMemo(() => {
     let list = category === "all" ? products : products.filter((p) => p.category === category);
     if (query.trim()) {
@@ -104,7 +113,7 @@ export function ShopGrid({
     else if (sort === "high") list = [...list].sort((a, b) => b.price - a.price);
     else if (sort === "name") list = [...list].sort((a, b) => a.name.localeCompare(b.name));
     return list;
-  }, [category, prices, occasions, recipients, sort, query]);
+  }, [products, category, prices, occasions, recipients, sort, query]);
 
   const toggle = <T,>(arr: T[], set: (v: T[]) => void, val: T) =>
     set(arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val]);
@@ -295,23 +304,25 @@ export function ShopGrid({
 
         {/* Product grid */}
         <div>
-          <p className="text-xs text-muted-foreground mb-4">
-            {filtered.length} {filtered.length === 1 ? t("shopProductSingular") : t("shopProductPlural")}
-            {category !== "all" &&
-              ` ${t("shopInCategory")} ${t(CATEGORIES.find((c) => c.key === category)!.labelKey)}`}
-          </p>
-          {filtered.length === 0 ? (
-            <div className="text-center py-24 border border-dashed border-border rounded-lg">
-              <p className="text-sm text-muted-foreground">{t("shopNoProductsMatch")}</p>
-              <button onClick={clearAll} className="mt-3 text-xs underline text-primary">{t("shopResetFilters")}</button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
-          )}
+          <QueryState isLoading={isLoading} isError={isError} onRetry={() => refetch()} skeletonCount={6}>
+            <p className="text-xs text-muted-foreground mb-4">
+              {filtered.length} {filtered.length === 1 ? t("shopProductSingular") : t("shopProductPlural")}
+              {category !== "all" &&
+                ` ${t("shopInCategory")} ${t(CATEGORIES.find((c) => c.key === category)!.labelKey)}`}
+            </p>
+            {filtered.length === 0 ? (
+              <div className="text-center py-24 border border-dashed border-border rounded-lg">
+                <p className="text-sm text-muted-foreground">{t("shopNoProductsMatch")}</p>
+                <button onClick={clearAll} className="mt-3 text-xs underline text-primary">{t("shopResetFilters")}</button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filtered.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            )}
+          </QueryState>
         </div>
       </div>
 

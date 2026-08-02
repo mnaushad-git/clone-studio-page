@@ -1,10 +1,13 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Copy, Package, Phone, Share2, User } from "lucide-react";
 import { toast } from "sonner";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { OrderStatusTimeline } from "@/components/OrderStatusTimeline";
-import { useStore } from "@/lib/store";
+import { useStore, type Order } from "@/lib/store";
+import { fetchOrderByTrackingToken, toLocalOrder } from "@/lib/checkout-api";
+import { formatAttributes } from "@/lib/format-variant-attributes";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/track/$id")({
@@ -25,9 +28,34 @@ export const Route = createFileRoute("/track/$id")({
 function TrackPage() {
   const t = useT();
   const { id } = Route.useParams();
-  const order = useStore((s) => s.orders.find((o) => o.trackingToken === id) ?? null);
+  const localOrder = useStore((s) => s.orders.find((o) => o.trackingToken === id) ?? null);
+
+  // A tracking link is meant to be shareable (that's the whole point of the Copy
+  // Link/Share buttons below) — the recipient opening it on another device/browser
+  // won't have this order in their own localStorage, so fall back to the backend
+  // (the same GET /orders/by-tracking-token/{token} the "local" copy was itself
+  // populated from) rather than only ever working for the browser that placed it.
+  const backendQuery = useQuery({
+    queryKey: ["order", "by-tracking-token", id],
+    queryFn: () => fetchOrderByTrackingToken(id).then(toLocalOrder),
+    enabled: !localOrder,
+    retry: false,
+  });
+
+  const order: Order | null = localOrder ?? backendQuery.data ?? null;
 
   if (!order) {
+    if (backendQuery.isLoading) {
+      return (
+        <div className="min-h-screen bg-background text-foreground flex flex-col">
+          <SiteHeader />
+          <main className="flex-1 max-w-2xl w-full mx-auto px-6 py-16 text-center">
+            <p className="text-sm text-muted-foreground">{t("checkoutLoading")}</p>
+          </main>
+          <SiteFooter />
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen bg-background text-foreground flex flex-col">
         <SiteHeader />
@@ -122,9 +150,12 @@ function TrackPage() {
             <div>
               <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("checkoutItems")}</p>
               <ul className="mt-2 space-y-1 text-muted-foreground">
-                {order.items.map((it, i) => (
-                  <li key={i}>{it.qty} × {it.name}{it.size ? ` (${it.size})` : ""}</li>
-                ))}
+                {order.items.map((it, i) => {
+                  const variant = formatAttributes(it.attributes);
+                  return (
+                    <li key={i}>{it.qty} × {it.name}{variant ? ` (${variant})` : ""}</li>
+                  );
+                })}
               </ul>
               <p className="mt-3 font-semibold text-primary">{t("checkoutTableTotal")} ${order.total.toFixed(2)}</p>
             </div>

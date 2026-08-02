@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { RECIPIENTS, recipientToSlug, products, type Recipient } from "@/lib/products";
+import { RECIPIENTS, recipientToSlug, type Recipient } from "@/lib/products";
+import { mapSummaryToProduct, useCatalogueProducts } from "@/lib/catalogue-api";
 import { useT, type TKey } from "@/lib/i18n";
 
 const RECIPIENT_LABEL_KEYS: Record<Recipient, TKey> = {
@@ -28,6 +29,8 @@ export const Route = createFileRoute("/recipients/")({
 
 function RecipientsIndex() {
   const t = useT();
+  const { data: page } = useCatalogueProducts({ limit: 100 });
+  const allProducts = page ? page.items.map(mapSummaryToProduct) : [];
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
@@ -46,7 +49,7 @@ function RecipientsIndex() {
 
       <div className="max-w-7xl mx-auto px-6 pb-16 grid grid-cols-2 md:grid-cols-4 gap-5">
         {RECIPIENTS.map((r) => {
-          const sample = products.find((p) => p.recipients?.includes(r)) ?? products[0];
+          const sample = allProducts.find((p) => p.recipients?.includes(r)) ?? allProducts[0];
           return (
             <Link
               key={r}
@@ -54,7 +57,9 @@ function RecipientsIndex() {
               params={{ slug: recipientToSlug(r) }}
               className="relative aspect-[4/5] rounded-lg overflow-hidden group"
             >
-              <img src={sample.image} alt={t(RECIPIENT_LABEL_KEYS[r])} className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition duration-500" />
+              {sample && (
+                <img src={sample.image} alt={t(RECIPIENT_LABEL_KEYS[r])} className="absolute inset-0 h-full w-full object-cover group-hover:scale-105 transition duration-500" />
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               <span className="absolute inset-x-0 bottom-5 text-center text-white font-display text-xl tracking-wide">
                 {t(RECIPIENT_LABEL_KEYS[r])}

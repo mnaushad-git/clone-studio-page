@@ -1,0 +1,2025 @@
+{
+  "$schema_note": "Canonical product seed data — Phase 2A analysis output. Not wired to any runtime code. See docs/catalogue/product-model.md.",
+  "generated_at": "2026-07-27",
+  "source_count_note": "docs/current-state/mock-data.md and docs/architecture/implementation-roadmap.md both state 28 products; actual src/lib/products.ts contains 26 (grep -c '{ id:' = 26). This is a documented discrepancy, see docs/catalogue/current-catalogue-audit.md.",
+  "products": [
+    {
+      "external_key": "terrific_bites.product.swiss-frosting",
+      "sku": "TB-CUP-001",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "swiss-frosting",
+      "name_en": "Swiss Frosting",
+      "name_ar": null,
+      "description_en": "Silky Swiss meringue buttercream on our signature vanilla sponge.",
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.cupcakes",
+      "sales_price": 12.5,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/prod-swiss.jpg",
+        "original_filename": "prod-swiss.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 23637,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Swiss Frosting",
+        "alt_text_ar": null,
+        "checksum": "md5:395721141ee943d8daf7deb0dad7ecd5"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Pack Size",
+            "values": [
+              {
+                "label": "PACK OF 6",
+                "sub": "Assorted",
+                "delta": 0
+              },
+              {
+                "label": "PACK OF 12",
+                "sub": "Assorted",
+                "delta": 11.25
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": true,
+      "occasions_raw": [
+        "Birthday",
+        "Thank You"
+      ],
+      "recipients_raw": [
+        "For Her",
+        "For Family"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"swiss-frosting\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.moose-cream",
+      "sku": "TB-CUP-002",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "moose-cream",
+      "name_en": "Moose Cream",
+      "name_ar": null,
+      "description_en": "Rich chocolate mousse crowned with cocoa curls.",
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.cupcakes",
+      "sales_price": 14.0,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/prod-moose.jpg",
+        "original_filename": "prod-moose.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 27375,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Moose Cream",
+        "alt_text_ar": null,
+        "checksum": "md5:9f37f54ba2e24d81987e7ac56cd07213"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Pack Size",
+            "values": [
+              {
+                "label": "PACK OF 6",
+                "sub": "Assorted",
+                "delta": 0
+              },
+              {
+                "label": "PACK OF 12",
+                "sub": "Assorted",
+                "delta": 12.6
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Birthday",
+        "Congratulations"
+      ],
+      "recipients_raw": [
+        "For Him",
+        "For Her"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"moose-cream\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.butter-frosting",
+      "sku": "TB-CUP-003",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "butter-frosting",
+      "name_en": "Butter Frosting",
+      "name_ar": null,
+      "description_en": "Classic American butter frosting on golden butter cake.",
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.cupcakes",
+      "sales_price": 11.0,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/prod-butter.jpg",
+        "original_filename": "prod-butter.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 22545,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Butter Frosting",
+        "alt_text_ar": null,
+        "checksum": "md5:6aa24c7329725b9d4d26476cb207e6f0"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Pack Size",
+            "values": [
+              {
+                "label": "PACK OF 6",
+                "sub": "Assorted",
+                "delta": 0
+              },
+              {
+                "label": "PACK OF 12",
+                "sub": "Assorted",
+                "delta": 9.9
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Thank You",
+        "Congratulations"
+      ],
+      "recipients_raw": [
+        "For Family"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"butter-frosting\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.light-sponge",
+      "sku": "TB-CUP-004",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "light-sponge",
+      "name_en": "Light Sponge",
+      "name_ar": null,
+      "description_en": "Airy sponge with a whisper of vanilla — light and delicate.",
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.cupcakes",
+      "sales_price": 9.5,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/prod-light.jpg",
+        "original_filename": "prod-light.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 20036,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Light Sponge",
+        "alt_text_ar": null,
+        "checksum": "md5:1f001c49a1a8c5492f81f14ce9e4ec66"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Pack Size",
+            "values": [
+              {
+                "label": "PACK OF 6",
+                "sub": "Assorted",
+                "delta": 0
+              },
+              {
+                "label": "PACK OF 12",
+                "sub": "Assorted",
+                "delta": 8.55
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Thank You"
+      ],
+      "recipients_raw": [
+        "For Her",
+        "For Family"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"light-sponge\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.buttercream-cake",
+      "sku": "TB-CAK-001",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "buttercream-cake",
+      "name_en": "Buttercream Cake",
+      "name_ar": null,
+      "description_en": "Three luscious layers of buttercream cake, finished with rainbow sprinkles and a cherry on top.",
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.cakes",
+      "sales_price": 300,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/cake-main.jpg",
+        "original_filename": "cake-main.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 59077,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Buttercream Cake",
+        "alt_text_ar": null,
+        "checksum": "md5:8b1cf0ad24a5bc4952bf2d06d085c7c8"
+      },
+      "additional_images": [
+        {
+          "original_path": "src/assets/cake-thumb-2.jpg",
+          "original_filename": "cake-thumb-2.jpg",
+          "source_type": "local_asset_import",
+          "exists": true,
+          "file_size": 53557,
+          "file_extension": "jpg",
+          "usage": "gallery_thumbnail",
+          "alt_text_en": "Buttercream Cake — additional view",
+          "alt_text_ar": null,
+          "checksum": "md5:a2a99e262c7fd850378908e9fada30be"
+        },
+        {
+          "original_path": "src/assets/cake-thumb-3.jpg",
+          "original_filename": "cake-thumb-3.jpg",
+          "source_type": "local_asset_import",
+          "exists": true,
+          "file_size": 53080,
+          "file_extension": "jpg",
+          "usage": "gallery_thumbnail",
+          "alt_text_en": "Buttercream Cake — additional view",
+          "alt_text_ar": null,
+          "checksum": "md5:45190f07b9b7cc620b9807f063bd6356"
+        },
+        {
+          "original_path": "src/assets/cake-thumb-4.jpg",
+          "original_filename": "cake-thumb-4.jpg",
+          "source_type": "local_asset_import",
+          "exists": true,
+          "file_size": 68554,
+          "file_extension": "jpg",
+          "usage": "gallery_thumbnail",
+          "alt_text_en": "Buttercream Cake — additional view",
+          "alt_text_ar": null,
+          "checksum": "md5:1e05cba2015df2b9233c59a68641c314"
+        }
+      ],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Cake Size",
+            "values": [
+              {
+                "label": "6 INCH",
+                "sub": "3 Layers",
+                "delta": 0
+              },
+              {
+                "label": "9 INCH",
+                "sub": "3 Layers",
+                "delta": 80
+              }
+            ]
+          },
+          {
+            "code": "flavor",
+            "name_en": "Flavor",
+            "values": [
+              {
+                "label": "Vanilla",
+                "delta": 0
+              },
+              {
+                "label": "Chocolate",
+                "delta": 0
+              }
+            ]
+          }
+        ],
+        "note": "Structural per-product variants as literally defined in src/lib/products.ts, restructured (2026-08-01) into combinatorial attribute axes so flavor is a real, separately priced/SKU'd variant dimension (previously flavor was decorative-only JSONB text with no price/SKU effect, D11 superseded). seed_service.py generates the Cartesian product of attributes[*].values as one catalogue_product_variants row per combination, with a catalogue_product_attribute_values row per axis (the identity this repo's Odoo variant importer adopts product.attribute/product.attribute.value ids into). Most other products instead fall back to category-level default size/flavor presentation options computed client-side in src/routes/product.$id.tsx (defaultSizesByCategory/defaultFlavorsByCategory) — those are NOT modeled here since they are UI presentation defaults, not persisted per-product data. See docs/catalogue/catalogue-decisions-required.md."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Birthday",
+        "Anniversary",
+        "Wedding",
+        "Graduation"
+      ],
+      "recipients_raw": [
+        "For Family",
+        "For Her",
+        "For Him"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"buttercream-cake\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.birthday-pair",
+      "sku": "TB-GIF-001",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "birthday-pair",
+      "name_en": "Birthday Pair Cups",
+      "name_ar": null,
+      "description_en": "A pair of celebration cupcakes ready to gift.",
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.gifts",
+      "sales_price": 22,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/gift-donuts.jpg",
+        "original_filename": "gift-donuts.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 20339,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Birthday Pair Cups",
+        "alt_text_ar": null,
+        "checksum": "md5:9e2a2f4dac059ba5798687f009c209ba"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Gift Tier",
+            "values": [
+              {
+                "label": "STANDARD",
+                "sub": "Gift Box",
+                "delta": 0
+              },
+              {
+                "label": "DELUXE",
+                "sub": "Premium Box",
+                "delta": 15.0
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Birthday",
+        "Congratulations"
+      ],
+      "recipients_raw": [
+        "For Him",
+        "For Her",
+        "For Kids"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"birthday-pair\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.butter-delight",
+      "sku": "TB-GIF-002",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "butter-delight",
+      "name_en": "Butter Frosting Delight",
+      "name_ar": null,
+      "description_en": "Butter-frosted bites in a golden gift box.",
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.gifts",
+      "sales_price": 18,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/gift-butter.jpg",
+        "original_filename": "gift-butter.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 25731,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Butter Frosting Delight",
+        "alt_text_ar": null,
+        "checksum": "md5:6a3443133dc458e7e7947d012ef6cee0"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Gift Tier",
+            "values": [
+              {
+                "label": "STANDARD",
+                "sub": "Gift Box",
+                "delta": 0
+              },
+              {
+                "label": "DELUXE",
+                "sub": "Premium Box",
+                "delta": 15.0
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Anniversary",
+        "Thank You"
+      ],
+      "recipients_raw": [
+        "For Her"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"butter-delight\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.cream-cheese-donut",
+      "sku": "TB-DON-001",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "cream-cheese-donut",
+      "name_en": "Cream & Cheese Donut",
+      "name_ar": null,
+      "description_en": "Fluffy donut filled with cream cheese frosting.",
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.donuts",
+      "sales_price": 8,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/gift-cream.jpg",
+        "original_filename": "gift-cream.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 36576,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Cream & Cheese Donut",
+        "alt_text_ar": null,
+        "checksum": "md5:f4b31463a88649fc7ff138c5308c6042"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Pack Size",
+            "values": [
+              {
+                "label": "SINGLE",
+                "sub": "1 Piece",
+                "delta": 0
+              },
+              {
+                "label": "PACK OF 6",
+                "sub": "Assorted",
+                "delta": 32.0
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Birthday"
+      ],
+      "recipients_raw": [
+        "For Kids"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"cream-cheese-donut\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.whisk-whimsy",
+      "sku": "TB-GIF-003",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "whisk-whimsy",
+      "name_en": "Whisk & Whimsy Cupcake",
+      "name_ar": null,
+      "description_en": "Whimsical cupcake decorated by hand.",
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.gifts",
+      "sales_price": 15,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/gift-whisk.jpg",
+        "original_filename": "gift-whisk.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 28302,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Whisk & Whimsy Cupcake",
+        "alt_text_ar": null,
+        "checksum": "md5:43c3821944d96eef4ae637e32cf9d4f9"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Gift Tier",
+            "values": [
+              {
+                "label": "STANDARD",
+                "sub": "Gift Box",
+                "delta": 0
+              },
+              {
+                "label": "DELUXE",
+                "sub": "Premium Box",
+                "delta": 15.0
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Birthday",
+        "Graduation"
+      ],
+      "recipients_raw": [
+        "For Kids",
+        "For Her"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"whisk-whimsy\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.sprinkle-1",
+      "sku": "TB-CUP-005",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "sprinkle-1",
+      "name_en": "Sprinkle Cupcakes",
+      "name_ar": null,
+      "description_en": "Colorful sprinkle-topped cupcakes for any occasion.",
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.cupcakes",
+      "sales_price": 4.5,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/divine-1.jpg",
+        "original_filename": "divine-1.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 38660,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Sprinkle Cupcakes",
+        "alt_text_ar": null,
+        "checksum": "md5:271e32e8606ac53fa43e965a2d2b538e"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Pack Size",
+            "values": [
+              {
+                "label": "PACK OF 6",
+                "sub": "Assorted",
+                "delta": 0
+              },
+              {
+                "label": "PACK OF 12",
+                "sub": "Assorted",
+                "delta": 4.05
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Birthday"
+      ],
+      "recipients_raw": [
+        "For Kids"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"sprinkle-1\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.sprinkle-2",
+      "sku": "TB-CUP-006",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "sprinkle-2",
+      "name_en": "Cherry Sprinkle",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.cupcakes",
+      "sales_price": 4.5,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/divine-2.jpg",
+        "original_filename": "divine-2.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 38569,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Cherry Sprinkle",
+        "alt_text_ar": null,
+        "checksum": "md5:81372e9837b095f13e7da5f5b8b38ddf"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Pack Size",
+            "values": [
+              {
+                "label": "PACK OF 6",
+                "sub": "Assorted",
+                "delta": 0
+              },
+              {
+                "label": "PACK OF 12",
+                "sub": "Assorted",
+                "delta": 4.05
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Birthday"
+      ],
+      "recipients_raw": [
+        "For Kids",
+        "For Her"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"sprinkle-2\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing",
+        "description_en_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.sprinkle-3",
+      "sku": "TB-CUP-007",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "sprinkle-3",
+      "name_en": "Pink Whip",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.cupcakes",
+      "sales_price": 4.5,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/divine-3.jpg",
+        "original_filename": "divine-3.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 25757,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Pink Whip",
+        "alt_text_ar": null,
+        "checksum": "md5:385fe84009d70c3e5d78c689a459800e"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Pack Size",
+            "values": [
+              {
+                "label": "PACK OF 6",
+                "sub": "Assorted",
+                "delta": 0
+              },
+              {
+                "label": "PACK OF 12",
+                "sub": "Assorted",
+                "delta": 4.05
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Birthday",
+        "Thank You"
+      ],
+      "recipients_raw": [
+        "For Her"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"sprinkle-3\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing",
+        "description_en_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.sprinkle-4",
+      "sku": "TB-CUP-008",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "sprinkle-4",
+      "name_en": "Confetti Whip",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.cupcakes",
+      "sales_price": 4.5,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/divine-4.jpg",
+        "original_filename": "divine-4.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 31085,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Confetti Whip",
+        "alt_text_ar": null,
+        "checksum": "md5:768295234b2cff378d692c0407ad40dd"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Pack Size",
+            "values": [
+              {
+                "label": "PACK OF 6",
+                "sub": "Assorted",
+                "delta": 0
+              },
+              {
+                "label": "PACK OF 12",
+                "sub": "Assorted",
+                "delta": 4.05
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Birthday",
+        "Congratulations"
+      ],
+      "recipients_raw": [
+        "For Kids"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"sprinkle-4\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing",
+        "description_en_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.choc-truffle",
+      "sku": "TB-CHO-001",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "choc-truffle",
+      "name_en": "Chocolate Truffle",
+      "name_ar": null,
+      "description_en": "Dark chocolate truffles rolled in cocoa.",
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.chocolates",
+      "sales_price": 6.99,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/choc-1.jpg",
+        "original_filename": "choc-1.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 133761,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Chocolate Truffle",
+        "alt_text_ar": null,
+        "checksum": "md5:7036b5a9a773a665cb26c8441ddc853b"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Box Size",
+            "values": [
+              {
+                "label": "SMALL BOX",
+                "sub": "8 Pieces",
+                "delta": 0
+              },
+              {
+                "label": "LARGE BOX",
+                "sub": "16 Pieces",
+                "delta": 5.59
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Anniversary",
+        "Thank You"
+      ],
+      "recipients_raw": [
+        "For Her",
+        "For Him"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"choc-truffle\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.choc-praline",
+      "sku": "TB-CHO-002",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "choc-praline",
+      "name_en": "Hazelnut Praline",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.chocolates",
+      "sales_price": 7.5,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/choc-2.jpg",
+        "original_filename": "choc-2.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 51183,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Hazelnut Praline",
+        "alt_text_ar": null,
+        "checksum": "md5:74dfa72191daf388d3874b71dad03069"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Box Size",
+            "values": [
+              {
+                "label": "SMALL BOX",
+                "sub": "8 Pieces",
+                "delta": 0
+              },
+              {
+                "label": "LARGE BOX",
+                "sub": "16 Pieces",
+                "delta": 6.0
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Anniversary"
+      ],
+      "recipients_raw": [
+        "For Him"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"choc-praline\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing",
+        "description_en_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.choc-ganache",
+      "sku": "TB-CHO-003",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "choc-ganache",
+      "name_en": "Ganache Bites",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.chocolates",
+      "sales_price": 8.25,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/choc-3.jpg",
+        "original_filename": "choc-3.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 98202,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Ganache Bites",
+        "alt_text_ar": null,
+        "checksum": "md5:b632ba5c21f2d21a776ea207eeef336e"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Box Size",
+            "values": [
+              {
+                "label": "SMALL BOX",
+                "sub": "8 Pieces",
+                "delta": 0
+              },
+              {
+                "label": "LARGE BOX",
+                "sub": "16 Pieces",
+                "delta": 6.6
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Anniversary",
+        "Wedding"
+      ],
+      "recipients_raw": [
+        "For Her"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"choc-ganache\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing",
+        "description_en_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.choc-caramel",
+      "sku": "TB-CHO-004",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "choc-caramel",
+      "name_en": "Salted Caramel",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.chocolates",
+      "sales_price": 7.25,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/choc-4.jpg",
+        "original_filename": "choc-4.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 104204,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Salted Caramel",
+        "alt_text_ar": null,
+        "checksum": "md5:85e8553ca6bd07c56dbfa0b979fd7bfb"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Box Size",
+            "values": [
+              {
+                "label": "SMALL BOX",
+                "sub": "8 Pieces",
+                "delta": 0
+              },
+              {
+                "label": "LARGE BOX",
+                "sub": "16 Pieces",
+                "delta": 5.8
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Thank You"
+      ],
+      "recipients_raw": [
+        "For Him",
+        "For Her"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"choc-caramel\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing",
+        "description_en_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.choc-mint",
+      "sku": "TB-CHO-005",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "choc-mint",
+      "name_en": "Mint Delight",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.chocolates",
+      "sales_price": 6.5,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/choc-5.jpg",
+        "original_filename": "choc-5.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 91447,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Mint Delight",
+        "alt_text_ar": null,
+        "checksum": "md5:f9df3b5d080246ca206fe583613f4ab2"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Box Size",
+            "values": [
+              {
+                "label": "SMALL BOX",
+                "sub": "8 Pieces",
+                "delta": 0
+              },
+              {
+                "label": "LARGE BOX",
+                "sub": "16 Pieces",
+                "delta": 5.2
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Thank You"
+      ],
+      "recipients_raw": [
+        "For Him"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"choc-mint\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing",
+        "description_en_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.choc-orange",
+      "sku": "TB-CHO-006",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "choc-orange",
+      "name_en": "Orange Zest",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.chocolates",
+      "sales_price": 6.75,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/choc-6.jpg",
+        "original_filename": "choc-6.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 129473,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Orange Zest",
+        "alt_text_ar": null,
+        "checksum": "md5:408eaeb437b36a59af3fa6bdb6734073"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Box Size",
+            "values": [
+              {
+                "label": "SMALL BOX",
+                "sub": "8 Pieces",
+                "delta": 0
+              },
+              {
+                "label": "LARGE BOX",
+                "sub": "16 Pieces",
+                "delta": 5.4
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Congratulations"
+      ],
+      "recipients_raw": [
+        "For Her"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"choc-orange\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing",
+        "description_en_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.choc-almond",
+      "sku": "TB-CHO-007",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "choc-almond",
+      "name_en": "Roasted Almond",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.chocolates",
+      "sales_price": 7.99,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/choc-7.jpg",
+        "original_filename": "choc-7.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 107374,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Roasted Almond",
+        "alt_text_ar": null,
+        "checksum": "md5:268af6fc0af57317bc03353b08e4b7c7"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Box Size",
+            "values": [
+              {
+                "label": "SMALL BOX",
+                "sub": "8 Pieces",
+                "delta": 0
+              },
+              {
+                "label": "LARGE BOX",
+                "sub": "16 Pieces",
+                "delta": 6.39
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Anniversary"
+      ],
+      "recipients_raw": [
+        "For Him"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"choc-almond\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing",
+        "description_en_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.choc-white",
+      "sku": "TB-CHO-008",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "choc-white",
+      "name_en": "White Dream",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.chocolates",
+      "sales_price": 6.25,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/choc-8.jpg",
+        "original_filename": "choc-8.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 101915,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "White Dream",
+        "alt_text_ar": null,
+        "checksum": "md5:9a70781832cb16b479ee7917c757afae"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Box Size",
+            "values": [
+              {
+                "label": "SMALL BOX",
+                "sub": "8 Pieces",
+                "delta": 0
+              },
+              {
+                "label": "LARGE BOX",
+                "sub": "16 Pieces",
+                "delta": 5.0
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Wedding"
+      ],
+      "recipients_raw": [
+        "For Her"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"choc-white\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing",
+        "description_en_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.choc-berry",
+      "sku": "TB-CHO-009",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "choc-berry",
+      "name_en": "Berry Truffle",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.chocolates",
+      "sales_price": 7.99,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/choc-9.jpg",
+        "original_filename": "choc-9.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 94652,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Berry Truffle",
+        "alt_text_ar": null,
+        "checksum": "md5:ab34acd7b88e6f442260f12748e259ef"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Box Size",
+            "values": [
+              {
+                "label": "SMALL BOX",
+                "sub": "8 Pieces",
+                "delta": 0
+              },
+              {
+                "label": "LARGE BOX",
+                "sub": "16 Pieces",
+                "delta": 6.39
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Anniversary",
+        "Thank You"
+      ],
+      "recipients_raw": [
+        "For Her"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"choc-berry\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing",
+        "description_en_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.extra-donut",
+      "sku": "TB-EXT-001",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "extra-donut",
+      "name_en": "Fanky Donut",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.extras",
+      "sales_price": 4.89,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/extra-donut.jpg",
+        "original_filename": "extra-donut.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 48746,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Fanky Donut",
+        "alt_text_ar": null,
+        "checksum": "md5:7aa1e95dfb9df967c58a4893ee314e00"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Pack Size",
+            "values": [
+              {
+                "label": "SINGLE",
+                "sub": "1 Piece",
+                "delta": 0
+              },
+              {
+                "label": "PACK",
+                "sub": "4 Pieces",
+                "delta": 14.67
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Birthday"
+      ],
+      "recipients_raw": [
+        "For Kids"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"extra-donut\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing",
+        "description_en_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.extra-icecream",
+      "sku": "TB-EXT-002",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "extra-icecream",
+      "name_en": "Icecream Cone",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.extras",
+      "sales_price": 5.49,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/extra-icecream.jpg",
+        "original_filename": "extra-icecream.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 35882,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Icecream Cone",
+        "alt_text_ar": null,
+        "checksum": "md5:383b306a4c1dd4d5055cf30f689d876f"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Ice Cream Size",
+            "values": [
+              {
+                "label": "SMALL (3OZ)",
+                "delta": 0
+              },
+              {
+                "label": "MEDIUM (11OZ)",
+                "delta": 3
+              },
+              {
+                "label": "LARGE (16OZ)",
+                "delta": 6
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Birthday"
+      ],
+      "recipients_raw": [
+        "For Kids"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"extra-icecream\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing",
+        "description_en_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.extra-cheesecake",
+      "sku": "TB-EXT-003",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "extra-cheesecake",
+      "name_en": "Mini Cheesecake",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.extras",
+      "sales_price": 6.29,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/extra-cheesecake.jpg",
+        "original_filename": "extra-cheesecake.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 67642,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Mini Cheesecake",
+        "alt_text_ar": null,
+        "checksum": "md5:332bcabb2f971b0f4f1849afec84b6ad"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Pack Size",
+            "values": [
+              {
+                "label": "SINGLE",
+                "sub": "1 Piece",
+                "delta": 0
+              },
+              {
+                "label": "PACK",
+                "sub": "4 Pieces",
+                "delta": 18.87
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Thank You"
+      ],
+      "recipients_raw": [
+        "For Family"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"extra-cheesecake\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing",
+        "description_en_missing"
+      ]
+    },
+    {
+      "external_key": "terrific_bites.product.extra-donuts-pair",
+      "sku": "TB-EXT-004",
+      "sku_generated": true,
+      "sku_requires_confirmation": true,
+      "slug": "extra-donuts-pair",
+      "name_en": "Donuts Pair",
+      "name_ar": null,
+      "description_en": null,
+      "description_ar": null,
+      "short_description_en": null,
+      "short_description_ar": null,
+      "category_external_key": "terrific_bites.category.extras",
+      "sales_price": 7.89,
+      "currency": "SAR",
+      "tax_reference": null,
+      "active": true,
+      "sellable": true,
+      "product_type": "variant_parent",
+      "unit_of_measure": null,
+      "primary_image": {
+        "original_path": "src/assets/extra-donuts-pair.jpg",
+        "original_filename": "extra-donuts-pair.jpg",
+        "source_type": "local_asset_import",
+        "exists": true,
+        "file_size": 62604,
+        "file_extension": "jpg",
+        "usage": "primary_product_image",
+        "alt_text_en": "Donuts Pair",
+        "alt_text_ar": null,
+        "checksum": "md5:bcb33bb64761fec8d27a9bd493eb9fcb"
+      },
+      "additional_images": [],
+      "variants": {
+        "attributes": [
+          {
+            "code": "size",
+            "name_en": "Pack Size",
+            "values": [
+              {
+                "label": "SINGLE",
+                "sub": "1 Piece",
+                "delta": 0
+              },
+              {
+                "label": "PACK",
+                "sub": "4 Pieces",
+                "delta": 23.67
+              }
+            ]
+          }
+        ],
+        "note": "Added 2026-08-01: previously this product had no real backend variant (product_type=simple) and its size picker on the product page was purely client-side decoration (defaultSizesByCategory/sizeOverridesById in src/routes/product.$id.tsx), which meant the price shown when a customer picked a size was never what the server would actually charge (see the product.$id.tsx fallback-size-delta-zeroing fix). This replaces that placeholder with a real, backend-priced Size variant per option, using the exact same price math the placeholder used to display (kept as the real, approved price rather than inventing a new one). Flavor stays decorative (no backend axis) for this product — it never had a price effect."
+      },
+      "is_new_flag_raw": false,
+      "occasions_raw": [
+        "Birthday"
+      ],
+      "recipients_raw": [
+        "For Kids",
+        "For Family"
+      ],
+      "source_references": [
+        "src/lib/products.ts (products array, id: \"extra-donuts-pair\")",
+        "src/lib/admin-store.ts (ProductOverride schema — no seed override exists for this product; productOverrides seed is {})",
+        "src/routes/product.$id.tsx (detail page rendering + category-default size/flavor fallback)",
+        "src/components/ShopGrid.tsx (listing/search/filter usage)",
+        "src/components/ProductCard.tsx (card rendering)"
+      ],
+      "requires_confirmation": [
+        "sku_generated_no_business_source",
+        "name_ar_missing",
+        "description_ar_missing",
+        "description_en_missing"
+      ]
+    }
+  ]
+}

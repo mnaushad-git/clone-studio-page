@@ -1,7 +1,8 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { ShopGrid } from "@/components/ShopGrid";
-import { slugToOccasion, products, type Occasion } from "@/lib/products";
+import { occasionToSlug, slugToOccasion, type Occasion } from "@/lib/products";
+import { mapSummaryToProduct, useCatalogueProducts } from "@/lib/catalogue-api";
 import { useT, type TKey } from "@/lib/i18n";
 
 const OCCASION_LABEL_KEYS: Record<Occasion, TKey> = {
@@ -47,13 +48,14 @@ function MomentsPage() {
   const t = useT();
   const { occasion } = Route.useLoaderData() as { occasion: Occasion };
   const hero = OCCASION_HERO[occasion] ?? { subtitleKey: "momentsHeroDefaultSubtitle" as TKey, blurbKey: "momentsHeroDefaultBlurb" as TKey, accent: "✨" };
-  const sample = products.find((p) => p.occasions?.includes(occasion)) ?? products[0];
+  const { data: sample } = useCatalogueProducts({ moment: occasionToSlug(occasion), limit: 1 });
+  const sampleImage = sample?.items[0] ? mapSummaryToProduct(sample.items[0]).image : undefined;
   const occasionLabel = t(OCCASION_LABEL_KEYS[occasion]);
 
   const HeroBlock = (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0">
-        <img src={sample.image} alt="" className="h-full w-full object-cover opacity-25" />
+        {sampleImage && <img src={sampleImage} alt="" className="h-full w-full object-cover opacity-25" />}
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background" />
       </div>
       <div className="relative max-w-4xl mx-auto px-6 py-14 sm:py-20 text-center">
