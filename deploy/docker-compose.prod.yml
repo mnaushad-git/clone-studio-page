@@ -1,0 +1,147 @@
+# Terrific Bites production backend. Isolated from everything else on the VPS: its own
+# Compose project, networks, volumes, PostgreSQL and Redis. Nothing is published except
+# the API, on loopback only, for the reverse proxy to reach.
+#
+# Run from deploy/:  docker compose --env-file .env.prod -f docker-compose.prod.yml <cmd>
+# See docs/deployment/production-runbook.md.
+
+name: terrific-bites
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+x-backend: &backend
+  image: terrific-bites-api:${TB_IMAGE_TAG:?set TB_IMAGE_TAG to the git SHA to run}
+  restart: unless-stopped
+  logging: *logging
+  env_file: .env.prod
+  environment: &backend-env
+    APP_ENV: production
+    DEBUG: "false"
+    # Hard-coded so that .env.prod cannot switch them. Live Odoo order push, real payments
+    # and real notifications each need an explicit, reviewed change to this file.
+    ODOO_ORDER_PUSH_PROVIDER: stub
+    PAYMENT_PROVIDER: stub
+    NOTIFICATION_PROVIDER: stub
+    DATABASE_URL: postgresql+psycopg://terrific_bites:${POSTGRES_PASSWORD:?}@postgres:5432/terrific_bites
+    REDIS_URL: redis://:${REDIS_PASSWORD:?}@redis:6379/0
+    CELERY_BROKER_URL: redis://:${REDIS_PASSWORD:?}@redis:6379/1
+    CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD:?}@redis:6379/2
+    MEDIA_ROOT: /app/media
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      POSTGRES_USER: terrific_bites
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_DB: terrific_bites
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks: [internal]
+    mem_limit: 768m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U terrific_bites -d terrific_bites"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    logging: *logging
+    # A broker and cache: state is safe to lose and rebuild, so no persistence.
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\" --save '' --appendonly no --maxmemory 128mb --maxmemory-policy noeviction"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?}
+    networks: [internal]
+    mem_limit: 192m
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # One-shot: docker compose ... run --rm migrate
+  migrate:
+    <<: *backend
+    restart: "no"
+    profiles: [ops]
+    command: ["alembic", "upgrade", "head"]
+    networks: [internal]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    <<: *backend
+    ports:
+      - "127.0.0.1:${API_HOST_PORT:?}:8000"
+    volumes:
+      - media:/app/media
+    networks: [internal, egress]
+    mem_limit: 512m
+    healthcheck:
+      # TRUSTED_HOSTS holds only the public hostname, so the probe has to send it.
+      test:
+        - CMD
+        - python
+        - -c
+        - |
+          import os, urllib.request as u
+          r = u.Request("http://127.0.0.1:8000/api/v1/readiness", headers={"Host": os.environ["API_PUBLIC_HOST"]})
+          u.urlopen(r, timeout=4)
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery-worker:
+    <<: *backend
+    command: ["celery", "-A", "app.workers.celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
+    volumes:
+      - media:/app/media
+    networks: [internal, egress]
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A app.workers.celery_app inspect ping --timeout 10 | grep -q pong"]
+      interval: 60s
+      timeout: 20s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Exactly one instance: a second would fire every scheduled task twice.
+  celery-beat:
+    <<: *backend
+    command: ["celery", "-A", "app.workers.celery_app", "beat", "--loglevel=INFO", "--schedule=/tmp/celerybeat-schedule"]
+    networks: [internal]
+    mem_limit: 192m
+    depends_on:
+      redis:
+        condition: service_healthy
+
+networks:
+  # No route to the outside world or to any other application on this host.
+  internal:
+    internal: true
+  # Lets the API publish its loopback port and the worker reach Odoo when it is configured.
+  egress:
+
+volumes:
+  postgres_data:
+  media:

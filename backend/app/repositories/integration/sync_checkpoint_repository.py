@@ -18,9 +18,7 @@ class SyncCheckpointRepository(BaseRepository[IntegrationSyncCheckpoint]):
         )
         return self.session.execute(stmt).scalar_one_or_none()
 
-    def get_or_create(
-        self, integration_name: str, entity_type: str
-    ) -> IntegrationSyncCheckpoint:
+    def get_or_create(self, integration_name: str, entity_type: str) -> IntegrationSyncCheckpoint:
         existing = self.get(integration_name, entity_type)
         if existing is not None:
             return existing
@@ -30,9 +28,7 @@ class SyncCheckpointRepository(BaseRepository[IntegrationSyncCheckpoint]):
         return checkpoint
 
     def mark_running(self, checkpoint: IntegrationSyncCheckpoint) -> IntegrationSyncCheckpoint:
-        return self.update(
-            checkpoint, status="RUNNING", last_attempted_run_at=datetime.now(UTC)
-        )
+        return self.update(checkpoint, status="RUNNING", last_attempted_run_at=datetime.now(UTC))
 
     def mark_success(
         self,

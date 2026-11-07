@@ -93,9 +93,9 @@ uvicorn app.main:app --reload
 Then:
 
 ```sh
-curl http://localhost:8000/api/v1/health
-curl http://localhost:8000/api/v1/version
-curl http://localhost:8000/api/v1/readiness   # 200 if Postgres+Redis reachable, else 503
+curl http://localhost:8020/api/v1/health
+curl http://localhost:8020/api/v1/version
+curl http://localhost:8020/api/v1/readiness   # 200 if Postgres+Redis reachable, else 503
 ```
 
 ## Local development — with Docker Compose

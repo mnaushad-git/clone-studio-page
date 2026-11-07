@@ -120,7 +120,6 @@ def downgrade() -> None:
         "'EXTERNAL_XML_ID')",
     )
 
-
     variants = sa.table(
         "catalogue_product_variants",
         sa.column("external_key", sa.String),

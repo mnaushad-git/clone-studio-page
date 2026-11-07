@@ -1672,7 +1672,9 @@ class OdooCatalogueImportService:
             if row.odoo_attribute_id != odoo_id:
                 self.attribute_values.update(row, odoo_attribute_id=odoo_id)
 
-    def _adopt_attribute_value_odoo_id(self, plan_item: ImportPlanItem, odoo_id: int | None) -> None:
+    def _adopt_attribute_value_odoo_id(
+        self, plan_item: ImportPlanItem, odoo_id: int | None
+    ) -> None:
         if odoo_id is None:
             return
         attribute_name_en = plan_item.proposed_values.get("attribute_name_en")

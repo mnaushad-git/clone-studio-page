@@ -176,9 +176,7 @@ def _detail_out(order: Order, audit_repo: AdminAuditRepository) -> AdminOrderDet
                 id=str(item.id),
                 sku=item.sku,
                 name_en=item.name_en,
-                attributes=[
-                    AdminOrderItemAttributeOut(**a) for a in (item.attributes_json or [])
-                ],
+                attributes=[AdminOrderItemAttributeOut(**a) for a in (item.attributes_json or [])],
                 inscription=item.inscription,
                 quantity=item.quantity,
                 unit_price=_money(item.unit_price),

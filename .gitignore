@@ -46,3 +46,7 @@ backend/.coverage
 # Local-disk media storage for images pulled from Odoo (MediaStorageService) —
 # operational data, never committed.
 backend/media
+
+# Production secrets and backups stay on the server only
+deploy/.env.prod
+deploy/backups/

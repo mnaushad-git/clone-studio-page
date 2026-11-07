@@ -1,0 +1,28 @@
+# Proposed site block for the VPS's existing Caddy, which issues the certificate itself
+# once the DNS record resolves. Add it alongside the existing sites, then validate BEFORE
+# reloading. `caddy reload` is graceful, but it is a change to shared infrastructure, so it
+# needs approval.
+#
+# The upstream assumes Caddy runs on the host. If Caddy runs in a container, loopback is
+# the container itself: see "Reverse proxy" in docs/deployment/production-runbook.md.
+api.terrific-bites.trunexus.ai {
+	encode gzip
+
+	# Matches the app's own expectation that it is only served over HTTPS.
+	header Strict-Transport-Security "max-age=31536000"
+
+	reverse_proxy 127.0.0.1:18010 {
+		health_uri /api/v1/health
+		health_headers {
+			Host api.terrific-bites.trunexus.ai
+		}
+		health_interval 30s
+	}
+
+	log {
+		output file /var/log/caddy/api.terrific-bites.log {
+			roll_size 10mb
+			roll_keep 5
+		}
+	}
+}

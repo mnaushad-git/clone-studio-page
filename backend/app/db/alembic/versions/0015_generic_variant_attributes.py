@@ -49,9 +49,7 @@ depends_on: Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    op.add_column(
-        "order_items", sa.Column("attributes_json", postgresql.JSONB(), nullable=True)
-    )
+    op.add_column("order_items", sa.Column("attributes_json", postgresql.JSONB(), nullable=True))
 
     order_items = sa.table(
         "order_items",
@@ -71,9 +69,7 @@ def upgrade() -> None:
         if row.size_label:
             attributes.append({"code": "size", "name_en": "Size", "value_label_en": row.size_label})
         if row.flavor:
-            attributes.append(
-                {"code": "flavor", "name_en": "Flavor", "value_label_en": row.flavor}
-            )
+            attributes.append({"code": "flavor", "name_en": "Flavor", "value_label_en": row.flavor})
         connection.execute(
             order_items.update()
             .where(order_items.c.id == row.id)
@@ -87,7 +83,8 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.add_column(
-        "catalogue_product_variants", sa.Column("variant_attributes", postgresql.JSONB(), nullable=True)
+        "catalogue_product_variants",
+        sa.Column("variant_attributes", postgresql.JSONB(), nullable=True),
     )
     op.add_column("order_items", sa.Column("size_label", sa.String(length=64), nullable=True))
     op.add_column("order_items", sa.Column("flavor", sa.String(length=64), nullable=True))

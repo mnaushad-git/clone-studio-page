@@ -91,7 +91,14 @@ _ODOO_DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 # already in use in data/catalogue/products.json, lowercased. An Odoo attribute whose
 # name matches one of these renders correctly on today's two-slot storefront UI even
 # on its very first sync (no prior Postgres row to reuse a code from yet).
-_SIZE_ATTRIBUTE_NAMES = {"size", "pack size", "box size", "gift tier", "cake size", "ice cream size"}
+_SIZE_ATTRIBUTE_NAMES = {
+    "size",
+    "pack size",
+    "box size",
+    "gift tier",
+    "cake size",
+    "ice cream size",
+}
 _FLAVOR_ATTRIBUTE_NAMES = {"flavor", "flavour"}
 
 
@@ -221,8 +228,10 @@ class OdooCatalogueSyncService:
         )
         counts_by_entity["PRODUCT_TEMPLATE"] = product_counts.as_dict()
 
-        variant_counts, variant_id_map, variant_records, price_extra_by_variant = self.sync_variants(
-            client, run=run, full_resync=full_resync, product_id_map=product_id_map
+        variant_counts, variant_id_map, variant_records, price_extra_by_variant = (
+            self.sync_variants(
+                client, run=run, full_resync=full_resync, product_id_map=product_id_map
+            )
         )
         counts_by_entity["PRODUCT_VARIANT"] = variant_counts.as_dict()
 

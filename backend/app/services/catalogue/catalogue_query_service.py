@@ -167,9 +167,7 @@ class CatalogueQueryService:
             primary_image=_image_out(_primary_image(product)),
             gallery_images=[_image_out(i) for i in _gallery_images(product)],
             variants=[
-                _variant_out(v)
-                for v in sorted(product.variants, key=lambda v: v.sku)
-                if v.active
+                _variant_out(v) for v in sorted(product.variants, key=lambda v: v.sku) if v.active
             ],
             merchandising=_merchandising_out(product.merchandising),
             moments=moments,

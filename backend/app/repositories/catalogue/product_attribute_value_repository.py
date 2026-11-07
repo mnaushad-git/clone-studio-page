@@ -36,11 +36,7 @@ class ProductAttributeValueRepository(BaseRepository[CatalogueProductAttributeVa
         attribute is encountered again (on a different product/variant), rather than
         minting a fresh code per occurrence.
         """
-        stmt = (
-            select(self.model)
-            .where(self.model.odoo_attribute_id == odoo_attribute_id)
-            .limit(1)
-        )
+        stmt = select(self.model).where(self.model.odoo_attribute_id == odoo_attribute_id).limit(1)
         return self.session.execute(stmt).scalar_one_or_none()
 
     def list_by_attribute_name(

@@ -125,6 +125,7 @@ def set_admin_auth_cookies(
         secure=secure,
         samesite="lax",
         path="/",
+        domain=settings.admin_cookie_domain,
     )
     response.set_cookie(
         ADMIN_REFRESH_COOKIE,
@@ -134,6 +135,7 @@ def set_admin_auth_cookies(
         secure=secure,
         samesite="lax",
         path="/",
+        domain=settings.admin_cookie_domain,
     )
     # Deliberately NOT httponly — the admin-api.ts client reads this to echo it back
     # as X-CSRF-Token on writes (double-submit pattern).
@@ -145,9 +147,11 @@ def set_admin_auth_cookies(
         secure=secure,
         samesite="lax",
         path="/",
+        domain=settings.admin_cookie_domain,
     )
 
 
-def clear_admin_auth_cookies(response: Response) -> None:
+def clear_admin_auth_cookies(response: Response, settings: Settings) -> None:
+    # A browser only deletes a cookie when the Domain matches the one it was set with.
     for name in (ADMIN_ACCESS_COOKIE, ADMIN_REFRESH_COOKIE, ADMIN_CSRF_COOKIE):
-        response.delete_cookie(name, path="/")
+        response.delete_cookie(name, path="/", domain=settings.admin_cookie_domain)

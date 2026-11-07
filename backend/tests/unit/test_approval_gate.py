@@ -73,18 +73,18 @@ def test_real_approval_file_gate_is_satisfied() -> None:
     assert {d.decision_id for d in result.approved} == {"D03", "D04", "D08", "D10", "D19"}
 
 
-def test_real_approval_file_d20_is_deliberately_unapproved_and_non_blocking() -> None:
-    """D20 (Odoo native product-attribute/variant modeling activation) is new, higher-
-    risk write surface — deliberately left PROPOSED (not yet approved) and
-    blocks_import=false, so it gates only PRODUCT_ATTRIBUTE/PRODUCT_ATTRIBUTE_VALUE/
-    PRODUCT_VARIANT plan items (via VARIANT_BLOCKING_DECISION_IDS in
-    odoo_import_planning.py) without blocking the overall category/template --apply
-    gate this test file otherwise asserts is satisfied.
+def test_real_approval_file_d20_is_non_blocking_whatever_its_approval_status() -> None:
+    """D20 (Odoo native product-attribute/variant modeling activation) gates only
+    PRODUCT_ATTRIBUTE/PRODUCT_ATTRIBUTE_VALUE/PRODUCT_VARIANT plan items (via
+    VARIANT_BLOCKING_DECISION_IDS in odoo_import_planning.py) and must never block the
+    overall category/template --apply gate this test file otherwise asserts is satisfied.
+
+    Its status is a business decision recorded in the approvals file, so this test does
+    not pin it. test_odoo_import_planning.py covers how each status gates variant items.
     """
     decisions = load_business_approvals(REAL_APPROVALS_PATH)
     d20 = next(d for d in decisions if d.decision_id == "D20")
     assert d20.blocks_import is False
-    assert d20.status != "APPROVED"
     assert d20.is_resolved_approval is True  # non-blocking decisions are trivially resolved
 
 

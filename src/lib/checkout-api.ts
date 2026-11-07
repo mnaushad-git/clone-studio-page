@@ -9,7 +9,7 @@
 import type { CartItem, Address, Order, OrderStatus } from "@/lib/store";
 
 const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://localhost:8000";
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://localhost:8020";
 
 export class CheckoutApiError extends Error {
   status?: number;

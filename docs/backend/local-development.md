@@ -53,15 +53,15 @@ Copy-Item .env.example .env    # then edit DATABASE_URL/REDIS_URL/ADMIN_JWT_SECR
 
 alembic upgrade head           # requires DATABASE_URL reachable
 
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8020
 ```
 
 Smoke-test:
 
 ```powershell
-curl http://localhost:8000/api/v1/health
-curl http://localhost:8000/api/v1/version
-curl http://localhost:8000/api/v1/readiness   # 200 if Postgres+Redis reachable, else 503
+curl http://localhost:8020/api/v1/health
+curl http://localhost:8020/api/v1/version
+curl http://localhost:8020/api/v1/readiness   # 200 if Postgres+Redis reachable, else 503
 ```
 
 ### 4. Bootstrap an admin user
@@ -108,7 +108,7 @@ npm run dev
 ```
 
 Set `VITE_API_BASE_URL` in the root `.env`/`.env.local` if the backend isn't at
-`http://localhost:8000`. The Admin Portal is at `/admin` (redirects to `/admin/login`
+`http://localhost:8020`. The Admin Portal is at `/admin` (redirects to `/admin/login`
 if not authenticated); the Storefront is at `/`.
 
 ## Option A — Docker Compose
@@ -119,7 +119,7 @@ From the **repository root** (`docker-compose.yml` lives there, not under `backe
 docker compose up --build
 ```
 
-Starts `postgres`, `redis`, `backend-api` (port `${API_PORT:-8000}`),
+Starts `postgres`, `redis`, `backend-api` (port `${API_PORT:-8020}`),
 `celery-worker`, `celery-beat`. Apply migrations and bootstrap an admin inside the
 running container:
 

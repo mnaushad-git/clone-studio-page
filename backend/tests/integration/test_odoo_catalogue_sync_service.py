@@ -302,7 +302,9 @@ def test_sync_resolves_attribute_combination_and_adds_price_extra(
         categories=[_category_record(701, "Cakes")],
         templates=[_template_record(310, "Layer Cake", categ_id=701, sku="LC-1")],
         variants=[
-            _variant_record(410, 310, "Layer Cake (9 Inch, Vanilla)", sku="LC-1-9V", ptav_ids=[1, 2]),
+            _variant_record(
+                410, 310, "Layer Cake (9 Inch, Vanilla)", sku="LC-1-9V", ptav_ids=[1, 2]
+            ),
         ],
         template_attribute_values=[
             _ptav_record(1, 101, price_extra=20.0),
@@ -342,9 +344,7 @@ def test_sync_resolves_attribute_combination_and_adds_price_extra(
     assert rows["flavor"]["value_label_en"] == "Vanilla"
 
     price = db_session.execute(
-        text(
-            "SELECT amount FROM catalogue_product_prices WHERE product_variant_id = :vid"
-        ),
+        text("SELECT amount FROM catalogue_product_prices WHERE product_variant_id = :vid"),
         {"vid": str(variant.id)},
     ).scalar_one()
     assert float(price) == 25.5 + 20.0  # _template_record's list_price + this combo's price_extra

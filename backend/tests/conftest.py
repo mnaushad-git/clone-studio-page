@@ -47,6 +47,8 @@ if os.environ.get("RUN_ODOO_INTEGRATION_TESTS") != "1":
     os.environ["ODOO_BASE_URL"] = ""
     os.environ["ODOO_DATABASE"] = ""
     os.environ["ODOO_USERNAME"] = ""
+    # A developer's .env may select the live pusher; the suite always runs on the stub.
+    os.environ["ODOO_ORDER_PUSH_PROVIDER"] = "stub"
 
 from collections.abc import Generator  # noqa: E402
 

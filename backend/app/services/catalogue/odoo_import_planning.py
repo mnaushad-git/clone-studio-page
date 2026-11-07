@@ -525,7 +525,11 @@ def plan_attributes(
         attr_blocking: list[str] = []
 
         if stored_attr_id:
-            attr_action, attr_match_strategy, attr_odoo_id = "MATCH", "POSTGRES_STORED_ID", stored_attr_id
+            attr_action, attr_match_strategy, attr_odoo_id = (
+                "MATCH",
+                "POSTGRES_STORED_ID",
+                stored_attr_id,
+            )
         elif client is None or repo is None:
             attr_action, attr_match_strategy, attr_odoo_id = "BLOCKED", None, None
             attr_blocking = [f"Cannot verify against Odoo: {connect_failure}"]
@@ -534,7 +538,8 @@ def plan_attributes(
             if not name_matches and open_decisions:
                 attr_action, attr_match_strategy, attr_odoo_id = "BLOCKED", None, None
                 attr_blocking = [
-                    f"{d.decision_id} ({d.title}) is {d.status}, not APPROVED" for d in open_decisions
+                    f"{d.decision_id} ({d.title}) is {d.status}, not APPROVED"
+                    for d in open_decisions
                 ]
             elif not name_matches:
                 attr_action, attr_match_strategy, attr_odoo_id = "CREATE", None, None
@@ -765,7 +770,9 @@ def plan_variants(
                         existing_odoo_id=None,
                         planned_action="BLOCKED",
                         blocking_issues=["ATTRIBUTE_NOT_RESOLVED"],
-                        warnings=[f"Attribute/value not resolved: {n!r}={v!r}" for n, v in unresolved],
+                        warnings=[
+                            f"Attribute/value not resolved: {n!r}={v!r}" for n, v in unresolved
+                        ],
                     )
                 )
                 continue
@@ -829,7 +836,10 @@ def plan_variants(
 
             items.append(
                 ImportPlanItem(
-                    **base_kwargs, match_strategy=None, existing_odoo_id=None, planned_action="CREATE"
+                    **base_kwargs,
+                    match_strategy=None,
+                    existing_odoo_id=None,
+                    planned_action="CREATE",
                 )
             )
 

@@ -28,9 +28,9 @@ useful when debugging whether a symptom is cache-related.
 With `CACHE_DEBUG_HEADERS_ENABLED=true` (the default outside `APP_ENV=production`):
 
 ```sh
-curl -i http://localhost:8000/api/v1/catalogue/homepage | grep -i x-cache
+curl -i http://localhost:8020/api/v1/catalogue/homepage | grep -i x-cache
 # X-Cache: MISS          (first request)
-curl -i http://localhost:8000/api/v1/catalogue/homepage | grep -i x-cache
+curl -i http://localhost:8020/api/v1/catalogue/homepage | grep -i x-cache
 # X-Cache: HIT            (second request, within the TTL)
 ```
 
@@ -48,7 +48,7 @@ Preferred — through the app, so nothing outside `CacheInvalidationService` eve
 issues a raw Redis command:
 
 ```sh
-curl -X POST http://localhost:8000/api/v1/admin/system/cache/invalidate \
+curl -X POST http://localhost:8020/api/v1/admin/system/cache/invalidate \
   -H "Content-Type: application/json" -H "X-CSRF-Token: <csrf>" \
   --cookie "<admin session cookie>" \
   -d '{"operation": "all"}'

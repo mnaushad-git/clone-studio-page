@@ -53,9 +53,9 @@ services:
       # Images the catalogue sync pulls from Odoo are written by celery-worker onto
       # the shared terrific_bites_media volume and served here at /media.
       MEDIA_ROOT: /app/media
-      MEDIA_BASE_URL: http://localhost:${API_PORT:-8000}/media
+      MEDIA_BASE_URL: http://localhost:${API_PORT:-8020}/media
     ports:
-      - "${API_PORT:-8000}:8000"
+      - "${API_PORT:-8020}:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -87,7 +87,7 @@ services:
       ODOO_PASSWORD: ${ODOO_PASSWORD:-}
       ODOO_API_KEY: ${ODOO_API_KEY:-}
       MEDIA_ROOT: /app/media
-      MEDIA_BASE_URL: http://localhost:${API_PORT:-8000}/media
+      MEDIA_BASE_URL: http://localhost:${API_PORT:-8020}/media
     depends_on:
       postgres:
         condition: service_healthy

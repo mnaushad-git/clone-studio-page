@@ -101,7 +101,7 @@ def logout(
     refresh_token = request.cookies.get(ADMIN_REFRESH_COOKIE)
     AuthService(session).logout(refresh_token, admin=admin, request=request)
     session.commit()
-    clear_admin_auth_cookies(response)
+    clear_admin_auth_cookies(response, get_app_settings())
     return {"ok": True}
 
 
@@ -131,5 +131,5 @@ def change_password(
     session.commit()
     # The password change revoked every session (including this request's) —
     # the client must log in again.
-    clear_admin_auth_cookies(response)
+    clear_admin_auth_cookies(response, get_app_settings())
     return {"ok": True}

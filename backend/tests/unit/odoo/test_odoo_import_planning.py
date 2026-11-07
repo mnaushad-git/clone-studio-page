@@ -294,7 +294,9 @@ def test_plan_attributes_creates_attribute_and_values_when_no_match(config: Odoo
 
     items = plan_attributes([_buttercream()], [], client, None, {}, {}, "corr-1")
 
-    size_attr = next(i for i in items if i.entity_type == "PRODUCT_ATTRIBUTE" and i.canonical_name == "Size")
+    size_attr = next(
+        i for i in items if i.entity_type == "PRODUCT_ATTRIBUTE" and i.canonical_name == "Size"
+    )
     assert size_attr.planned_action == "CREATE"
     assert size_attr.proposed_values == {"name": "Size", "create_variant": "always"}
 
@@ -323,7 +325,9 @@ def test_plan_attributes_matches_existing_attribute_by_name(config: OdooConfig) 
 
     items = plan_attributes([_buttercream()], [], client, None, {}, {}, "corr-1")
 
-    size_attr = next(i for i in items if i.entity_type == "PRODUCT_ATTRIBUTE" and i.canonical_name == "Size")
+    size_attr = next(
+        i for i in items if i.entity_type == "PRODUCT_ATTRIBUTE" and i.canonical_name == "Size"
+    )
     assert size_attr.planned_action == "MATCH"
     assert size_attr.match_strategy == "NAME"
     assert size_attr.existing_odoo_id == 5
@@ -342,7 +346,9 @@ def test_plan_attributes_blocks_when_existing_attribute_has_wrong_create_variant
 
     items = plan_attributes([_buttercream()], [], client, None, {}, {}, "corr-1")
 
-    size_attr = next(i for i in items if i.entity_type == "PRODUCT_ATTRIBUTE" and i.canonical_name == "Size")
+    size_attr = next(
+        i for i in items if i.entity_type == "PRODUCT_ATTRIBUTE" and i.canonical_name == "Size"
+    )
     assert size_attr.planned_action == "BLOCKED"
     assert "EXISTING_ATTRIBUTE_WRONG_CREATE_VARIANT_MODE" in size_attr.blocking_issues
 
@@ -375,7 +381,9 @@ def test_plan_attributes_value_search_scoped_to_its_own_resolved_attribute_id(
     plan_attributes([_buttercream()], [], client, None, {}, {}, "corr-1")
 
     value_search_calls = [
-        c for c in transport.calls if c.args[3] == "product.attribute.value" and c.args[4] == "search_read"
+        c
+        for c in transport.calls
+        if c.args[3] == "product.attribute.value" and c.args[4] == "search_read"
     ]
     assert value_search_calls  # at least one value lookup happened
     for call in value_search_calls:
@@ -453,7 +461,9 @@ def test_plan_attributes_create_blocked_when_d20_not_approved(config: OdooConfig
         [_buttercream()], [_approval("D20", status="PROPOSED")], client, None, {}, {}, "corr-1"
     )
 
-    size_attr = next(i for i in items if i.entity_type == "PRODUCT_ATTRIBUTE" and i.canonical_name == "Size")
+    size_attr = next(
+        i for i in items if i.entity_type == "PRODUCT_ATTRIBUTE" and i.canonical_name == "Size"
+    )
     assert size_attr.planned_action == "BLOCKED"
     assert any("D20" in issue for issue in size_attr.blocking_issues)
 
@@ -475,7 +485,9 @@ def test_plan_attributes_create_allowed_when_d20_approved(config: OdooConfig) ->
         "corr-1",
     )
 
-    size_attr = next(i for i in items if i.entity_type == "PRODUCT_ATTRIBUTE" and i.canonical_name == "Size")
+    size_attr = next(
+        i for i in items if i.entity_type == "PRODUCT_ATTRIBUTE" and i.canonical_name == "Size"
+    )
     assert size_attr.planned_action == "CREATE"
 
 
@@ -491,7 +503,10 @@ def test_unresolved_attribute_values_collects_blocked_value_pairs(config: OdooCo
                 {
                     "code": "flavor",
                     "name_en": "Flavor",
-                    "values": [{"label": "Vanilla", "delta": 0}, {"label": "Chocolate", "delta": 0}],
+                    "values": [
+                        {"label": "Vanilla", "delta": 0},
+                        {"label": "Chocolate", "delta": 0},
+                    ],
                 }
             ]
         },

@@ -12,10 +12,14 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Annotated
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 # Field names whose values must never be written to logs verbatim.
+INSECURE_ADMIN_JWT_SECRET = "dev-insecure-admin-jwt-secret-change-me"
+MIN_PRODUCTION_JWT_SECRET_LENGTH = 32
+_LOCAL_HOST_MARKERS = ("localhost", "127.0.0.1", "0.0.0.0", "[::1]")
+
 SECRET_FIELD_NAMES: frozenset[str] = frozenset(
     {
         "database_url",
@@ -105,7 +109,7 @@ class Settings(BaseSettings):
     # storage yet: no existing storage/credential story in this app to build on, and
     # CLAUDE.md says not to introduce infrastructure without a demonstrated need.
     media_root: str = "media"
-    media_base_url: str = "http://localhost:8000/media"
+    media_base_url: str = "http://localhost:8020/media"
 
     # Checkout pricing — mirrors the Admin Portal's current localStorage-only defaults
     # (src/lib/admin-store.ts SiteSettings) since admin settings aren't backend-owned
@@ -134,7 +138,13 @@ class Settings(BaseSettings):
     # insecure placeholder (never used verbatim in production; every deployed
     # environment must set its own ADMIN_JWT_SECRET), same posture as ODOO_PASSWORD's
     # blank-by-default: the app must still start and be usable locally without one.
-    admin_jwt_secret: str = "dev-insecure-admin-jwt-secret-change-me"
+    admin_jwt_secret: str = INSECURE_ADMIN_JWT_SECRET
+    # Domain attribute for the admin auth/CSRF cookies. Required in production, where the
+    # API (api.<frontend-host>) and the frontend are on different hosts: without it the
+    # JS-readable admin_csrf cookie is host-only to the API, the frontend cannot echo it
+    # as X-CSRF-Token, and every mutating admin request fails with 403. Blank means
+    # host-only, which is right for localhost development.
+    admin_cookie_domain: str | None = None
     admin_access_token_ttl_minutes: int = 15
     admin_refresh_token_ttl_days: int = 7
     # Account lockout (DB-backed, works even when Redis is down) — after this many
@@ -203,6 +213,56 @@ class Settings(BaseSettings):
         if isinstance(value, str) and not value.strip():
             return None
         return value
+
+    @field_validator("admin_cookie_domain", mode="before")
+    @classmethod
+    def _blank_cookie_domain_to_none(cls, value: object) -> object:
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
+
+    @model_validator(mode="after")
+    def _refuse_unsafe_production_config(self) -> Settings:
+        """Fail at startup rather than serve production on development defaults. Reports
+        which settings are wrong, never their values."""
+        if self.app_env != "production":
+            return self
+
+        problems: list[str] = []
+        if self.debug:
+            problems.append("DEBUG must be false")
+        if (
+            self.admin_jwt_secret == INSECURE_ADMIN_JWT_SECRET
+            or len(self.admin_jwt_secret) < MIN_PRODUCTION_JWT_SECRET_LENGTH
+        ):
+            problems.append(
+                "ADMIN_JWT_SECRET must be a unique secret of at least "
+                f"{MIN_PRODUCTION_JWT_SECRET_LENGTH} characters"
+            )
+        if not self.admin_cookie_domain:
+            problems.append("ADMIN_COOKIE_DOMAIN must be set")
+        if not self.cors_allowed_origins or any(
+            origin == "*"
+            or not origin.startswith("https://")
+            or any(marker in origin for marker in _LOCAL_HOST_MARKERS)
+            for origin in self.cors_allowed_origins
+        ):
+            problems.append("CORS_ALLOWED_ORIGINS must list only public https:// origins")
+        if not self.trusted_hosts or any(
+            host == "*" or any(marker in host for marker in _LOCAL_HOST_MARKERS)
+            for host in self.trusted_hosts
+        ):
+            problems.append("TRUSTED_HOSTS must list only the public API hostname(s)")
+        if not self.media_base_url.startswith("https://") or any(
+            marker in self.media_base_url for marker in _LOCAL_HOST_MARKERS
+        ):
+            problems.append("MEDIA_BASE_URL must be a public https:// URL")
+        if "postgres:postgres@" in self.database_url:
+            problems.append("DATABASE_URL must not use the development postgres credentials")
+
+        if problems:
+            raise ValueError("Unsafe production configuration: " + "; ".join(problems))
+        return self
 
     def masked_dict(self) -> dict[str, object]:
         """Config snapshot safe to log — secret fields replaced with a fixed marker."""
