@@ -322,8 +322,9 @@ def test_storefront_order_flows_through_postgres_pay_and_odoo_sync_into_admin_an
     assert sync_summary.succeeded == 1
 
     db_session.refresh(db_order)
-    assert db_order.odoo_sync_status == "synced"
-    assert db_order.odoo_last_synced_at is not None
+    # The stub pusher sent nothing to Odoo, so the order must not read as delivered.
+    assert db_order.odoo_sync_status == "simulated"
+    assert db_order.odoo_last_synced_at is None
     paid_event = next(e for e in db_order.outbox_events if e.event_type == "order.paid")
     assert paid_event.status == "completed"
 
@@ -334,7 +335,7 @@ def test_storefront_order_flows_through_postgres_pay_and_odoo_sync_into_admin_an
     assert admin_detail.status_code == 200
     body = admin_detail.json()
     assert body["status"] == "paid"
-    assert body["odoo"]["sync_status"] == "synced"
+    assert body["odoo"]["sync_status"] == "simulated"
     assert body["payments"][0]["status"] == "succeeded"
 
     # 4. The Storefront's own customer-facing tracking view reflects the same state
@@ -431,10 +432,10 @@ def test_sync_paid_orders_is_idempotent_on_a_re_run(
     assert db_order is not None
     db_session.refresh(db_order)
     first_synced_at = db_order.odoo_last_synced_at
-    assert db_order.odoo_sync_status == "synced"
+    assert db_order.odoo_sync_status == "simulated"
 
     # A second, independent sync pass (e.g. Beat's periodic poll running again)
-    # should find nothing pending — the order is already "synced", not "pending".
+    # should find nothing pending: the event is already completed.
     summary = OdooOrderSyncService(db_session).sync_paid_orders()
     assert summary.processed == 0
 

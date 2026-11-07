@@ -16,5 +16,6 @@ def version(settings: Settings = Depends(get_settings)) -> dict[str, Any]:
     return {
         "app_version": settings.app_version,
         "app_env": settings.app_env,
+        "deployment_stage": settings.deployment_stage,
         "api_version": "v1",
     }

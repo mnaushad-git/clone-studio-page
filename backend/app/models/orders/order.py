@@ -22,6 +22,7 @@ from sqlalchemy import (
     Numeric,
     String,
     Text,
+    false,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -43,10 +44,11 @@ if TYPE_CHECKING:
 # cancelled: never paid or refunded before fulfilment.
 ORDER_STATUSES = ("pending_payment", "paid", "processing", "delivered", "cancelled")
 
-# not_synced: never attempted (or not yet paid). synced: an OdooOrderPusher call
-# succeeded — odoo_sale_order_id is set for a real (non-stub) pusher. failed: the last
-# push attempt raised or returned success=False; the outbox event stays retryable.
-ODOO_ORDER_SYNC_STATUSES = ("not_synced", "synced", "failed")
+# not_synced: never attempted (or not yet paid). synced: Odoo confirmed the order and
+# odoo_sale_order_id is set. simulated: nothing was sent to Odoo, because the order is a
+# demo order or the stub pusher is selected; never present this as delivered. failed: the
+# last push attempt raised or returned success=False; the outbox event stays retryable.
+ODOO_ORDER_SYNC_STATUSES = ("not_synced", "synced", "simulated", "failed")
 
 # not_required: order was never paid (cancelled from pending_payment) — nothing to
 # refund. pending: order had a successful payment when cancelled — a human must
@@ -118,6 +120,11 @@ class Order(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     odoo_sync_status: Mapped[str] = mapped_column(String(16), nullable=False, default="not_synced")
     odoo_sale_order_id: Mapped[int | None] = mapped_column(Integer)
     odoo_last_synced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Set once, at creation, from DEPLOYMENT_STAGE. A demo order can never be pushed to
+    # Odoo, even if the deployment later moves to the live stage on the same database.
+    is_demo: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
 
     cancellation_reason: Mapped[str | None] = mapped_column(Text)
     refund_status: Mapped[str | None] = mapped_column(String(16))

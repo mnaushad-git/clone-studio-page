@@ -12,6 +12,11 @@ import { registerProducts, variantComboKey } from "@/lib/products";
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://localhost:8020";
 
+// A server-rendered page waits on this call, so it can't be left to the platform's connect
+// timeout: a slow API must become the error page quickly, not a blank wait.
+const SERVER_RENDER_TIMEOUT_MS = 8000;
+const BROWSER_TIMEOUT_MS = 15000;
+
 export class CatalogueApiError extends Error {
   status?: number;
   constructor(message: string, status?: number) {
@@ -175,7 +180,11 @@ async function apiFetch<T>(path: string, params?: Record<string, string | number
 
   let response: Response;
   try {
-    response = await fetch(url.toString());
+    response = await fetch(url.toString(), {
+      signal: AbortSignal.timeout(
+        typeof window === "undefined" ? SERVER_RENDER_TIMEOUT_MS : BROWSER_TIMEOUT_MS,
+      ),
+    });
   } catch {
     throw new CatalogueApiError("Could not reach the catalogue service. Check your connection and try again.");
   }

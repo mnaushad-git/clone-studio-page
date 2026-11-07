@@ -16,6 +16,7 @@ import { useAdmin } from "@/lib/admin-store";
 import { useDeliveryOptions } from "@/lib/admin-api";
 import { primeDeliveryOptions } from "@/lib/store";
 import { useT } from "@/lib/i18n";
+import { DemoBanner } from "@/components/DemoNotices";
 
 function NotFoundComponent() {
   const t = useT();
@@ -166,6 +167,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <DeliveryOptionsSync />
+      <DemoBanner />
       <MaintenanceBanner />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />

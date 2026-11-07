@@ -2,10 +2,12 @@ import { useMemo, useRef, useState } from "react";
 import { BadgeCheck, Camera, Star, X } from "lucide-react";
 import { toast } from "sonner";
 import { useStore, selectAverageRating, selectHasPurchased, reviews as reviewsApi } from "@/lib/store";
-import { useT } from "@/lib/i18n";
+import { useT, useLang } from "@/lib/i18n";
+import { formatStableDate } from "@/lib/format-date";
 
 export function ProductReviews({ productId }: { productId: string }) {
   const t = useT();
+  const lang = useLang();
   const allReviews = useStore((s) => s.reviews);
   const list = useMemo(
     () => allReviews.filter((r) => r.productId === productId).sort((a, b) => b.createdAt - a.createdAt),
@@ -80,7 +82,7 @@ export function ProductReviews({ productId }: { productId: string }) {
                   </span>
                 )}
                 <span>·</span>
-                <span>{new Date(r.createdAt).toLocaleDateString()}</span>
+                <span>{formatStableDate(r.createdAt, lang)}</span>
               </div>
               <div className="mt-1 flex items-center gap-0.5">
                 {[1, 2, 3, 4, 5].map((n) => (

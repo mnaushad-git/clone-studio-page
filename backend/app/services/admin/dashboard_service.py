@@ -143,4 +143,14 @@ class DashboardService:
                 )
             )
 
+        simulated_sync = self.orders.count_simulated_sync()
+        if simulated_sync:
+            alerts.append(
+                DashboardAlert(
+                    type="odoo_sync_simulated",
+                    message="Orders were simulated in stub mode and are not in Odoo.",
+                    count=simulated_sync,
+                )
+            )
+
         return alerts

@@ -24,6 +24,7 @@ class AdminOrderListItemOut(BaseModel):
     payment_status: str
     status: str
     odoo_sync_status: str
+    is_demo: bool
     notification_status: str
 
 
@@ -131,6 +132,7 @@ class AdminOrderOdooOut(BaseModel):
 class AdminOrderDetailOut(BaseModel):
     id: str
     order_number: str
+    is_demo: bool
     status: str
     payment_status: str
     currency: str

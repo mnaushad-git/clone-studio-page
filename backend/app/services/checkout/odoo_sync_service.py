@@ -75,6 +75,14 @@ class OdooOrderSyncService:
             event.last_error = f"Order {event.order_id} no longer exists."
             return False
 
+        if order.is_demo:
+            # Checked per order, not per deployment: a demo order must stay out of Odoo
+            # even if this database is later run with the live pusher.
+            event.status = "completed"
+            event.processed_at = datetime.now(UTC)
+            order.odoo_sync_status = "simulated"
+            return True
+
         event.status = "processing"
         self.session.flush()
 
@@ -113,6 +121,10 @@ class OdooOrderSyncService:
 
         event.status = "completed"
         event.processed_at = datetime.now(UTC)
+        if result.simulated:
+            order.odoo_sync_status = "simulated"
+            return True
+
         order.odoo_sync_status = "synced"
         order.odoo_sale_order_id = result.odoo_sale_order_id
         order.odoo_last_synced_at = datetime.now(UTC)

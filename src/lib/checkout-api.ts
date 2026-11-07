@@ -47,6 +47,7 @@ export type OrderStatusEventOut = {
 export type OrderOut = {
   id: string;
   order_number: string;
+  is_demo: boolean;
   status: string;
   currency: string;
   subtotal_amount: string;
@@ -233,5 +234,6 @@ export function toLocalOrder(order: OrderOut): Order {
       at: Date.parse(event.occurred_at),
     })),
     trackingToken: order.tracking_token,
+    isDemo: order.is_demo,
   };
 }

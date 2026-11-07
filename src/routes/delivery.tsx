@@ -13,6 +13,7 @@ import {
   CalendarPlus,
 } from "lucide-react";
 import { toast } from "sonner";
+import { storeNow } from "@/lib/location";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import {
@@ -30,6 +31,7 @@ import {
 import { useDeliveryOptions, type DeliverySlotOut } from "@/lib/admin-api";
 import { getProduct } from "@/lib/products";
 import { useT, type TKey } from "@/lib/i18n";
+import { useCartProducts } from "@/lib/use-cart-products";
 
 // Fallback shown until the server-backed slot list (GET /api/v1/checkout/
 // delivery-options) has loaded — mirrors the six two-hour slots seeded by
@@ -61,7 +63,7 @@ function getSlotLabels(slots: DeliverySlotOut[] | undefined): string[] {
 }
 function nextSlot(
   slots: DeliverySlotOut[] | undefined,
-  now = new Date(),
+  now = storeNow(),
 ): { day: "Today" | "Tomorrow"; label: string } {
   const src = slotSource(slots);
   const mins = now.getHours() * 60 + now.getMinutes();
@@ -91,6 +93,7 @@ function DeliveryPage() {
   const t = useT();
   const navigate = useNavigate();
   const cartItems = useStore((s) => s.cart);
+  useCartProducts();
   const currentPromo = useStore((s) => s.promo);
   const user = useStore((s) => s.user);
   const savedAddresses = useStore((s) => s.addresses);

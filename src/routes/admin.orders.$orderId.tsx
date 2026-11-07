@@ -10,6 +10,7 @@ import {
 import { Card, Badge, Button, Select, Modal, Field, Textarea } from "@/components/admin/ui";
 import { formatAttributes } from "@/lib/format-variant-attributes";
 import { ArrowLeft, RefreshCw, AlertTriangle } from "lucide-react";
+import { odooSyncLabel } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/admin/orders/$orderId")({ component: OrderDetailPage });
 
@@ -231,12 +232,14 @@ function OrderDetailPage() {
                 tone={
                   order.odoo.sync_status === "synced"
                     ? "success"
+                    : order.odoo.sync_status === "simulated"
+                    ? "info"
                     : order.odoo.sync_status === "failed"
                       ? "danger"
                       : "default"
                 }
               >
-                {order.odoo.sync_status}
+                {odooSyncLabel(order.odoo.sync_status)}
               </Badge>
             </div>
             {order.odoo.sale_order_id && (

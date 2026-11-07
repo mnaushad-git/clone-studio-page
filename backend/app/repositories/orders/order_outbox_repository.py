@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import Sequence
+from datetime import datetime
 
 from sqlalchemy import func, select
 
@@ -30,6 +31,18 @@ class OrderOutboxRepository(BaseRepository[OrderOutboxEvent]):
             .order_by(OrderOutboxEvent.created_at.desc())
         )
         return self.session.execute(stmt).scalars().all()
+
+    def count_pending_older_than(self, event_types: Sequence[str], older_than: datetime) -> int:
+        stmt = (
+            select(func.count())
+            .select_from(OrderOutboxEvent)
+            .where(
+                OrderOutboxEvent.status == "pending",
+                OrderOutboxEvent.event_type.in_(event_types),
+                OrderOutboxEvent.created_at < older_than,
+            )
+        )
+        return self.session.execute(stmt).scalar_one()
 
     def count_by_type_and_status(self, event_type: str, status: str) -> int:
         stmt = (

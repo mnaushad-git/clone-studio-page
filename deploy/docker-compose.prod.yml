@@ -21,6 +21,9 @@ x-backend: &backend
   environment: &backend-env
     APP_ENV: production
     DEBUG: "false"
+    # Stage A. Moving to "live" also needs the three providers below to be real: the app
+    # refuses to start on any other combination.
+    DEPLOYMENT_STAGE: demo
     # Hard-coded so that .env.prod cannot switch them. Live Odoo order push, real payments
     # and real notifications each need an explicit, reviewed change to this file.
     ODOO_ORDER_PUSH_PROVIDER: stub

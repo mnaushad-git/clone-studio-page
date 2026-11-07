@@ -47,6 +47,8 @@ class OdooPushResult:
     success: bool
     odoo_sale_order_id: int | None
     raw: dict[str, Any]
+    # True when nothing was actually sent to Odoo. Recorded as odoo_sync_status="simulated".
+    simulated: bool = False
 
 
 class OdooOrderPusher(Protocol):
@@ -98,6 +100,7 @@ class StubOdooOrderPusher:
                 "currency": currency,
                 "line_count": len(lines),
             },
+            simulated=True,
         )
 
 

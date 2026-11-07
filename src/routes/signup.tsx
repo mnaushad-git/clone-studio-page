@@ -5,6 +5,7 @@ import { z } from "zod";
 import illustration from "@/assets/signup-illustration.jpg";
 import { auth, addresses as addressStore, RIYADH_AREAS } from "@/lib/store";
 import { useT } from "@/lib/i18n";
+import { DemoSignInNotice } from "@/components/DemoNotices";
 
 export const Route = createFileRoute("/signup")({
   component: SignupPage,
@@ -102,6 +103,7 @@ function SignupPage() {
         <div className="w-full max-w-md mx-auto">
           <h1 className="font-display text-3xl md:text-4xl text-primary text-center mb-8">{t("accountSignupTitle")}</h1>
 
+          <DemoSignInNotice />
           <form className="space-y-4" onSubmit={submit} noValidate>
             <Field label={t("accountSignupFieldName")} placeholder={t("accountSignupPlaceholderName")} required value={form.name} error={errors.name} onChange={set("name")} />
             <Field label={t("accountSignupFieldEmail")} type="email" placeholder="you@example.com" required value={form.email} error={errors.email} onChange={set("email")} />

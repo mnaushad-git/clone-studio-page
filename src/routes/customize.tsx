@@ -14,6 +14,7 @@ import { useStore, cart, promo, selectSubtotal, selectDiscount, selectTax, selec
 import { featured, getProduct } from "@/lib/products";
 import { formatAttributes } from "@/lib/format-variant-attributes";
 import { useT, type TKey } from "@/lib/i18n";
+import { useCartProducts } from "@/lib/use-cart-products";
 
 const GIFT_CARDS: { id: string; labelKey: TKey; image: string }[] = [
   { id: "classic", labelKey: "cdGiftCardClassic", image: giftCard },
@@ -48,6 +49,7 @@ function CustomizePage() {
   const t = useT();
   const navigate = useNavigate();
   const cartItems = useStore((s) => s.cart);
+  useCartProducts();
   const currentPromo = useStore((s) => s.promo);
   const subtotal = useStore(selectSubtotal);
   const discount = useStore(selectDiscount);

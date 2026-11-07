@@ -19,10 +19,12 @@ import { useAdmin } from "@/lib/admin-store";
 import { getProduct, products } from "@/lib/products";
 import { formatAttributes } from "@/lib/format-variant-attributes";
 import { useT } from "@/lib/i18n";
+import { useCartProducts } from "@/lib/use-cart-products";
 
 export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useT();
   const items = useStore((s) => s.cart);
+  useCartProducts();
   const subtotal = useStore(selectSubtotal);
   const discountRaw = useStore(selectDiscount);
   const taxRaw = useStore(selectTax);

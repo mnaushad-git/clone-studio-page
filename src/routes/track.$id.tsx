@@ -9,6 +9,7 @@ import { useStore, type Order } from "@/lib/store";
 import { fetchOrderByTrackingToken, toLocalOrder } from "@/lib/checkout-api";
 import { formatAttributes } from "@/lib/format-variant-attributes";
 import { useT } from "@/lib/i18n";
+import { DemoOrderNotice } from "@/components/DemoNotices";
 
 export const Route = createFileRoute("/track/$id")({
   component: TrackPage,
@@ -92,6 +93,7 @@ function TrackPage() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <SiteHeader />
+      {order.isDemo && <DemoOrderNotice />}
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-8">
         <div className="bg-white rounded-2xl border border-border p-6 sm:p-8">
           <div className="flex items-start justify-between flex-wrap gap-3">

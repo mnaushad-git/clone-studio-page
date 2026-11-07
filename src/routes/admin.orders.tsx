@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useAdminOrders, type AdminOrderFilters } from "@/lib/admin-api";
 import { Card, Badge, Select, Input, EmptyState, Button } from "@/components/admin/ui";
 import { Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { odooSyncLabel } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/admin/orders")({ component: OrdersPage });
 
@@ -89,6 +90,7 @@ function OrdersPage() {
             <option value="">Any sync</option>
             <option value="not_synced">Not synced</option>
             <option value="synced">Synced</option>
+            <option value="simulated">Simulated (not in Odoo)</option>
             <option value="failed">Failed</option>
           </Select>
           <Select
@@ -164,12 +166,14 @@ function OrdersPage() {
                         tone={
                           o.odoo_sync_status === "synced"
                             ? "success"
+                            : o.odoo_sync_status === "simulated"
+                            ? "info"
                             : o.odoo_sync_status === "failed"
                               ? "danger"
                               : "default"
                         }
                       >
-                        {o.odoo_sync_status}
+                        {odooSyncLabel(o.odoo_sync_status)}
                       </Badge>
                     </td>
                     <td>

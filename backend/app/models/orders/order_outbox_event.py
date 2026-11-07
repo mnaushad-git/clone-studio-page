@@ -20,6 +20,12 @@ from app.models.mixins import TimestampMixin, UUIDPrimaryKeyMixin
 if TYPE_CHECKING:
     from app.models.orders.order import Order
 
+# Lifecycle by event type:
+#   order.created: audit record only. Nothing consumes it, because an order only goes
+#     downstream once paid. Written as `completed` in the order's own transaction, so it
+#     can never sit pending or count as backlog.
+#   order.paid: consumed by OdooOrderSyncService. pending -> processing -> completed/failed.
+#   order.notify: consumed by the notification service. Same transitions.
 OUTBOX_EVENT_TYPES = ("order.created", "order.paid", "order.notify")
 OUTBOX_STATUSES = ("pending", "processing", "completed", "failed")
 

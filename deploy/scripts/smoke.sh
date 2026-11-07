@@ -6,6 +6,7 @@ set -uo pipefail
 
 BASE="${1:-https://api.terrific-bites.trunexus.ai}"
 ORIGIN="${FRONTEND_ORIGIN:-https://terrific-bites.trunexus.ai}"
+EXPECTED_STAGE="${EXPECTED_STAGE:-demo}"
 fail=0
 
 check() {  # name expected-status path
@@ -19,6 +20,12 @@ check "catalogue homepage" 200 /api/v1/catalogue/homepage
 check "catalogue categories" 200 /api/v1/catalogue/categories
 check "api docs hidden in production" 404 /docs
 check "admin requires login" 401 /api/v1/admin/auth/me
+
+if curl -s -m 15 "$BASE/api/v1/version" | grep -q "\"deployment_stage\":\"$EXPECTED_STAGE\""; then
+  echo "ok    deployment stage is $EXPECTED_STAGE"
+else
+  echo "FAIL  deployment stage is not $EXPECTED_STAGE"; fail=1
+fi
 
 if curl -s -m 15 -D - -o /dev/null -H "Origin: $ORIGIN" "$BASE/api/v1/health" | grep -qi "^access-control-allow-origin: $ORIGIN"; then
   echo "ok    CORS allows $ORIGIN"

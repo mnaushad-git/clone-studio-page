@@ -15,8 +15,30 @@ export const FLAGS: Record<string, string> = {
   SA: "🇸🇦", AE: "🇦🇪", KW: "🇰🇼", QA: "🇶🇦", EG: "🇪🇬",
 };
 
+const STORE_TIME_ZONE = "Asia/Riyadh";
+
+/**
+ * The current time on the store's clock, as a Date whose local fields read as store time.
+ * Delivery slots and the same-day cutoff are about when the bakery can deliver, not what the
+ * visitor's device says. It also means the server and the browser agree, whatever time zone
+ * each is in, so these labels can't break hydration.
+ */
+export function storeNow(now: Date = new Date()): Date {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: STORE_TIME_ZONE,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  }).formatToParts(now);
+  const part = (type: string) => Number(parts.find((p) => p.type === type)?.value);
+  return new Date(part("year"), part("month") - 1, part("day"), part("hour"), part("minute"));
+}
+
 export function nextDeliveryWindow(city: { sameDayCutoffHour: number } | null) {
-  const now = new Date();
+  const now = storeNow();
   const cutoff = city?.sameDayCutoffHour ?? 15;
   const hoursRemaining = cutoff - now.getHours() - now.getMinutes() / 60;
   if (hoursRemaining > 0) {

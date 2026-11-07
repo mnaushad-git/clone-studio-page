@@ -4,6 +4,7 @@ import { User, X, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { auth } from "@/lib/store";
 import { useT } from "@/lib/i18n";
+import { DemoSignInNotice } from "@/components/DemoNotices";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -87,6 +88,8 @@ function LoginPage() {
             <ArrowLeft className="h-5 w-5" />
           </button>
         )}
+
+        <DemoSignInNotice />
 
         <div className="flex flex-col items-center">
           <div className="h-14 w-14 rounded-full bg-secondary flex items-center justify-center shadow-sm">

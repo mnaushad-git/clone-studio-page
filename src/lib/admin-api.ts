@@ -178,6 +178,11 @@ export type DashboardRecentOrderOut = {
   created_at: string;
 };
 
+/** "simulated" means nothing reached Odoo, so it must never read as a successful sync. */
+export function odooSyncLabel(status: string): string {
+  return status === "simulated" ? "simulated (not in Odoo)" : status;
+}
+
 export type DashboardAlertOut = { type: string; message: string; count: number };
 
 export function fetchDashboardSummary(): Promise<DashboardSummaryOut> {

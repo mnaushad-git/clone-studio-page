@@ -3,6 +3,7 @@ import { useDashboardSummary, useDashboardRecentOrders, useDashboardAlerts } fro
 import { Stat, Card, Badge, EmptyState } from "@/components/admin/ui";
 import { AlertTriangle, RefreshCw, ShoppingBag, TrendingUp } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { odooSyncLabel } from "@/lib/admin-api";
 
 export const Route = createFileRoute("/admin/")({ component: Dashboard });
 
@@ -123,12 +124,14 @@ function Dashboard() {
                         tone={
                           o.odoo_sync_status === "synced"
                             ? "success"
+                            : o.odoo_sync_status === "simulated"
+                            ? "info"
                             : o.odoo_sync_status === "failed"
                               ? "danger"
                               : "default"
                         }
                       >
-                        {o.odoo_sync_status}
+                        {odooSyncLabel(o.odoo_sync_status)}
                       </Badge>
                     </td>
                     <td className="text-stone-500">{new Date(o.created_at).toLocaleString()}</td>

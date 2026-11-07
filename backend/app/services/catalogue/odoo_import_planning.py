@@ -545,7 +545,7 @@ def plan_attributes(
                 attr_action, attr_match_strategy, attr_odoo_id = "CREATE", None, None
             elif name_matches[0].get("create_variant") != "always":
                 found = name_matches[0]
-                attr_action, attr_match_strategy, attr_odoo_id = "BLOCKED", "NAME", int(found["id"])  # type: ignore[call-overload]
+                attr_action, attr_match_strategy, attr_odoo_id = "BLOCKED", "NAME", int(found["id"])
                 attr_blocking = ["EXISTING_ATTRIBUTE_WRONG_CREATE_VARIANT_MODE"]
                 attr_warnings = [
                     f"product.attribute id={found['id']} named {name!r} already exists with "
@@ -555,7 +555,7 @@ def plan_attributes(
                 ]
             else:
                 found = name_matches[0]
-                attr_action, attr_match_strategy, attr_odoo_id = "MATCH", "NAME", int(found["id"])  # type: ignore[call-overload]
+                attr_action, attr_match_strategy, attr_odoo_id = "MATCH", "NAME", int(found["id"])
 
         items.append(
             ImportPlanItem(
@@ -613,7 +613,7 @@ def _plan_attribute_value(
     # parsing canonical_external_key/canonical_name strings — the source of the
     # `unresolved_attribute_values` set plan_variants() needs.
     identity_values = {"attribute_name_en": attribute_name, "value_label_en": value_label}
-    base_kwargs = dict(
+    base_kwargs: dict[str, Any] = dict(
         entity_type="PRODUCT_ATTRIBUTE_VALUE",
         canonical_external_key=f"attribute_value:{attribute_name}:{value_label}",
         canonical_sku=None,
@@ -656,7 +656,7 @@ def _plan_attribute_value(
             return ImportPlanItem(
                 **base_kwargs,
                 match_strategy="NAME",
-                existing_odoo_id=int(value_matches[0]["id"]),  # type: ignore[call-overload]
+                existing_odoo_id=int(value_matches[0]["id"]),
                 planned_action="MATCH",
                 proposed_values=identity_values,
             )
@@ -745,7 +745,7 @@ def plan_variants(
             continue
         for external_key, sku, pairs in _iter_variant_combinations(product):
             canonical_name = f"{product['name_en']} — " + " / ".join(label for _, label in pairs)
-            base_kwargs = dict(
+            base_kwargs: dict[str, Any] = dict(
                 entity_type="PRODUCT_VARIANT",
                 canonical_external_key=external_key,
                 canonical_sku=sku,

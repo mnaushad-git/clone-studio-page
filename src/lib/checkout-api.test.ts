@@ -27,7 +27,8 @@ const address: Address = {
 function makeOrderOut(overrides: Partial<OrderOut> = {}): OrderOut {
   return {
     id: "order-1",
-    order_number: "TB-ABC123",
+    is_demo: false,
+  order_number: "TB-ABC123",
     status: "pending_payment",
     currency: "SAR",
     subtotal_amount: "25.00",

@@ -57,7 +57,7 @@ def _create_and_pay_order(api_client: TestClient, db_session: Session) -> dict:
     return paid
 
 
-def test_sync_paid_orders_marks_order_and_outbox_event_synced(
+def test_sync_paid_orders_records_stub_result_as_simulated_and_completes_event(
     api_client: TestClient, db_session: Session
 ) -> None:
     order = _create_and_pay_order(api_client, db_session)
@@ -70,8 +70,9 @@ def test_sync_paid_orders_marks_order_and_outbox_event_synced(
 
     db_order = db_session.get(Order, order["id"])
     assert db_order is not None
-    assert db_order.odoo_sync_status == "synced"
-    assert db_order.odoo_last_synced_at is not None
+    assert db_order.odoo_sync_status == "simulated"
+    assert db_order.odoo_sale_order_id is None
+    assert db_order.odoo_last_synced_at is None
 
     event = db_session.execute(
         select(OrderOutboxEvent).where(

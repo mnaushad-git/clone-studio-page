@@ -50,3 +50,4 @@ backend/media
 # Production secrets and backups stay on the server only
 deploy/.env.prod
 deploy/backups/
+deploy/.monitor-state

@@ -12,8 +12,11 @@ the live site needs approval first.
 | TLS | The VPS's existing Caddy | `deploy/caddy/api.terrific-bites.caddy` |
 | PostgreSQL, Redis, Celery | Containers in the `terrific-bites` Compose project | Internal network, not published, not shared with other applications |
 
-Live Odoo order push, real payments and real notifications are fixed to `stub` in
-`deploy/docker-compose.prod.yml`, so `.env.prod` cannot switch them on.
+The stage is fixed to `demo` (Stage A) in `deploy/docker-compose.prod.yml`, along with `stub`
+for Odoo order push, payments and notifications, so `.env.prod` cannot switch them. The app
+refuses to start if the stage and providers disagree. See
+[production-readiness-checklist.md](production-readiness-checklist.md) for what each stage
+requires, and [staging-plan.md](staging-plan.md) for the test plan that comes first.
 
 ## Before the first deployment
 
@@ -65,10 +68,11 @@ point at an API that doesn't exist yet.
 npm run build && node scripts/check-prod-bundle.mjs   # on the commit Lovable will build
 ```
 
-Finally, schedule the nightly backup (`crontab -e`):
+Finally, schedule the nightly backup and the monitor (`crontab -e`):
 
 ```
 15 2 * * * /opt/terrific-bites/deploy/scripts/backup-db.sh nightly >> /var/log/terrific-bites-backup.log 2>&1
+*/5 * * * * /opt/terrific-bites/deploy/scripts/monitor.sh >> /var/log/terrific-bites-monitor.log 2>&1
 ```
 
 ## Updating
@@ -135,11 +139,12 @@ To rotate:
 
 ## Going live with Odoo order push
 
-Needs explicit approval. Change `ODOO_ORDER_PUSH_PROVIDER` in
-`deploy/docker-compose.prod.yml` and set the Odoo values in `.env.prod`. Until then the stub
-marks orders `synced` with `odoo_sale_order_id` empty, without sending them anywhere. Check
-which of those orders should reach Odoo, then use `app.scripts.requeue_stub_synced_orders`
-(start with `--dry-run`), or they will never be sent.
+Needs explicit approval, and is part of moving to `DEPLOYMENT_STAGE=live`. Change the stage
+and providers in `deploy/docker-compose.prod.yml` and set the Odoo values in `.env.prod`.
+
+Until then, orders are recorded as `simulated`: nothing was sent to Odoo. Demo orders stay
+that way permanently and can't be sent. Any non-demo order simulated by the stub can be sent
+with `app.scripts.requeue_stub_synced_orders` (start with `--dry-run`).
 
 ## Monitoring
 
@@ -150,4 +155,27 @@ docker compose --env-file .env.prod -f docker-compose.prod.yml logs --tail=100 a
 
 Logs rotate at 10 MB, five files per container. `GET /api/v1/readiness` returns 503 when
 PostgreSQL or Redis is unreachable, and Docker marks the API unhealthy after three failed
-checks. Nothing sends alerts yet, so failures are only visible if someone looks.
+checks.
+
+`scripts/monitor.sh` runs every five minutes and alerts once when the state changes, and once
+on recovery. Set `ALERT_WEBHOOK_URL` in `.env.prod` (Slack, Discord, or any endpoint that
+accepts a JSON POST). It checks:
+- containers are running and healthy, and the public health URL responds;
+- the worker heartbeat, which goes stale if Beat or the worker stops;
+- paid orders waiting over 15 minutes, and failed order events;
+- disk use, and the age of the newest backup.
+
+To run the application's part by hand:
+`docker compose ... exec -T api python -m app.scripts.ops_health_check`.
+
+**The monitor runs on the VPS, so it can't report the VPS going down.** Add an external uptime
+check on `https://api.terrific-bites.trunexus.ai/api/v1/health` as well.
+
+## Page timing
+
+`scripts/measure-product-page.sh <url>` takes repeated samples with gaps between them. An
+intermittent 21-second page load seen during local testing came from a test hostname: DNS64
+returned an IPv6 address that couldn't be reached, and Windows spends 21 seconds timing out
+before falling back to IPv4. That explains the local result only, so hosted timing still has
+to be measured with this script. If a `connect` time near 21 seconds shows up, check for a
+wrong `AAAA` record on the API hostname.

@@ -70,6 +70,16 @@ section "redis"
 systemctl is-active redis-server redis 2>/dev/null | head -2
 command -v docker >/dev/null && $SUDO docker ps --format '{{.Names}} {{.Image}}' | grep -i redis
 
+section "baseline: existing sites (HTTP status, read-only)"
+$SUDO sh -c 'cat /etc/caddy/Caddyfile /etc/caddy/conf.d/* /etc/caddy/sites/* 2>/dev/null' \
+  | grep -E '^[[:space:]]*[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[[:space:]]*(,|\{)' \
+  | tr -d '{,' | awk '{print $1}' | sort -u | while read -r site; do
+      printf '%s %s\n' "$site" "$(curl -s -m 10 -o /dev/null -w '%{http_code}' "https://$site")"
+    done
+
+section "baseline: containers"
+command -v docker >/dev/null && $SUDO docker ps --format '{{.Names}} {{.Status}}' | sort
+
 section "applications and backups"
 ls -la /opt /srv /var/www 2>/dev/null | cut -c1-90
 $SUDO crontab -l 2>/dev/null | cut -d' ' -f1-6 | cut -c1-90

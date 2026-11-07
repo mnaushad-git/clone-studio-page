@@ -14,6 +14,7 @@ from app.core.security import clear_admin_auth_cookies, set_admin_auth_cookies
 
 GOOD: dict[str, Any] = {
     "app_env": "production",
+    "deployment_stage": "demo",
     "debug": False,
     "admin_jwt_secret": "x" * 48,
     "admin_cookie_domain": "terrific-bites.trunexus.ai",
@@ -93,3 +94,48 @@ def test_logout_clears_cookies_on_the_same_domain_they_were_set_on() -> None:
     headers = _set_cookie_headers(response)
     assert len(headers) == 3
     assert all("Domain=terrific-bites.trunexus.ai" in header for header in headers)
+
+
+def test_production_requires_an_explicit_stage() -> None:
+    with pytest.raises(ValidationError, match="DEPLOYMENT_STAGE must be demo or live"):
+        Settings(**{**GOOD, "deployment_stage": "development"})
+
+
+def test_unknown_stage_is_refused() -> None:
+    with pytest.raises(ValidationError, match="DEPLOYMENT_STAGE must be one of"):
+        Settings(deployment_stage="staging")
+
+
+@pytest.mark.parametrize(
+    "override",
+    [
+        {"odoo_order_push_provider": "live"},
+        {"payment_provider": "real_gateway"},
+        {"notification_provider": "real_sender"},
+    ],
+)
+def test_demo_stage_refuses_any_real_provider(override: dict[str, Any]) -> None:
+    with pytest.raises(ValidationError, match="DEPLOYMENT_STAGE=demo requires stub"):
+        Settings(deployment_stage="demo", **override)
+
+
+def test_live_stage_refuses_any_stub_provider() -> None:
+    with pytest.raises(ValidationError, match="DEPLOYMENT_STAGE=live refuses stub") as excinfo:
+        Settings(
+            deployment_stage="live",
+            payment_provider="real_gateway",
+            notification_provider="real_sender",
+            odoo_order_push_provider="stub",
+        )
+    assert "ODOO_ORDER_PUSH_PROVIDER" in str(excinfo.value)
+    assert "PAYMENT_PROVIDER" not in str(excinfo.value)
+
+
+def test_live_stage_accepts_only_real_providers() -> None:
+    settings = Settings(
+        deployment_stage="live",
+        payment_provider="real_gateway",
+        notification_provider="real_sender",
+        odoo_order_push_provider="live",
+    )
+    assert settings.is_demo_stage is False

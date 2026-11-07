@@ -13,6 +13,9 @@ import { useAdmin } from "@/lib/admin-store";
 import { getProduct } from "@/lib/products";
 import { useT } from "@/lib/i18n";
 import { createOrder, payOrder, toLocalOrder, CheckoutApiError } from "@/lib/checkout-api";
+import { DEMO_MODE } from "@/lib/demo";
+import { DemoPaymentNotice } from "@/components/DemoNotices";
+import { useCartProducts } from "@/lib/use-cart-products";
 
 export const Route = createFileRoute("/payment")({
   component: PaymentPage,
@@ -62,6 +65,7 @@ function PaymentPage() {
   const t = useT();
   const navigate = useNavigate();
   const cartItems = useStore((s) => s.cart);
+  useCartProducts();
   const currentPromo = useStore((s) => s.promo);
   const addressList = useStore((s) => s.addresses);
   const user = useStore((s) => s.user);
@@ -82,13 +86,15 @@ function PaymentPage() {
   const [errors, setErrors] = useState<Partial<Record<keyof typeof card, string>>>({});
   const [loading, setLoading] = useState(false);
   const selectedLabel = methods.find((m) => m.id === selected)?.label ?? "";
-  const isCredit = /credit|card|mada/i.test(selectedLabel);
+  // The demo never asks for card details, so a real card number can't be typed in.
+  const isCredit = !DEMO_MODE && /credit|card|mada/i.test(selectedLabel);
 
   const handleConfirm = async () => {
     setErrors({});
     if (cartItems.length === 0) { toast.error(t("checkoutToastCartEmpty")); return; }
     if (!selected) { toast.error(t("checkoutToastChooseMethod")); return; }
     let methodLabel = methods.find((m) => m.id === selected)?.label ?? t("checkoutStepPayment");
+    if (DEMO_MODE) methodLabel = `Demo payment (${methodLabel})`;
     if (isCredit) {
       const parsed = makeCardSchema(t).safeParse(card);
       if (!parsed.success) {
@@ -123,7 +129,7 @@ function PaymentPage() {
       // The backend order is now the source of truth for the confirmation/tracking
       // pages — see toLocalOrder()'s docstring for what this does and doesn't carry.
       orders.recordFromBackend(toLocalOrder(paid));
-      toast.success(t("checkoutToastPaymentConfirmed"));
+      toast.success(paid.is_demo ? t("demoOrderRecorded") : t("checkoutToastPaymentConfirmed"));
       setTimeout(() => navigate({ to: "/success" }), 400);
     } catch (err) {
       if (err instanceof CheckoutApiError && err.status === 422) {
@@ -174,6 +180,8 @@ function PaymentPage() {
                 );
               })}
             </section>
+
+            {DEMO_MODE && <DemoPaymentNotice />}
 
             {isCredit && (
               <section className="bg-white rounded-2xl shadow-sm p-6 space-y-4">
@@ -256,7 +264,7 @@ function PaymentPage() {
             <button type="button" onClick={handleConfirm} disabled={loading || cartItems.length === 0}
               className="w-full bg-primary text-primary-foreground rounded-md py-4 font-semibold hover:opacity-90 transition inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
               {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> {t("checkoutProcessing")}</>
-                : <><Lock className="h-4 w-4" /> {t("checkoutConfirmPayment")} · SAR {total.toFixed(2)}</>}
+                : <><Lock className="h-4 w-4" /> {DEMO_MODE ? t("demoConfirmButton") : t("checkoutConfirmPayment")} · SAR {total.toFixed(2)}</>}
             </button>
           </aside>
         </div>

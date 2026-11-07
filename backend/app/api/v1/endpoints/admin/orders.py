@@ -88,6 +88,7 @@ def _list_item_out(order: Order) -> AdminOrderListItemOut:
         payment_status=payment_status_for(order),
         status=order.status,
         odoo_sync_status=order.odoo_sync_status,
+        is_demo=order.is_demo,
         notification_status=_notification_status(order),
     )
 
@@ -141,6 +142,7 @@ def _detail_out(order: Order, audit_repo: AdminAuditRepository) -> AdminOrderDet
     return AdminOrderDetailOut(
         id=str(order.id),
         order_number=order.order_number,
+        is_demo=order.is_demo,
         status=order.status,
         payment_status=payment_status_for(order),
         currency=order.currency,

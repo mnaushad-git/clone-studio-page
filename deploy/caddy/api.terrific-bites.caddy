@@ -4,7 +4,7 @@
 # needs approval.
 #
 # The upstream assumes Caddy runs on the host. If Caddy runs in a container, loopback is
-# the container itself: see "Reverse proxy" in docs/deployment/production-runbook.md.
+# the container itself: see "Before the first deployment" in docs/deployment/production-runbook.md.
 api.terrific-bites.trunexus.ai {
 	encode gzip
 

@@ -59,6 +59,8 @@ export type Order = {
   pointsEarned?: number;
   trackingToken?: string;
   recipientConfirmationToken?: string;
+  /** Set by the backend. A demo order took no payment and never reaches Odoo. */
+  isDemo?: boolean;
   courier?: { name: string; phone: string };
 };
 
@@ -205,6 +207,10 @@ const isBrowser = typeof window !== "undefined";
 export const POINTS_PER_DOLLAR = 1;
 export const POINTS_REDEEM_RATE = 20; // 20 pts = SAR 1
 
+// A fixed date, not Date.now(): Cloudflare Workers freeze the clock at global scope, so the
+// server computed these as 1969 and the browser as today, breaking hydration.
+const SEEDED_REVIEW_BASE = Date.UTC(2026, 9, 1);
+
 const seededReviews: Review[] = [
   {
     id: "r1",
@@ -213,7 +219,7 @@ const seededReviews: Review[] = [
     rating: 5,
     title: "Absolutely divine!",
     body: "Ordered this for my daughter's birthday — everyone raved about it. Moist, beautifully decorated, and delivered on time.",
-    createdAt: Date.now() - 86400000 * 3,
+    createdAt: SEEDED_REVIEW_BASE - 86400000 * 3,
     verified: true,
   },
   {
@@ -222,7 +228,7 @@ const seededReviews: Review[] = [
     author: "Ahmed K.",
     rating: 4,
     body: "Great taste and presentation. A little sweet for my liking but overall lovely.",
-    createdAt: Date.now() - 86400000 * 8,
+    createdAt: SEEDED_REVIEW_BASE - 86400000 * 8,
     verified: true,
   },
   {
@@ -232,7 +238,7 @@ const seededReviews: Review[] = [
     rating: 5,
     title: "Melt in your mouth",
     body: "Rich, silky, and perfectly bittersweet. Will order again.",
-    createdAt: Date.now() - 86400000 * 12,
+    createdAt: SEEDED_REVIEW_BASE - 86400000 * 12,
     verified: true,
   },
   {
@@ -241,7 +247,7 @@ const seededReviews: Review[] = [
     author: "Layla H.",
     rating: 5,
     body: "Best cupcakes I've had in a long time. The frosting is not too sweet.",
-    createdAt: Date.now() - 86400000 * 5,
+    createdAt: SEEDED_REVIEW_BASE - 86400000 * 5,
     verified: true,
   },
   {
@@ -250,7 +256,7 @@ const seededReviews: Review[] = [
     author: "Omar S.",
     rating: 4,
     body: "Very chocolatey and rich. Portion could be a bit bigger.",
-    createdAt: Date.now() - 86400000 * 2,
+    createdAt: SEEDED_REVIEW_BASE - 86400000 * 2,
   },
 ];
 

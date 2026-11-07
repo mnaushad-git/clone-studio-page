@@ -19,6 +19,7 @@ from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 INSECURE_ADMIN_JWT_SECRET = "dev-insecure-admin-jwt-secret-change-me"
 MIN_PRODUCTION_JWT_SECRET_LENGTH = 32
 _LOCAL_HOST_MARKERS = ("localhost", "127.0.0.1", "0.0.0.0", "[::1]")
+DEPLOYMENT_STAGES = ("development", "demo", "live")
 
 SECRET_FIELD_NAMES: frozenset[str] = frozenset(
     {
@@ -46,6 +47,10 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     app_env: str = "development"
     debug: bool = False
+    # development: local work. demo: Stage A, every external provider must be a stub and
+    # every order is permanently marked is_demo. live: Stage B, every provider must be
+    # real. See docs/deployment/production-runbook.md.
+    deployment_stage: str = "development"
 
     # API
     api_v1_prefix: str = "/api/v1"
@@ -159,6 +164,9 @@ class Settings(BaseSettings):
     # Dashboard "stuck order" threshold (task brief §4) — an order paid/processing for
     # longer than this with no forward progress surfaces as an operational alert.
     ops_stuck_order_minutes: int = 30
+    # app/services/ops/health_monitor.py: alert thresholds for the operational check.
+    ops_heartbeat_max_age_seconds: int = 300
+    ops_outbox_max_age_minutes: int = 15
 
     # Selective Redis caching (cache-aside) for the read-heavy catalogue endpoints —
     # see app/cache/. PostgreSQL stays authoritative and the serving source of truth;
@@ -221,6 +229,31 @@ class Settings(BaseSettings):
             return None
         return value
 
+    @property
+    def is_demo_stage(self) -> bool:
+        return self.deployment_stage == "demo"
+
+    @model_validator(mode="after")
+    def _enforce_deployment_stage(self) -> Settings:
+        """A demo can never reach a real provider, and a live site can never fake one."""
+        if self.deployment_stage not in DEPLOYMENT_STAGES:
+            raise ValueError(f"DEPLOYMENT_STAGE must be one of {DEPLOYMENT_STAGES}")
+
+        providers = {
+            "PAYMENT_PROVIDER": self.payment_provider,
+            "NOTIFICATION_PROVIDER": self.notification_provider,
+            "ODOO_ORDER_PUSH_PROVIDER": self.odoo_order_push_provider,
+        }
+        if self.deployment_stage == "demo":
+            wrong = sorted(name for name, value in providers.items() if value != "stub")
+            if wrong:
+                raise ValueError(f"DEPLOYMENT_STAGE=demo requires stub for: {', '.join(wrong)}")
+        if self.deployment_stage == "live":
+            wrong = sorted(name for name, value in providers.items() if value == "stub")
+            if wrong:
+                raise ValueError(f"DEPLOYMENT_STAGE=live refuses stub for: {', '.join(wrong)}")
+        return self
+
     @model_validator(mode="after")
     def _refuse_unsafe_production_config(self) -> Settings:
         """Fail at startup rather than serve production on development defaults. Reports
@@ -229,6 +262,8 @@ class Settings(BaseSettings):
             return self
 
         problems: list[str] = []
+        if self.deployment_stage == "development":
+            problems.append("DEPLOYMENT_STAGE must be demo or live")
         if self.debug:
             problems.append("DEBUG must be false")
         if (

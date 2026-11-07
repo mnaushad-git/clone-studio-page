@@ -10,11 +10,13 @@ from __future__ import annotations
 
 import secrets
 import string
+from datetime import UTC, datetime
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.checkout import CheckoutRequest
+from app.core.config import get_settings
 from app.models.orders.order import Order
 from app.models.orders.order_item import OrderItem
 from app.models.orders.order_outbox_event import OrderOutboxEvent
@@ -28,13 +30,16 @@ _ORDER_NUMBER_ALPHABET = string.ascii_uppercase + string.digits
 _MAX_ORDER_NUMBER_ATTEMPTS = 5
 
 
-def _generate_order_number() -> str:
+def _generate_order_number(*, is_demo: bool) -> str:
     suffix = "".join(secrets.choice(_ORDER_NUMBER_ALPHABET) for _ in range(6))
-    return f"TB-{suffix}"
+    return f"{'DEMO' if is_demo else 'TB'}-{suffix}"
 
 
-def _generate_tracking_token(order_number: str) -> str:
-    return "tk-" + order_number.lower().replace("-", "")
+def _generate_tracking_token() -> str:
+    # The tracking endpoint returns the recipient's name, phone and address, so the token
+    # must be unguessable and must not be derived from the order number, which is shown
+    # on receipts and to support staff.
+    return "tk-" + secrets.token_urlsafe(24)
 
 
 class OrderService:
@@ -49,12 +54,14 @@ class OrderService:
         self.pricing.validate_delivery_slot(request.delivery.delivery_time)
         pricing = self.pricing.price_cart(request.items, request.promo_code)
 
+        is_demo = get_settings().is_demo_stage
         for attempt in range(_MAX_ORDER_NUMBER_ATTEMPTS):
-            order_number = _generate_order_number()
+            order_number = _generate_order_number(is_demo=is_demo)
             savepoint = self.session.begin_nested()
             try:
                 order = Order(
                     order_number=order_number,
+                    is_demo=is_demo,
                     status="pending_payment",
                     currency=pricing.currency,
                     subtotal_amount=pricing.subtotal_amount,
@@ -78,7 +85,7 @@ class OrderService:
                     delivery_address_extra=request.delivery.address_extra,
                     delivery_date=request.delivery.delivery_date,
                     delivery_time=request.delivery.delivery_time,
-                    tracking_token=_generate_tracking_token(order_number),
+                    tracking_token=_generate_tracking_token(),
                 )
                 self.orders.create(order)
                 savepoint.commit()
@@ -120,6 +127,9 @@ class OrderService:
                 order_id=order.id,
                 event_type="order.created",
                 payload={"order_id": str(order.id), "order_number": order.order_number},
+                # Audit record with no consumer: see the lifecycle in order_outbox_event.py.
+                status="completed",
+                processed_at=datetime.now(UTC),
             )
         )
 

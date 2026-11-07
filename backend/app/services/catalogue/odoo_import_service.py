@@ -1636,7 +1636,7 @@ class OdooCatalogueImportService:
                 warnings.append(
                     {
                         "attribute_name": name,
-                        "duplicate_odoo_ids": [int(m["id"]) for m in matches],  # type: ignore[call-overload]
+                        "duplicate_odoo_ids": [int(m["id"]) for m in matches],
                         "issue": (
                             f"{len(matches)} product.attribute records named {name!r} exist in "
                             "Odoo — should be exactly one shared attribute."

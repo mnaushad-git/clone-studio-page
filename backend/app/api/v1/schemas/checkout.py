@@ -87,6 +87,7 @@ class OrderOut(BaseModel):
 
     id: str
     order_number: str
+    is_demo: bool
     status: str
     currency: str
     subtotal_amount: str

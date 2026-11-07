@@ -44,6 +44,11 @@ celery_app.conf.update(
     # even if that nudge is lost (worker down, broker hiccup) — the outbox event just
     # stays `pending` until the next tick picks it up.
     beat_schedule={
+        # Proves Beat and the worker are both running: see app/services/ops/health_monitor.py.
+        "record-worker-heartbeat": {
+            "task": "app.workers.tasks.health.record_heartbeat",
+            "schedule": 60.0,
+        },
         "push-paid-orders-to-odoo": {
             "task": "app.workers.tasks.order_sync.push_paid_orders_to_odoo",
             "schedule": 60.0,

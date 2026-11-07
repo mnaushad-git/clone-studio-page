@@ -7,7 +7,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductReviews } from "@/components/ProductReviews";
 import { getProduct, variantComboKey } from "@/lib/products";
-import { fetchProductDetail, mapDetailToProduct, mapSummaryToProduct, useCatalogueProducts } from "@/lib/catalogue-api";
+import { fetchProductDetail, mapDetailToProduct, mapSummaryToProduct, useCatalogueProducts, CatalogueApiError } from "@/lib/catalogue-api";
 import { useAdmin } from "@/lib/admin-store";
 import { useT } from "@/lib/i18n";
 import {
@@ -25,8 +25,11 @@ export const Route = createFileRoute("/product/$id")({
     try {
       const detail = await fetchProductDetail(params.id);
       return { product: mapDetailToProduct(detail) };
-    } catch {
-      throw notFound();
+    } catch (err) {
+      // Only a real 404 means the product doesn't exist. An outage must reach the error
+      // page with its retry button, not tell customers the product is gone.
+      if (err instanceof CatalogueApiError && err.status === 404) throw notFound();
+      throw err;
     }
   },
   head: ({ loaderData }) => ({

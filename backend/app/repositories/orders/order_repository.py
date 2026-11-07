@@ -213,9 +213,13 @@ class OrderRepository(BaseRepository[Order]):
             .select_from(Order)
             .where(
                 Order.status.in_(("paid", "processing", "delivered")),
-                Order.odoo_sync_status != "synced",
+                Order.odoo_sync_status.not_in(("synced", "simulated")),
             )
         )
+        return self.session.execute(stmt).scalar_one()
+
+    def count_simulated_sync(self) -> int:
+        stmt = select(func.count()).select_from(Order).where(Order.odoo_sync_status == "simulated")
         return self.session.execute(stmt).scalar_one()
 
     def count_payment_incomplete(self, older_than: datetime) -> int:

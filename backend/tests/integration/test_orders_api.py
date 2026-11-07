@@ -84,7 +84,7 @@ def test_create_order_writes_order_and_outbox_event_in_one_transaction(
     )
     assert len(outbox_events) == 1
     assert outbox_events[0].event_type == "order.created"
-    assert outbox_events[0].status == "pending"
+    assert outbox_events[0].status == "completed"
 
 
 def test_create_order_rejects_unknown_product_with_404(

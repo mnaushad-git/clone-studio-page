@@ -69,6 +69,7 @@ def _order_out(order: Order) -> OrderOut:
     return OrderOut(
         id=str(order.id),
         order_number=order.order_number,
+        is_demo=order.is_demo,
         status=order.status,
         currency=order.currency,
         subtotal_amount=_money(order.subtotal_amount),

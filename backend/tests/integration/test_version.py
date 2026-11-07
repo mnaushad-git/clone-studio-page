@@ -17,6 +17,6 @@ def test_version_does_not_expose_secrets_or_infra_details(client: TestClient) ->
     response = client.get("/api/v1/version")
     body = response.json()
 
-    assert set(body.keys()) == {"app_version", "app_env", "api_version"}
+    assert set(body.keys()) == {"app_version", "app_env", "deployment_stage", "api_version"}
     assert "database_url" not in body
     assert "odoo_password" not in body
