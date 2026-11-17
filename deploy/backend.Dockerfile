@@ -9,10 +9,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY backend/pyproject.toml ./
+COPY backend/pyproject.toml backend/constraints.txt ./
 COPY backend/app ./app
 COPY backend/alembic.ini ./
-RUN pip install --upgrade pip && pip install .
+# constraints.txt pins every dependency to the tested version (see the file's header).
+RUN pip install --upgrade pip && pip install -c constraints.txt .
 
 # app/scripts resolve the catalogue as <repo root>/data, which is /data in this image.
 COPY data/catalogue /data/catalogue

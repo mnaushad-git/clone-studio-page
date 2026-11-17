@@ -1,6 +1,7 @@
 # Allow-list: only what deploy/backend.Dockerfile copies reaches the build context.
 *
 !backend/pyproject.toml
+!backend/constraints.txt
 !backend/alembic.ini
 !backend/app
 !data/catalogue
