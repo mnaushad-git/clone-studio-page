@@ -5,7 +5,7 @@ import { Card, Badge, Select, Input, EmptyState, Button } from "@/components/adm
 import { Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { odooSyncLabel } from "@/lib/admin-api";
 
-export const Route = createFileRoute("/admin/orders")({ component: OrdersPage });
+export const Route = createFileRoute("/admin/orders/")({ component: OrdersPage });
 
 const STATUSES = ["pending_payment", "paid", "processing", "delivered", "cancelled"];
 const STATUS_TONE: Record<string, "success" | "info" | "warn" | "danger" | "default"> = {

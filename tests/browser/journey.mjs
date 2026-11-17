@@ -94,7 +94,7 @@ async function main() {
   const page = await ctx.newPage();
   const errs = [];
   watch(page, errs);
-  const routes = ["/", "/shop", "/cakes", "/cupcakes", "/gifts", "/moments", "/recipients", `/product/${slug}`, "/about", "/corporate", "/wishlist", "/login", "/admin/login"];
+  const routes = ["/", "/shop", "/cakes", "/cupcakes", "/gifts", "/moments", "/recipients", `/product/${slug}`, "/about", "/corporate", "/wishlist", "/login", "/customize", "/admin/login"];
   for (const route of routes) {
     errs.length = 0;
     const r = await page.goto(FE + route, IDLE);
@@ -114,6 +114,9 @@ async function main() {
   await page.goto(`${FE}/customize`, IDLE);
   await page.screenshot({ path: path.join(OUT, "customize.png"), fullPage: true });
   rec("customize reached", page.url().includes("/customize"), page.url());
+  const extrasRow = page.locator("section", { hasText: /Add a Little Extra/i }).first();
+  const extrasShown = await extrasRow.getByRole("button", { name: /^(Add|Added)$/ }).count();
+  rec("customize shows the extras upsell", extrasShown > 0, `items=${extrasShown}`);
   await page.getByRole("button", { name: /Continue to Delivery/i }).first().click();
   await page.waitForURL(/delivery/, { timeout: 15000 });
   await page.waitForLoadState("networkidle");
@@ -185,6 +188,25 @@ async function main() {
   }
   await ap.goto(`${FE}/admin/orders`, IDLE);
   rec("admin sees the order", (await ap.locator("body").innerText()).includes(order.order_number), order.order_number);
+
+  // Opening an order must show the detail page, not keep the list (the list once owned
+  // the detail route without an <Outlet />, so only the URL changed).
+  const orderRow = ap.locator("tr", { hasText: order.order_number }).first();
+  await orderRow.locator('a[href*="/admin/orders/"]').first().click();
+  await ap.waitForURL(/\/admin\/orders\/[0-9a-f-]{36}/, { timeout: 20000 });
+  const detailHeading = ap.getByText(`Order ${order.order_number}`, { exact: true });
+  const opened = await detailHeading.waitFor({ timeout: 15000 }).then(() => true, () => false);
+  rec("admin order detail opens from the list", opened && (await ap.getByPlaceholder(/^Order number/).count()) === 0, ap.url());
+  const detailUrl = ap.url();
+  aerr.length = 0;
+  await ap.goto(detailUrl, IDLE);
+  const direct = await detailHeading.waitFor({ timeout: 15000 }).then(() => true, () => false);
+  const detailText = await ap.locator("body").innerText();
+  rec(
+    "admin order detail loads directly",
+    direct && /Total:\s*SAR\s*\d+\.\d{2}/.test(detailText) && /Odoo sync/.test(detailText) && !aerr.some((e) => /hydrat|PAGEERROR/i.test(e)),
+    `errors=${aerr.length} ${aerr[0] ?? ""}`,
+  );
 
   await browser.close();
   const failed = results.filter((x) => !x.ok);

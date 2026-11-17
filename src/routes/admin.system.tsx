@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSystemStatus } from "@/lib/admin-api";
+import { summariseProviderModes } from "@/lib/provider-modes";
 import { Card, Badge } from "@/components/admin/ui";
 import { RefreshCw } from "lucide-react";
 
@@ -48,10 +49,9 @@ function SystemStatusPage() {
       {isError && <div className="text-sm text-red-600 py-6 text-center">{error?.message}</div>}
       {data && (
         <div className="max-w-lg space-y-1">
-          {data.stub_providers_active && (
+          {summariseProviderModes(data).anySimulated && (
             <div className="mb-4 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800">
-              Development mode: one or more providers below are running as stubs. No real payments,
-              Odoo orders, or notifications are being sent.
+              {summariseProviderModes(data).message}
             </div>
           )}
           <StatusRow label="PostgreSQL" value={data.database} tone={toneFor(data.database)} />

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Check, MessageSquare, Minus, Plus, Ticket, MapPin, Truck, X, Link2, PenLine,
 } from "lucide-react";
@@ -11,7 +11,8 @@ import giftCardRed from "@/assets/gift-card-red.jpg";
 import giftCardCream from "@/assets/gift-card-cream.jpg";
 import giftCardBrown from "@/assets/gift-card-brown.jpg";
 import { useStore, cart, promo, selectSubtotal, selectDiscount, selectTax, selectDeliveryFee, selectTotal } from "@/lib/store";
-import { featured, getProduct } from "@/lib/products";
+import { getProduct } from "@/lib/products";
+import { mapSummaryToProduct, useCatalogueProducts } from "@/lib/catalogue-api";
 import { formatAttributes } from "@/lib/format-variant-attributes";
 import { useT, type TKey } from "@/lib/i18n";
 import { useCartProducts } from "@/lib/use-cart-products";
@@ -52,6 +53,12 @@ function CustomizePage() {
   const minOrder = useMinOrder();
   const cartItems = useStore((s) => s.cart);
   useCartProducts();
+  // Extras come from the catalogue API query, not the in-memory product cache. That cache
+  // lives per process: on the SSR server it holds whatever earlier requests loaded, in a
+  // freshly opened browser it is empty. Rendering from it made the server and browser
+  // disagree (React hydration error #418) and left this section empty on a direct load.
+  const { data: extrasPage } = useCatalogueProducts({ category: "extras", limit: 100 });
+  const extras = useMemo(() => (extrasPage?.items ?? []).map(mapSummaryToProduct), [extrasPage]);
   const currentPromo = useStore((s) => s.promo);
   const subtotal = useStore(selectSubtotal);
   const discount = useStore(selectDiscount);
@@ -138,7 +145,7 @@ function CustomizePage() {
                 <button onClick={() => setShowExtras(true)} className="text-sm text-primary hover:underline">{t("cdViewAll")}</button>
               </div>
               <div className="grid grid-cols-3 gap-4">
-                {featured.extras.slice(0, 3).map((e) => {
+                {extras.slice(0, 3).map((e) => {
                   const inCart = cartItems.some((c) => c.productId === e.id);
                   return (
                     <div key={e.id} className="text-center">
@@ -412,7 +419,7 @@ function CustomizePage() {
             <p className="text-sm text-muted-foreground mt-1">{t("cdPerfectAdditions")}</p>
             <div className="mt-6 border-t border-border" />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-              {featured.extras.map((p) => {
+              {extras.map((p) => {
                 const inCart = cartItems.some((c) => c.productId === p.id);
                 return (
                   <div key={p.id} className={`bg-secondary/40 rounded-xl p-3 ${inCart ? "ring-2 ring-primary" : ""}`}>

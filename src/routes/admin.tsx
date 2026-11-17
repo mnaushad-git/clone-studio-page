@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { useAdmin, notificationStore } from "@/lib/admin-store";
 import { fetchMe, logout, useAdminMe, useSystemStatus, type AdminUserOut } from "@/lib/admin-api";
+import { summariseProviderModes } from "@/lib/provider-modes";
 
 export const Route = createFileRoute("/admin")({
   beforeLoad: async ({ location, context }) => {
@@ -82,11 +83,15 @@ const NAV: NavItem[] = [
 
 function OperationalBanner() {
   const { data: status } = useSystemStatus();
-  if (!status?.stub_providers_active) return null;
+  if (!status) return null;
+  const providers = summariseProviderModes(status);
+  if (!providers.anySimulated) return null;
   return (
-    <div className="bg-amber-500 text-black text-center text-xs py-2 font-medium px-4">
-      Development mode: payments, Odoo order push, and notifications are using stub providers — no
-      real charges, ERP orders, or emails/SMS are sent.
+    <div
+      className="bg-amber-500 text-black text-center text-xs py-2 font-medium px-4"
+      data-testid="provider-mode-banner"
+    >
+      {providers.message}
       {status.redis === "down" &&
         " Worker infrastructure (Redis) is unavailable — retry actions will queue but not run until it's back."}
     </div>

@@ -3,7 +3,7 @@
  *
  * Product data itself no longer lives here as static literals — it's fetched from the
  * catalogue API (src/lib/catalogue-api.ts) and registered into the cache below as it
- * arrives, so `getProduct`/`products`/`featured` keep working synchronously for call
+ * arrives, so `getProduct`/`products` keep working synchronously for call
  * sites (cart, checkout, wishlist, admin) that aren't wired to the API directly in
  * this phase. Category/occasion/recipient vocabulary stays static: it's a stable,
  * already-approved taxonomy (matches data/catalogue/{categories,moments,recipients}.json
@@ -78,17 +78,6 @@ export function registerProducts(items: Product[]): void {
 export function getProduct(id: string): Product | undefined {
   return productCache.get(id);
 }
-
-/** Same slices as the old static `featured` object, now computed live off whatever's
- * in the cache — kept only for the customize (gift builder) page, which isn't wired
- * to the catalogue API directly in this phase. The homepage itself uses
- * useCatalogueHomepage() instead (see src/routes/index.tsx).
- */
-export const featured = {
-  get extras() {
-    return products.filter((p) => p.category === "extras");
-  },
-};
 
 export const CATEGORY_LABEL: Record<Category, string> = {
   cupcakes: "Cupcakes",

@@ -38,7 +38,6 @@ import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminLoyaltyRouteImport } from './routes/admin.loyalty'
-import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminPromotionsRouteImport } from './routes/admin.promotions'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
@@ -53,6 +52,7 @@ import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as RecipientsIndexRouteImport } from './routes/recipients.index'
 import { Route as RecipientsSlugRouteImport } from './routes/recipients.$slug'
 import { Route as TrackIdRouteImport } from './routes/track.$id'
+import { Route as AdminOrdersIndexRouteImport } from './routes/admin.orders.index'
 import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -200,11 +200,6 @@ const AdminLoyaltyRoute = AdminLoyaltyRouteImport.update({
   path: '/loyalty',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminOrdersRoute = AdminOrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminProductsRoute = AdminProductsRouteImport.update({
   id: '/products',
   path: '/products',
@@ -275,10 +270,15 @@ const TrackIdRoute = TrackIdRouteImport.update({
   path: '/track/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminOrdersIndexRoute = AdminOrdersIndexRouteImport.update({
+  id: '/orders/',
+  path: '/orders/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminOrdersOrderIdRoute = AdminOrdersOrderIdRouteImport.update({
-  id: '/$orderId',
-  path: '/$orderId',
-  getParentRoute: () => AdminOrdersRoute,
+  id: '/orders/$orderId',
+  path: '/orders/$orderId',
+  getParentRoute: () => AdminRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -310,7 +310,6 @@ export interface FileRoutesByFullPath {
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
-  '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/products': typeof AdminProductsRoute
   '/admin/promotions': typeof AdminPromotionsRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -327,6 +326,7 @@ export interface FileRoutesByFullPath {
   '/moments/': typeof MomentsIndexRoute
   '/recipients/': typeof RecipientsIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
+  '/admin/orders/': typeof AdminOrdersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -356,7 +356,6 @@ export interface FileRoutesByTo {
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
-  '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/products': typeof AdminProductsRoute
   '/admin/promotions': typeof AdminPromotionsRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -373,6 +372,7 @@ export interface FileRoutesByTo {
   '/moments': typeof MomentsIndexRoute
   '/recipients': typeof RecipientsIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
+  '/admin/orders': typeof AdminOrdersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -404,7 +404,6 @@ export interface FileRoutesById {
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/loyalty': typeof AdminLoyaltyRoute
-  '/admin/orders': typeof AdminOrdersRouteWithChildren
   '/admin/products': typeof AdminProductsRoute
   '/admin/promotions': typeof AdminPromotionsRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -421,6 +420,7 @@ export interface FileRoutesById {
   '/moments/': typeof MomentsIndexRoute
   '/recipients/': typeof RecipientsIndexRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
+  '/admin/orders/': typeof AdminOrdersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -453,7 +453,6 @@ export interface FileRouteTypes {
     | '/admin/delivery'
     | '/admin/login'
     | '/admin/loyalty'
-    | '/admin/orders'
     | '/admin/products'
     | '/admin/promotions'
     | '/admin/reviews'
@@ -470,6 +469,7 @@ export interface FileRouteTypes {
     | '/moments/'
     | '/recipients/'
     | '/admin/orders/$orderId'
+    | '/admin/orders/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -499,7 +499,6 @@ export interface FileRouteTypes {
     | '/admin/delivery'
     | '/admin/login'
     | '/admin/loyalty'
-    | '/admin/orders'
     | '/admin/products'
     | '/admin/promotions'
     | '/admin/reviews'
@@ -516,6 +515,7 @@ export interface FileRouteTypes {
     | '/moments'
     | '/recipients'
     | '/admin/orders/$orderId'
+    | '/admin/orders'
   id:
     | '__root__'
     | '/'
@@ -546,7 +546,6 @@ export interface FileRouteTypes {
     | '/admin/delivery'
     | '/admin/login'
     | '/admin/loyalty'
-    | '/admin/orders'
     | '/admin/products'
     | '/admin/promotions'
     | '/admin/reviews'
@@ -563,6 +562,7 @@ export interface FileRouteTypes {
     | '/moments/'
     | '/recipients/'
     | '/admin/orders/$orderId'
+    | '/admin/orders/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -800,13 +800,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoyaltyRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/orders': {
-      id: '/admin/orders'
-      path: '/orders'
-      fullPath: '/admin/orders'
-      preLoaderRoute: typeof AdminOrdersRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/products': {
       id: '/admin/products'
       path: '/products'
@@ -905,27 +898,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrackIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/orders/': {
+      id: '/admin/orders/'
+      path: '/orders'
+      fullPath: '/admin/orders/'
+      preLoaderRoute: typeof AdminOrdersIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/orders/$orderId': {
       id: '/admin/orders/$orderId'
-      path: '/$orderId'
+      path: '/orders/$orderId'
       fullPath: '/admin/orders/$orderId'
       preLoaderRoute: typeof AdminOrdersOrderIdRouteImport
-      parentRoute: typeof AdminOrdersRoute
+      parentRoute: typeof AdminRoute
     }
   }
 }
-
-interface AdminOrdersRouteChildren {
-  AdminOrdersOrderIdRoute: typeof AdminOrdersOrderIdRoute
-}
-
-const AdminOrdersRouteChildren: AdminOrdersRouteChildren = {
-  AdminOrdersOrderIdRoute: AdminOrdersOrderIdRoute,
-}
-
-const AdminOrdersRouteWithChildren = AdminOrdersRoute._addFileChildren(
-  AdminOrdersRouteChildren,
-)
 
 interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
@@ -936,7 +924,6 @@ interface AdminRouteChildren {
   AdminDeliveryRoute: typeof AdminDeliveryRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminLoyaltyRoute: typeof AdminLoyaltyRoute
-  AdminOrdersRoute: typeof AdminOrdersRouteWithChildren
   AdminProductsRoute: typeof AdminProductsRoute
   AdminPromotionsRoute: typeof AdminPromotionsRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
@@ -945,6 +932,8 @@ interface AdminRouteChildren {
   AdminSystemRoute: typeof AdminSystemRoute
   AdminThemeRoute: typeof AdminThemeRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminOrdersOrderIdRoute: typeof AdminOrdersOrderIdRoute
+  AdminOrdersIndexRoute: typeof AdminOrdersIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -956,7 +945,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDeliveryRoute: AdminDeliveryRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminLoyaltyRoute: AdminLoyaltyRoute,
-  AdminOrdersRoute: AdminOrdersRouteWithChildren,
   AdminProductsRoute: AdminProductsRoute,
   AdminPromotionsRoute: AdminPromotionsRoute,
   AdminReviewsRoute: AdminReviewsRoute,
@@ -965,6 +953,8 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSystemRoute: AdminSystemRoute,
   AdminThemeRoute: AdminThemeRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminOrdersOrderIdRoute: AdminOrdersOrderIdRoute,
+  AdminOrdersIndexRoute: AdminOrdersIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
