@@ -21,6 +21,12 @@ class ProductImageRepository(BaseRepository[CatalogueProductImage]):
         )
         return self.session.execute(stmt).scalars().all()
 
+    def product_ids_with_images_not_from(self, source_system: str) -> set[uuid.UUID]:
+        """Products that have at least one image from another source, such as the
+        storefront's seeded images."""
+        stmt = select(self.model.product_id).where(self.model.source_system != source_system)
+        return set(self.session.execute(stmt).scalars().all())
+
     def get_by_product_and_path(
         self, product_id: uuid.UUID, original_path: str
     ) -> CatalogueProductImage | None:

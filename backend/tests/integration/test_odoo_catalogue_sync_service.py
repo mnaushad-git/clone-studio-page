@@ -7,6 +7,7 @@ instance or a real network call.
 
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import Any
 
 import pytest
@@ -20,7 +21,13 @@ from app.models.catalogue.product import CatalogueProduct
 from app.models.catalogue.product_variant import CatalogueProductVariant
 from app.services.catalogue import odoo_catalogue_sync_service as service_module
 from app.services.catalogue.odoo_catalogue_sync_service import OdooCatalogueSyncService
-from tests.integration.catalogue_factories import make_category, make_product
+from tests.integration.catalogue_factories import (
+    make_category,
+    make_image,
+    make_price,
+    make_product,
+    make_variant,
+)
 from tests.unit.odoo.conftest import FakeTransport, make_config
 
 
@@ -706,3 +713,207 @@ def test_incremental_sync_uses_checkpoint_watermark_on_second_run(
     )
     domain = category_call.args[5][0]
     assert domain and domain[0][0] == "write_date" and domain[0][1] == ">="
+
+
+# -- field ownership: storefront-owned fields survive the sync -------------------------------
+#
+# Regression for the 2026-11-17 staging defect: after the first catalogue import, the sync
+# stored Odoo's False as the text "false" in 15 product descriptions and replaced 55 variant
+# display names with the bare template name.
+
+BERRY_TEMPLATE_SKU = "TB-CHO-009"
+
+
+def _seed_berry_truffle(
+    db_session: Session, *, description_en: str | None
+) -> tuple[CatalogueProduct, CatalogueProductVariant]:
+    product = make_product(
+        db_session, sku=BERRY_TEMPLATE_SKU, name_en="Berry Truffle", description_en=description_en
+    )
+    variant = make_variant(
+        db_session, product, sku=BERRY_LARGE_SKU, name_en="Berry Truffle — LARGE BOX"
+    )
+    make_price(db_session, variant, amount=Decimal("14.38"), currency="SAR")
+    db_session.commit()
+    return product, variant
+
+
+def _sync_berry_truffle(
+    db_session: Session,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    description_sale: Any,
+    image_1920: Any = False,
+    correlation_id: str = "corr-own",
+) -> Any:
+    template = _template_record(310, "Berry Truffle", categ_id=701, sku=BERRY_TEMPLATE_SKU)
+    template["description_sale"] = description_sale
+    template["image_1920"] = image_1920
+    _fake_connected_client(
+        monkeypatch,
+        categories=[_category_record(701, "Chocolates")],
+        templates=[template],
+        # Odoo's product.product.name is the template name, without the size suffix.
+        variants=[_variant_record(410, 310, "Berry Truffle", sku=BERRY_LARGE_SKU, lst_price=14.38)],
+    )
+    return OdooCatalogueSyncService(db_session).sync_all(
+        trigger="MANUAL", initiated_by="test", correlation_id=correlation_id, full_resync=True
+    )
+
+
+@pytest.mark.parametrize("value", [False, None, "", "   "])
+def test_odoo_text_treats_odoo_empty_values_as_absent(value: Any) -> None:
+    assert service_module._odoo_text(value) is None
+
+
+def test_odoo_text_keeps_real_text() -> None:
+    assert service_module._odoo_text("  Silky buttercream ") == "Silky buttercream"
+
+
+@pytest.mark.parametrize("description_sale", [False, None, "", "   "])
+def test_new_product_with_empty_odoo_description_gets_no_text(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch, description_sale: Any
+) -> None:
+    template = _template_record(223, "Red Velvet", categ_id=802, sku="RV-1")
+    template["description_sale"] = description_sale
+    _fake_connected_client(
+        monkeypatch,
+        categories=[_category_record(802, "Cakes")],
+        templates=[template],
+        variants=[_variant_record(9001, 223, "Red Velvet", sku="RV-1")],
+    )
+
+    run = OdooCatalogueSyncService(db_session).sync_all(
+        trigger="MANUAL", initiated_by="test", correlation_id="corr-empty", full_resync=True
+    )
+
+    assert run.status == "SUCCEEDED"
+    product = db_session.query(CatalogueProduct).filter_by(odoo_product_template_id=223).one()
+    assert product.description_en is None
+
+
+@pytest.mark.parametrize("description_sale", [False, None, "", "Odoo sales text"])
+def test_sync_preserves_storefront_description(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch, description_sale: Any
+) -> None:
+    product, _ = _seed_berry_truffle(db_session, description_en="Hand-rolled berry ganache.")
+
+    run = _sync_berry_truffle(db_session, monkeypatch, description_sale=description_sale)
+
+    assert run.status == "SUCCEEDED"
+    db_session.refresh(product)
+    assert product.description_en == "Hand-rolled berry ganache."
+    assert product.odoo_product_template_id == 310  # the mapping itself is still synced
+
+
+def test_sync_leaves_an_empty_storefront_description_empty(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    product, _ = _seed_berry_truffle(db_session, description_en=None)
+
+    _sync_berry_truffle(db_session, monkeypatch, description_sale=False)
+
+    db_session.refresh(product)
+    assert product.description_en is None
+
+
+def test_sync_preserves_variant_name_suffix(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _, variant = _seed_berry_truffle(db_session, description_en=None)
+
+    run = _sync_berry_truffle(db_session, monkeypatch, description_sale=False)
+
+    assert run.status == "SUCCEEDED"
+    db_session.refresh(variant)
+    assert variant.name_en == "Berry Truffle — LARGE BOX"
+    assert variant.odoo_product_variant_id == 410
+    assert variant.sku == BERRY_LARGE_SKU
+
+
+def test_sync_keeps_odoo_owned_fields_and_price(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    product, variant = _seed_berry_truffle(db_session, description_en="Kept.")
+
+    _sync_berry_truffle(db_session, monkeypatch, description_sale=False)
+
+    db_session.refresh(product)
+    db_session.refresh(variant)
+    assert product.sku == BERRY_TEMPLATE_SKU
+    assert product.unit_of_measure == "Units"
+    assert product.sellable is True and product.active is True
+    assert variant.active is True
+    assert float(_published_price(db_session)) == 14.38
+    assert _table_count(db_session, "catalogue_products") == 1
+    assert _table_count(db_session, "catalogue_product_variants") == 1
+
+
+def test_repeat_sync_reports_nothing_changed(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    product, variant = _seed_berry_truffle(db_session, description_en="Kept.")
+    _sync_berry_truffle(db_session, monkeypatch, description_sale=False, correlation_id="r1")
+    db_session.refresh(product)
+    db_session.refresh(variant)
+    before = (product.description_en, product.name_en, product.sku, variant.name_en, variant.sku)
+
+    run = _sync_berry_truffle(db_session, monkeypatch, description_sale=False, correlation_id="r2")
+
+    unchanged = {"created": 0, "updated": 0, "skipped": 1, "failed": 0}
+    for entity in ("CATEGORY", "PRODUCT_TEMPLATE", "PRODUCT_VARIANT", "PRODUCT_PRICE"):
+        assert run.counts_by_entity_json[entity] == unchanged, entity
+    db_session.refresh(product)
+    db_session.refresh(variant)
+    after = (product.description_en, product.name_en, product.sku, variant.name_en, variant.sku)
+    assert after == before
+    assert float(_published_price(db_session)) == 14.38
+
+
+def _stub_media(monkeypatch: pytest.MonkeyPatch) -> list[str]:
+    saved: list[str] = []
+
+    def save(self: Any, slug: str, role: str, order: int, data: bytes) -> tuple[str, str]:
+        saved.append(role)
+        path = f"media/products/{slug}/{role.lower()}-{order}.jpg"
+        return path, f"https://media.example/{path}"
+
+    monkeypatch.setattr(service_module.MediaStorageService, "save_product_image", save)
+    return saved
+
+
+def test_sync_never_adds_odoo_images_to_a_product_with_storefront_images(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    product, _ = _seed_berry_truffle(db_session, description_en=None)
+    make_image(db_session, product, original_path="src/assets/choc-berry.jpg")
+    db_session.commit()
+    saved = _stub_media(monkeypatch)
+
+    run = _sync_berry_truffle(
+        db_session, monkeypatch, description_sale=False, image_1920="aW1hZ2U="
+    )
+
+    assert run.status == "SUCCEEDED"
+    assert saved == []
+    paths = (
+        db_session.execute(
+            text("SELECT original_path FROM catalogue_product_images WHERE product_id = :p"),
+            {"p": str(product.id)},
+        )
+        .scalars()
+        .all()
+    )
+    assert paths == ["src/assets/choc-berry.jpg"]
+
+
+def test_sync_still_uses_odoo_image_for_a_product_without_storefront_images(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _seed_berry_truffle(db_session, description_en=None)
+    saved = _stub_media(monkeypatch)
+
+    _sync_berry_truffle(db_session, monkeypatch, description_sale=False, image_1920="aW1hZ2U=")
+
+    assert saved == ["PRIMARY"]
+    assert _table_count(db_session, "catalogue_product_images") == 1

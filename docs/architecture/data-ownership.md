@@ -96,6 +96,25 @@ the audit's finding that admin `productOverrides` today conflates commercial fie
 (price, stock) with merchandising fields (visibility, name, description) in one
 undifferentiated blob ([mock-data.md](../current-state/mock-data.md)).
 
+### Catalogue sync field ownership
+
+How the Odoo → PostgreSQL pull (`odoo_catalogue_sync_service.py`) treats each catalogue
+field today. "Create only" means the sync fills the field only when it creates a row the
+storefront doesn't have yet. It never overwrites the field on an existing row.
+
+| Field | Owner | Sync behaviour |
+|---|---|---|
+| Odoo ids (`odoo_*_id`), SKU (`default_code`) | Odoo | Every sync |
+| Product name, category, unit of measure, active, sellable | Odoo | Every sync |
+| Variant active flag, attribute values (code, label, Odoo ids) | Odoo | Every sync |
+| Price | Odoo | Every sync, through the price reconciliation gate (refuses to publish a price that differs from `data/catalogue/products.json`) |
+| Product description (`description_en`) | Storefront | Create only |
+| Variant display name (`name_en`, e.g. "Berry Truffle — LARGE BOX") | Storefront | Create only. Odoo's `product.product.name` is the template name without the suffix |
+| Images | Storefront | Odoo images are used only for a product with no storefront image |
+| Arabic text, slugs, merchandising | Storefront | Never synced (slug: create only) |
+
+An empty Odoo field (`False`, `None`, blank) is treated as absent and never stored as text.
+
 ## 5. Ownership transition for orders
 
 An order has exactly one authoritative owner at any point in time, but that owner changes

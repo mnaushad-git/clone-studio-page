@@ -113,6 +113,39 @@ _SIZE_ATTRIBUTE_NAMES = {
 }
 _FLAVOR_ATTRIBUTE_NAMES = {"flavor", "flavour"}
 
+# Field ownership (docs/architecture/data-ownership.md, "Catalogue sync field ownership").
+# Odoo-owned fields are written on every sync. Storefront-owned fields are written only when
+# the sync creates a row the storefront has never had, and never on an update: product
+# descriptions, variant display names (Odoo's product.product.name is the template name,
+# without the "— LARGE BOX" suffix), images, Arabic text and slugs. Prices keep their own
+# reconciled path (sync_prices).
+_STOREFRONT_OWNED_PRODUCT_FIELDS = frozenset({"description_en"})
+_STOREFRONT_OWNED_VARIANT_FIELDS = frozenset({"name_en"})
+
+# Bookkeeping written on every sync. Excluded when deciding whether a row changed, so an
+# unchanged record is reported SKIP_UNCHANGED instead of UPDATE.
+_SYNC_BOOKKEEPING_FIELDS = frozenset({"last_synced_at"})
+
+
+def _odoo_text(value: Any) -> str | None:
+    """Odoo returns False for an empty field. Stored as is, that became the text "false"."""
+    if value is None or value is False:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _apply_values(row: Any, values: dict[str, Any]) -> bool:
+    """Writes values to row; returns whether any field other than bookkeeping changed."""
+    changed = any(
+        getattr(row, key) != value
+        for key, value in values.items()
+        if key not in _SYNC_BOOKKEEPING_FIELDS
+    )
+    for key, value in values.items():
+        setattr(row, key, value)
+    return changed
+
 
 @dataclass(frozen=True)
 class ResolvedAttribute:
@@ -532,7 +565,7 @@ class OdooCatalogueSyncService:
                 strategy = "NATURAL_KEY"
 
         values: dict[str, Any] = {
-            "name_en": record["name"],
+            "name_en": _odoo_text(record.get("name")) or f"odoo-category-{odoo_id}",
             "odoo_category_id": odoo_id,
             "source_system": "odoo",
             "source_updated_at": _parse_odoo_datetime(record.get("write_date")),
@@ -551,9 +584,7 @@ class OdooCatalogueSyncService:
             self.session.flush()
             return row, "CREATE", "CREATED"
 
-        changed = any(getattr(row, key) != value for key, value in values.items())
-        for key, value in values.items():
-            setattr(row, key, value)
+        changed = _apply_values(row, values)
         if changed:
             self.session.flush()
         return row, ("UPDATE" if changed else "SKIP_UNCHANGED"), strategy
@@ -679,9 +710,9 @@ class OdooCatalogueSyncService:
             )
 
         values: dict[str, Any] = {
-            "sku": record.get("default_code") or f"odoo-{odoo_id}",
-            "name_en": record["name"],
-            "description_en": record.get("description_sale"),
+            "sku": _odoo_text(record.get("default_code")) or f"odoo-{odoo_id}",
+            "name_en": _odoo_text(record.get("name")) or f"odoo-{odoo_id}",
+            "description_en": _odoo_text(record.get("description_sale")),
             "category_id": category_id,
             "unit_of_measure": record["uom_id"][1] if record.get("uom_id") else None,
             "active": bool(record.get("active", True)),
@@ -712,9 +743,9 @@ class OdooCatalogueSyncService:
             )
             return row, "CREATE", "CREATED"
 
-        changed = any(getattr(row, key) != value for key, value in values.items())
-        for key, value in values.items():
-            setattr(row, key, value)
+        for key in _STOREFRONT_OWNED_PRODUCT_FIELDS:
+            values.pop(key)
+        changed = _apply_values(row, values)
         if changed:
             self.session.flush()
         return row, ("UPDATE" if changed else "SKIP_UNCHANGED"), strategy
@@ -873,8 +904,8 @@ class OdooCatalogueSyncService:
 
         values: dict[str, Any] = {
             "product_id": product_id,
-            "sku": record.get("default_code") or f"odoo-variant-{odoo_id}",
-            "name_en": record["name"],
+            "sku": _odoo_text(record.get("default_code")) or f"odoo-variant-{odoo_id}",
+            "name_en": _odoo_text(record.get("name")) or f"odoo-variant-{odoo_id}",
             "active": bool(record.get("active", True)),
             "odoo_product_variant_id": odoo_id,
             "source_system": "odoo",
@@ -889,9 +920,9 @@ class OdooCatalogueSyncService:
             self.session.flush()
             return row, "CREATE", "CREATED"
 
-        changed = any(getattr(row, key) != value for key, value in values.items())
-        for key, value in values.items():
-            setattr(row, key, value)
+        for key in _STOREFRONT_OWNED_VARIANT_FIELDS:
+            values.pop(key)
+        changed = _apply_values(row, values)
         if changed:
             self.session.flush()
         return row, ("UPDATE" if changed else "SKIP_UNCHANGED"), strategy
@@ -1102,6 +1133,15 @@ class OdooCatalogueSyncService:
 
         counts = EntityCounts()
         try:
+            # Images are storefront-owned: a product that already has storefront images
+            # keeps exactly those, and Odoo's pictures are only used for products the
+            # storefront has none for.
+            storefront_imaged = self.images.product_ids_with_images_not_from("odoo")
+            product_id_map = {
+                tmpl_id: product_uuid
+                for tmpl_id, product_uuid in product_id_map.items()
+                if product_uuid not in storefront_imaged
+            }
             # Primary image reuses image_1920 already fetched with the template record
             # this run — no extra Odoo call, and only (re)written for templates this
             # run actually read.
