@@ -1,6 +1,6 @@
-# Terrific Bites production backend. Isolated from everything else on the VPS: its own
-# Compose project, networks, volumes, PostgreSQL and Redis. Nothing is published except
-# the API, on loopback only, for the reverse proxy to reach.
+# Terrific Bites client STAGING stack (terrific-bites.trunexus.ai) on the dedicated VPS. Its
+# own Compose project, networks, volumes, PostgreSQL, Redis and staging Odoo. Nothing is
+# published except loopback ports for Caddy on the host (and Odoo for an SSH tunnel).
 #
 # Run from deploy/:  docker compose --env-file .env.prod -f docker-compose.prod.yml <cmd>
 # See docs/deployment/production-runbook.md.
@@ -22,12 +22,13 @@ x-backend: &backend
   environment: &backend-env
     APP_ENV: production
     DEBUG: "false"
-    # Stage A. Moving to "live" also needs the three providers below to be real and
-    # FINANCE_RULES_APPROVED=true: the app refuses to start on any other combination.
-    DEPLOYMENT_STAGE: demo
-    # Hard-coded so that .env.prod cannot switch them. Live Odoo order push, real payments
-    # and real notifications each need an explicit, reviewed change to this file.
-    ODOO_ORDER_PUSH_PROVIDER: stub
+    # Client staging. Payments and notifications are stubs; paid test orders are pushed to
+    # the staging Odoo below and nowhere else (app/core/config.py, _check_staging). The app
+    # refuses to start if any of this is changed to point elsewhere.
+    DEPLOYMENT_STAGE: staging
+    # Hard-coded so that .env.prod cannot switch them. Real payments and real notifications
+    # each need an explicit, reviewed change to this file and a different stage.
+    ODOO_ORDER_PUSH_PROVIDER: live
     PAYMENT_PROVIDER: stub
     NOTIFICATION_PROVIDER: stub
     DATABASE_URL: postgresql+psycopg://terrific_bites:${POSTGRES_PASSWORD:?}@postgres:5432/terrific_bites
@@ -42,16 +43,20 @@ x-backend: &backend
     ADMIN_COOKIE_DOMAIN: ${ADMIN_COOKIE_DOMAIN:?}
     MEDIA_BASE_URL: ${MEDIA_BASE_URL:?}
     LOG_LEVEL: ${LOG_LEVEL:-INFO}
-    # Addresses only. Credentials go solely to the services below that talk to Odoo.
-    ODOO_BASE_URL: ${ODOO_BASE_URL:-}
-    ODOO_DATABASE: ${ODOO_DATABASE:-}
+    # The staging Odoo service in this project, fixed here and in code (STAGING_ODOO_*), so
+    # that no environment value can redirect staging to another Odoo. Addresses only:
+    # credentials go solely to the services below that talk to Odoo.
+    ODOO_BASE_URL: http://odoo:8069
+    ODOO_DATABASE: terrific_odoo
 
 x-worker-env: &worker-env
   <<: *backend-env
   SERVICE_ROLE: worker
   ODOO_USERNAME: ${ODOO_ORDER_SYNC_LOGIN:-terrific-order-sync}
   ODOO_PASSWORD: ${ODOO_ORDER_SYNC_PASSWORD:?}
-  ODOO_WRITE_APPROVED_TARGET: ${ODOO_WRITE_APPROVED_TARGET:-}
+  # Approves sale-order writes to the staging Odoo only. The order-sync user can't create
+  # products, so this does not allow a catalogue import (see catalogue-import below).
+  ODOO_WRITE_APPROVED_TARGET: http://odoo:8069#terrific_odoo
 
 x-odoo: &odoo
   image: odoo:19.0
@@ -134,8 +139,10 @@ services:
       SERVICE_ROLE: catalogue_import
       ODOO_USERNAME: ${ODOO_CATALOGUE_IMPORT_LOGIN:-terrific-catalogue-import}
       ODOO_PASSWORD: ${ODOO_CATALOGUE_IMPORT_PASSWORD:?}
+      # Blank unless a test-data import into the staging Odoo has been approved; staging
+      # refuses any other value.
       ODOO_WRITE_APPROVED_TARGET: ${ODOO_WRITE_APPROVED_TARGET:-}
-    networks: [internal, egress]
+    networks: [internal]
     depends_on:
       postgres:
         condition: service_healthy
@@ -177,7 +184,8 @@ services:
     command: ["celery", "-A", "app.workers.celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
     volumes:
       - media:/app/media
-    networks: [internal, egress]
+    # Internal only: the staging Odoo is the one Odoo it can reach, with no route out.
+    networks: [internal]
     mem_limit: 512m
     healthcheck:
       test: ["CMD-SHELL", "celery -A app.workers.celery_app inspect ping --timeout 10 | grep -q pong"]
@@ -258,7 +266,8 @@ networks:
   # No route to the outside world or to any other application on this host.
   internal:
     internal: true
-  # Lets the API publish its loopback port and the worker reach Odoo when it is configured.
+  # Lets the API, frontend and Odoo publish their loopback ports. The worker and catalogue
+  # import are deliberately not on it.
   egress:
 
 volumes:

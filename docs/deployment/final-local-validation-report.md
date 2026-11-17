@@ -1,5 +1,9 @@
 # Final local validation report
 
+> **Historical record** of local development closure. Its section 10 assumed the shared VPS
+> `187.127.159.23`; deployment now targets client staging on the dedicated VPS `2.25.11.35`,
+> see [hostinger-deployment-package.md](hostinger-deployment-package.md).
+
 Terrific Bites MVP, local development closure, 9 November 2026. Nothing here has been committed,
 pushed or deployed. Baseline: commit `e58e072`.
 

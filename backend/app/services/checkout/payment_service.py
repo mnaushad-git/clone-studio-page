@@ -43,9 +43,12 @@ class PaymentService:
 
     def _refuse_provider_mismatch(self, order: Order, provider_name: str) -> None:
         is_stub = provider_name == "stub"
+        # Staging orders are real orders bound for the staging Odoo, paid by the stub: the
+        # stage itself guarantees no real gateway exists to charge them.
         stub_allowed_for_real_orders = self.settings.deployment_stage in (
             "development",
             "local_integration",
+            "staging",
         )
         if is_stub and not order.is_demo and not stub_allowed_for_real_orders:
             raise ConflictError(

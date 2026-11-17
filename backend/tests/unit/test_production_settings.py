@@ -97,13 +97,13 @@ def test_logout_clears_cookies_on_the_same_domain_they_were_set_on() -> None:
 
 
 def test_production_requires_an_explicit_stage() -> None:
-    with pytest.raises(ValidationError, match="DEPLOYMENT_STAGE must be demo or live"):
+    with pytest.raises(ValidationError, match="DEPLOYMENT_STAGE must be demo, staging or live"):
         Settings(**{**GOOD, "deployment_stage": "development"})
 
 
 def test_unknown_stage_is_refused() -> None:
     with pytest.raises(ValidationError, match="DEPLOYMENT_STAGE must be one of"):
-        Settings(deployment_stage="staging")
+        Settings(deployment_stage="uat")
 
 
 @pytest.mark.parametrize(

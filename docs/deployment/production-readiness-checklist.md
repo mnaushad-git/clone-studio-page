@@ -5,13 +5,17 @@ that environment. Passing locally doesn't count for staging or production.
 
 ## Stage design
 
-| Setting | Stage A: client demo | Stage B: production |
-|---|---|---|
-| `DEPLOYMENT_STAGE` (backend) | `demo` | `live` |
-| `VITE_DEMO_MODE` (frontend) | `true` | `false` |
-| Payment, notification, Odoo order push | Must all be `stub`; the app refuses to start otherwise | Must all be real; the app refuses to start otherwise |
-| New orders | `DEMO-` number, `is_demo=true` | `TB-` number, `is_demo=false` |
-| Odoo sync status | `simulated` | `synced`, with an Odoo sale order id |
+| Setting | Stage A: client demo | Client staging (UAT) | Stage B: production |
+|---|---|---|---|
+| `DEPLOYMENT_STAGE` (backend) | `demo` | `staging` | `live` |
+| `VITE_DEMO_MODE` (frontend) | `true` | `true` | `false` |
+| Payment, notification | Must be `stub` | Must be `stub` | Must be real |
+| Odoo order push | Must be `stub` | `live`, only to the stack's own staging Odoo (`http://odoo:8069`, `terrific_odoo`) | Must be real |
+| New orders | `DEMO-` number, `is_demo=true` | `TB-` number, `is_demo=false`, stub-paid | `TB-` number, `is_demo=false` |
+| Odoo sync status | `simulated` | `synced` to the staging Odoo | `synced`, with an Odoo sale order id |
+
+The app refuses to start on any combination outside its column. Client staging runs on the
+dedicated VPS `2.25.11.35`: see [hostinger-deployment-package.md](hostinger-deployment-package.md).
 
 Moving to Stage B adds to this design and doesn't replace it. Payment, notification and Odoo
 providers already sit behind adapters, so real ones plug in without changing checkout or the
@@ -33,11 +37,11 @@ database, though Stage B should still start on a fresh one.
 
 **Infrastructure (not started)**
 - [ ] VPS access confirmed and discovery report reviewed
-- [ ] Capacity confirmed, including the effect on myMakan and Maskan
+- [ ] Capacity of the dedicated VPS confirmed by discovery
 - [ ] Staging plan approved and all steps passed
 - [ ] Docker image and Compose stack tested on the VPS
 - [ ] Backup and restore tested on the VPS
-- [ ] HTTPS working through Caddy, with existing sites unaffected
+- [ ] Caddy installed on the host and HTTPS working for the API, preview and storefront
 - [ ] Alert channel set up, and a real alert received at the agreed destination
 - [ ] External uptime check on `/api/v1/health` (the VPS can't report its own outage)
 - [ ] Page timing measured on the VPS and on Lovable's hosting
@@ -81,7 +85,7 @@ database, though Stage B should still start on a fresh one.
 - [ ] Alerts routed to a named person, with an on-call plan
 - [ ] Log retention and error tracking
 - [ ] Load test at expected peak
-- [ ] Decision on whether a shared VPS is still acceptable. The architecture docs expect managed PostgreSQL and Redis with point-in-time recovery
+- [ ] Decision on whether a single VPS is acceptable for production. The architecture docs expect managed PostgreSQL and Redis with point-in-time recovery
 - [ ] Rollback rehearsed
 - [ ] Fresh production database, with no demo orders carried over
 

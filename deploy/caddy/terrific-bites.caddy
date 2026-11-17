@@ -1,8 +1,8 @@
-# Proposed site block for the storefront on the VPS's existing Caddy, next to
-# api.terrific-bites.caddy. Add it, validate, then reload; all of this needs approval. The
-# certificate is only issued once DNS for this hostname points at the VPS, and that DNS
-# change is what moves the site off Lovable. Same upstream caveat as the API block if
-# Caddy runs in a container.
+# STAGING storefront and Admin Portal site for the host Caddy on the dedicated VPS
+# (2.25.11.35), next to api.terrific-bites.caddy. The certificate is only issued once the
+# terrific-bites record points at the VPS, and that DNS change is what moves staging off
+# Lovable: it needs explicit approval. Before then, validate through preview.terrific-bites
+# (see "Pre-cutover validation" in docs/deployment/hostinger-deployment-package.md).
 terrific-bites.trunexus.ai {
 	encode gzip
 
@@ -11,6 +11,8 @@ terrific-bites.trunexus.ai {
 		X-Content-Type-Options "nosniff"
 		X-Frame-Options "SAMEORIGIN"
 		Referrer-Policy "strict-origin-when-cross-origin"
+		# Staging: keep it out of search results.
+		X-Robots-Tag "noindex, nofollow"
 		-Server
 	}
 

@@ -1,5 +1,11 @@
 # Updating the live site
 
+> **Superseded (17 November 2026).** This describes the earlier plan for the shared VPS
+> `187.127.159.23` (existing Caddy, myMakan and Maskan, Stage A `demo`). Terrific Bites client
+> staging now runs on the dedicated VPS `2.25.11.35` with `DEPLOYMENT_STAGE=staging`. Follow
+> [hostinger-deployment-package.md](hostinger-deployment-package.md) instead; this file is
+> kept for its history only.
+
 The shortest path from today's live site to the current code. It reuses the Lovable hosting
 and the existing VPS and Caddy, and adds no new servers or environments.
 

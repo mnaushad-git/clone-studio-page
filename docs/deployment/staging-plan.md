@@ -1,5 +1,11 @@
 # Staging deployment and test plan
 
+> **Superseded (17 November 2026).** This describes the earlier plan for the shared VPS
+> `187.127.159.23` (existing Caddy, myMakan and Maskan, Stage A `demo`). Terrific Bites client
+> staging now runs on the dedicated VPS `2.25.11.35` with `DEPLOYMENT_STAGE=staging`. Follow
+> [hostinger-deployment-package.md](hostinger-deployment-package.md) instead; this file is
+> kept for its history only.
+
 > **Optional.** The chosen approach updates the live site directly, without a separate staging
 > environment: see [update-plan.md](update-plan.md). This plan is kept for if a staging copy
 > is wanted later.

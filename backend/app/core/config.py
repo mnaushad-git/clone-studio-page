@@ -20,10 +20,22 @@ from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 INSECURE_ADMIN_JWT_SECRET = "dev-insecure-admin-jwt-secret-change-me"
 MIN_PRODUCTION_JWT_SECRET_LENGTH = 32
 _LOCAL_HOST_MARKERS = ("localhost", "127.0.0.1", "0.0.0.0", "[::1]")
-DEPLOYMENT_STAGES = ("development", "demo", "local_integration", "live")
+DEPLOYMENT_STAGES = ("development", "demo", "local_integration", "staging", "live")
 # The hosts a local_integration deployment may push real sale orders to.
 LOCAL_ODOO_HOSTS = ("localhost", "127.0.0.1", "terrific-odoo")
 ODOO_CREDENTIAL_FREE_ROLES = ("api", "beat", "migrate")
+# The only Odoo a staging deployment may contact: the Compose project's own `odoo` service on
+# its internal network, and its one database. Fixed in code, so that no environment value can
+# point staging at an external or production Odoo.
+STAGING_ODOO_BASE_URL = "http://odoo:8069"
+STAGING_ODOO_DATABASE = "terrific_odoo"
+STAGING_ODOO_WRITE_TARGET = f"{STAGING_ODOO_BASE_URL}#{STAGING_ODOO_DATABASE}"
+# The services allowed to hold an Odoo login on staging, and the login each must use. These
+# are the restricted integration users created by deploy/odoo/bootstrap.py.
+STAGING_ODOO_LOGINS = {
+    "worker": "terrific-order-sync",
+    "catalogue_import": "terrific-catalogue-import",
+}
 
 SECRET_FIELD_NAMES: frozenset[str] = frozenset(
     {
@@ -53,8 +65,10 @@ class Settings(BaseSettings):
     debug: bool = False
     # development: local work. demo: Stage A, every external provider must be a stub and
     # every order is permanently marked is_demo. local_integration: real sale orders into
-    # an isolated local Odoo, payments and notifications stubbed, never on production. live:
-    # Stage B, every provider must be real. See docs/deployment/production-runbook.md.
+    # an isolated local Odoo, payments and notifications stubbed, never on production.
+    # staging: the client UAT site; payments and notifications stubbed, sale orders only into
+    # the deployment's own staging Odoo (STAGING_ODOO_*). live: Stage B, every provider must
+    # be real. See docs/deployment/production-runbook.md.
     deployment_stage: str = "development"
     # Which process this is, so that _refuse_odoo_credentials_outside_workers can hold each
     # one to the credentials its job needs. Blank is local development and tests.
@@ -290,6 +304,8 @@ class Settings(BaseSettings):
                 )
         if self.deployment_stage == "local_integration":
             self._check_local_integration()
+        if self.deployment_stage == "staging":
+            self._check_staging()
         return self
 
     @model_validator(mode="after")
@@ -313,6 +329,55 @@ class Settings(BaseSettings):
         if urlsplit(self.odoo_base_url).hostname not in LOCAL_ODOO_HOSTS:
             raise ValueError("DEPLOYMENT_STAGE=local_integration requires a local Odoo host")
 
+    def _check_staging(self) -> None:
+        """Fail closed: staging may reach exactly one Odoo, with exactly the expected user.
+        Messages name the setting that is wrong, never its value."""
+        problems: list[str] = []
+        if self.payment_provider != "stub":
+            problems.append("PAYMENT_PROVIDER must be stub")
+        if self.notification_provider != "stub":
+            problems.append("NOTIFICATION_PROVIDER must be stub")
+        if self.odoo_order_push_provider not in ("stub", "live"):
+            problems.append("ODOO_ORDER_PUSH_PROVIDER must be stub or live")
+
+        # Any process that has an Odoo address at all, reading or writing, gets the same one.
+        if (self.odoo_base_url.strip() or self.odoo_order_push_provider == "live") and (
+            self.odoo_base_url.strip().rstrip("/") != STAGING_ODOO_BASE_URL
+        ):
+            problems.append(f"ODOO_BASE_URL must be the staging Odoo {STAGING_ODOO_BASE_URL}")
+        if (self.odoo_database.strip() or self.odoo_order_push_provider == "live") and (
+            self.odoo_database.strip() != STAGING_ODOO_DATABASE
+        ):
+            problems.append(f"ODOO_DATABASE must be the staging database {STAGING_ODOO_DATABASE}")
+        approved = self.odoo_write_approved_target.strip()
+        if approved and approved != STAGING_ODOO_WRITE_TARGET:
+            problems.append(
+                f"ODOO_WRITE_APPROVED_TARGET may only name the staging Odoo "
+                f"{STAGING_ODOO_WRITE_TARGET}"
+            )
+
+        holds_credential = bool(self.odoo_password or self.odoo_api_key)
+        expected_login = STAGING_ODOO_LOGINS.get(self.service_role)
+        if holds_credential and expected_login is None:
+            role = self.service_role or "(blank)"
+            problems.append(f"SERVICE_ROLE={role} must not hold Odoo credentials")
+        if holds_credential and expected_login and self.odoo_username != expected_login:
+            problems.append(
+                f"ODOO_USERNAME for SERVICE_ROLE={self.service_role} must be the staging "
+                f"integration user {expected_login}"
+            )
+        if self.service_role == "worker" and self.odoo_order_push_provider == "live":
+            if not holds_credential:
+                problems.append("the worker needs the staging order-sync credential to push orders")
+            if approved != STAGING_ODOO_WRITE_TARGET:
+                problems.append(
+                    f"ODOO_WRITE_APPROVED_TARGET must be {STAGING_ODOO_WRITE_TARGET} for the "
+                    "worker to push orders"
+                )
+
+        if problems:
+            raise ValueError("Unsafe staging configuration: " + "; ".join(problems))
+
     @model_validator(mode="after")
     def _refuse_unsafe_production_config(self) -> Settings:
         """Fail at startup rather than serve production on development defaults. Reports
@@ -322,7 +387,7 @@ class Settings(BaseSettings):
 
         problems: list[str] = []
         if self.deployment_stage == "development":
-            problems.append("DEPLOYMENT_STAGE must be demo or live")
+            problems.append("DEPLOYMENT_STAGE must be demo, staging or live")
         if self.debug:
             problems.append("DEBUG must be false")
         if (

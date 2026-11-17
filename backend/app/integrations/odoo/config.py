@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from urllib.parse import urlparse
 
-from app.core.config import Settings
+from app.core.config import STAGING_ODOO_BASE_URL, STAGING_ODOO_DATABASE, Settings
 from app.integrations.odoo.exceptions import OdooConfigurationError
 
 SUPPORTED_PROTOCOLS = frozenset({"jsonrpc"})
@@ -107,6 +107,16 @@ class OdooConfig:
         if settings.odoo_read_batch_size <= 0:
             issues.append(
                 f"ODOO_READ_BATCH_SIZE must be positive, got {settings.odoo_read_batch_size}"
+            )
+
+        # Every Odoo client, reading or writing, is built here: on staging none may be built for
+        # anything but the deployment's own Odoo.
+        if settings.deployment_stage == "staging" and (
+            base_url.rstrip("/") != STAGING_ODOO_BASE_URL or database != STAGING_ODOO_DATABASE
+        ):
+            issues.append(
+                f"Staging may connect only to its own Odoo {STAGING_ODOO_BASE_URL} "
+                f"database {STAGING_ODOO_DATABASE}"
             )
 
         protocol = settings.odoo_protocol.strip().lower()

@@ -163,7 +163,7 @@ collect() {
   echo "-- directories"; ls -d /opt/*odoo* /srv/*odoo* /var/lib/odoo /etc/odoo 2>/dev/null
   echo "-- Caddy sites mentioning odoo"; printf '%s\n' "$CADDY_SITES" | grep -i odoo
 
-  section "existing applications: myMakan and Maskan"
+  section "applications from the old shared VPS (myMakan, Maskan): none expected here"
   echo "-- containers"; d ps -a --format '{{.Names}} {{.Image}} {{.Status}} {{.Ports}}' | grep -iE "$APPS" | cut -c1-170
   echo "-- live usage"; d stats --no-stream --format '{{.Name}} {{.MemUsage}} {{.CPUPerc}}' | grep -iE "$APPS"
   echo "-- volumes"; d volume ls --format '{{.Name}}' | grep -iE "$APPS"

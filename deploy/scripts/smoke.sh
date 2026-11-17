@@ -6,7 +6,7 @@ set -uo pipefail
 
 BASE="${1:-https://api.terrific-bites.trunexus.ai}"
 ORIGIN="${FRONTEND_ORIGIN:-https://terrific-bites.trunexus.ai}"
-EXPECTED_STAGE="${EXPECTED_STAGE:-demo}"
+EXPECTED_STAGE="${EXPECTED_STAGE:-staging}"
 fail=0
 
 check() {  # name expected-status path

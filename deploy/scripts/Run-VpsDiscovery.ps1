@@ -12,7 +12,7 @@
 #>
 param(
     [Parameter(Mandatory = $true)] [string] $User,
-    [string] $ServerAddress = "187.127.159.23",
+    [string] $ServerAddress = "2.25.11.35",
     [string] $KeyPath = (Join-Path $env:USERPROFILE ".ssh\terrific_bites_vps"),
     [string] $OutputPath = (Join-Path (Get-Location) "vps-report.txt"),
     [switch] $AccessCheckOnly

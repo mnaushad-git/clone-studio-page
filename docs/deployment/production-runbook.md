@@ -1,5 +1,11 @@
 # Production runbook — Terrific Bites backend
 
+> **Superseded (17 November 2026).** This describes the earlier plan for the shared VPS
+> `187.127.159.23` (existing Caddy, myMakan and Maskan, Stage A `demo`). Terrific Bites client
+> staging now runs on the dedicated VPS `2.25.11.35` with `DEPLOYMENT_STAGE=staging`. Follow
+> [hostinger-deployment-package.md](hostinger-deployment-package.md) instead; this file is
+> kept for its history only.
+
 For whoever deploys or operates the backend. Every step below that changes the VPS, DNS or
 the live site needs approval first.
 

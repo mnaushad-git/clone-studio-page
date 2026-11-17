@@ -1,0 +1,26 @@
+# TEMPORARY pre-cutover validation site: the same frontend container as terrific-bites.caddy,
+# on a new hostname, so the VPS deployment can be tested end to end in a browser while
+# terrific-bites.trunexus.ai still points at Lovable. Needs a new A record
+# (preview.terrific-bites -> 2.25.11.35) and the preview origin added to CORS_ALLOWED_ORIGINS.
+# Remove this file, the record and the CORS origin after the cutover.
+preview.terrific-bites.trunexus.ai {
+	encode gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Robots-Tag "noindex, nofollow"
+		-Server
+	}
+
+	reverse_proxy 127.0.0.1:18011
+
+	log {
+		output file /var/log/caddy/preview.terrific-bites.log {
+			roll_size 10mb
+			roll_keep 5
+		}
+	}
+}

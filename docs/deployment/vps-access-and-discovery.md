@@ -1,7 +1,7 @@
 # VPS access and discovery
 
-For the person with access to the Hostinger VPS (`187.127.159.23`). Discovery only reads.
-Nothing here restarts or changes myMakan, Maskan or any other service.
+For the person with access to the dedicated Hostinger KVM 4 VPS (`2.25.11.35`, Ubuntu 24.04),
+which hosts only Terrific Bites client staging. Discovery only reads and changes nothing.
 
 ## Recommended: run discovery from the hPanel browser terminal
 
@@ -10,7 +10,7 @@ terminal is already logged in as root.
 
 1. On your computer, from the repository folder, copy the one-line command to the clipboard:
    `powershell -ExecutionPolicy Bypass -File deploy\scripts\Copy-VpsDiscovery.ps1`
-2. In hPanel open **VPS**, select `187.127.159.23`, **Manage**, then **Browser terminal**.
+2. In hPanel open **VPS**, select `2.25.11.35`, **Manage**, then **Browser terminal**.
 3. Paste the command and press Enter. It takes 1 to 3 minutes. A `sha256sum` error means the paste
    was damaged and nothing ran, so paste it again.
 4. Run `cat /tmp/tb-vps-report.txt` and copy the output into a local `vps-report.txt` (git-ignored).
@@ -24,7 +24,7 @@ shows how to undo it.
 ## 1. Find the VPS username (hPanel)
 
 1. Log in to [hPanel](https://hpanel.hostinger.com) and open **VPS**.
-2. Select the server with IP `187.127.159.23` and click **Manage**.
+2. Select the server with IP `2.25.11.35` and click **Manage**.
 3. On the **Overview** page, the details card lists the SSH username (normally `root`) and the
    IP address.
 
@@ -53,11 +53,11 @@ chown tb-deploy:tb-deploy /home/tb-deploy/.ssh/authorized_keys
 chmod 600 /home/tb-deploy/.ssh/authorized_keys
 ```
 
-3. **Do not add this user to the `docker` group or give it unrestricted sudo.** Group membership
-   is effectively root access, because it controls every container, including myMakan and Maskan.
-   Without it, discovery still runs but its Docker sections come back empty, which is why the
-   browser-terminal route above is recommended. How deployment gets Docker access is a separate
-   decision to make after discovery.
+3. **Docker access.** Membership of the `docker` group is effectively root access. The VPS runs
+   only Terrific Bites, so adding `tb-deploy` to it for deployment (`usermod -aG docker
+   tb-deploy`) is acceptable once approved, and is what the deployment steps assume. Don't give
+   it unrestricted sudo: the few root steps (firewall, Caddy) run from the browser terminal.
+   Without the group, discovery still runs but its Docker sections come back empty.
 
 4. Still in the browser terminal, show the server's fingerprint and keep it for part 3:
 
@@ -68,8 +68,8 @@ ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
 ## 3. Confirm the server's identity (PowerShell)
 
 ```powershell
-ssh-keygen -F 187.127.159.23 | Select-Object -First 1
-ssh-keyscan -T 10 -t ed25519 187.127.159.23 | ssh-keygen -lf -
+ssh-keygen -F 2.25.11.35 | Select-Object -First 1
+ssh-keyscan -T 10 -t ed25519 2.25.11.35 | ssh-keygen -lf -
 ```
 
 The second command's `SHA256:` value must **exactly** match the fingerprint from part 2. If it
@@ -79,7 +79,7 @@ If the first command prints nothing, this computer hasn't recorded the server ye
 fingerprints match, record it:
 
 ```powershell
-ssh-keyscan -T 10 -t ed25519 187.127.159.23 | Add-Content "$env:USERPROFILE\.ssh\known_hosts"
+ssh-keyscan -T 10 -t ed25519 2.25.11.35 | Add-Content "$env:USERPROFILE\.ssh\known_hosts"
 ```
 
 ## 4. Test access and run discovery (PowerShell)
@@ -107,21 +107,20 @@ powershell -ExecutionPolicy Bypass -File deploy\scripts\Run-VpsDiscovery.ps1 -Us
 variables, or anything from the Caddy config other than site names and upstream addresses. It
 does list your applications and domains, so skim it before sharing it.
 
-It also records a baseline of what's running and how each site responds. Keep that file: the
-regression check after every staging step compares against it.
+It also records a baseline of what's running. Keep that file to compare against after deployment.
 
 ## 5. Individual read-only checks
 
 To run a check on its own, start a session, then use the commands below:
 
 ```powershell
-ssh -i "$env:USERPROFILE\.ssh\terrific_bites_vps" -o IdentitiesOnly=yes tb-deploy@187.127.159.23
+ssh -i "$env:USERPROFILE\.ssh\terrific_bites_vps" -o IdentitiesOnly=yes tb-deploy@2.25.11.35
 ```
 
 | Question | Command |
 |---|---|
 | CPU, RAM, disk | `nproc; free -h; df -h -x tmpfs -x devtmpfs` |
-| Used ports (18010, 18011 and 18069 must be absent) | `ss -ltn` |
+| Used ports (80, 443, 18010, 18011 and 18069 must be absent) | `ss -ltn` |
 | Docker and Compose | `docker version --format '{{.Server.Version}}'; docker compose version` |
 | Containers | `docker ps -a --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'` |
 | Compose projects | `docker compose ls -a` |
@@ -134,8 +133,9 @@ ssh -i "$env:USERPROFILE\.ssh\terrific_bites_vps" -o IdentitiesOnly=yes tb-deplo
 DNS can be checked from your own computer:
 
 ```powershell
-nslookup staging.terrific-bites.trunexus.ai 8.8.8.8       # must not exist yet
-nslookup api.staging.terrific-bites.trunexus.ai 8.8.8.8   # must not exist yet
+nslookup terrific-bites.trunexus.ai 8.8.8.8               # still Lovable until the cutover
+nslookup api.terrific-bites.trunexus.ai 8.8.8.8           # 2.25.11.35 once added
+nslookup preview.terrific-bites.trunexus.ai 8.8.8.8       # 2.25.11.35 once added
 nslookup -type=NS trunexus.ai 8.8.8.8                     # dns-parking.com means hPanel manages it
 ```
 
@@ -147,10 +147,10 @@ nslookup -type=NS trunexus.ai 8.8.8.8                     # dns-parking.com mean
 | Free disk | At least 25 GB for images, both databases, the Odoo filestore and 14 days of backups |
 | Ports | 18010, 18011 and 18069 free on loopback |
 | Docker | Engine and Compose v2 present |
-| Caddy | Known whether it's on the host or in a container, and where its config lives |
-| Baseline | Every existing site and container recorded as healthy, so later differences are meaningful |
-| Isolation | myMakan and Maskan containers, volumes, networks and sites identified, none sharing a name, port or network with this stack |
-| Backups and rollback | A backup exists for the existing apps, and a VPS snapshot is confirmed in hPanel, before any deployment |
+| Ports 80 and 443 | Free, for the host Caddy installed during deployment |
+| Caddy | Not installed yet (expected). If one is found, stop and review before installing another |
+| Other applications | None expected. Anything found running is reviewed before deployment |
+| Rollback | A VPS snapshot is confirmed in hPanel before any deployment |
 
 The report's last section prints `OK` or `INSUFFICIENT` for memory and disk. `INSUFFICIENT` stops
 deployment: don't reduce the stack's memory limits to make it fit without a separate decision.
