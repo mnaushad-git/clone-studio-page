@@ -26,8 +26,18 @@ for db in app odoo; do
   docker exec -i "$NAME" pg_restore -U postgres -d "restored_$db" --no-owner --no-privileges --exit-on-error < "$DIR/$db.dump"
 done
 
-echo "app:  products=$(sql restored_app 'select count(*) from products') orders=$(sql restored_app 'select count(*) from orders') outbox=$(sql restored_app 'select count(*) from order_outbox_events')"
-echo "odoo: templates=$(sql restored_odoo 'select count(*) from product_template') variants=$(sql restored_odoo 'select count(*) from product_product') sale_orders=$(sql restored_odoo 'select count(*) from sale_order')"
+# Assigned first, not inside echo: a failed query then stops the script under set -e
+# instead of printing an empty count and still reporting success.
+products=$(sql restored_app 'select count(*) from catalogue_products')
+variants=$(sql restored_app 'select count(*) from catalogue_product_variants')
+orders=$(sql restored_app 'select count(*) from orders')
+outbox=$(sql restored_app 'select count(*) from order_outbox_events')
+odoo_templates=$(sql restored_odoo 'select count(*) from product_template')
+odoo_variants=$(sql restored_odoo 'select count(*) from product_product')
+odoo_sale_orders=$(sql restored_odoo 'select count(*) from sale_order')
+echo "app:  products=$products variants=$variants orders=$orders outbox=$outbox"
+echo "odoo: templates=$odoo_templates variants=$odoo_variants sale_orders=$odoo_sale_orders"
+[[ "$products" -gt 0 ]] || { echo "restored application database has no products" >&2; exit 1; }
 echo "odoo filestore files: $(tar -tzf "$DIR/odoo-filestore.tar.gz" | grep -vc '/$')"
 echo "media files: $(tar -tzf "$DIR/media.tar.gz" | grep -vc '/$')"
 echo "restore verification passed: $DIR"
