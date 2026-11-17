@@ -46,6 +46,9 @@ for site in "${SITES[@]}"; do
 done
 ls -l /etc/caddy/sites
 caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+# Validating as root opens each site's log file and so creates it owned by root; the service
+# runs as caddy and would then fail to reload with "permission denied".
+chown -R caddy:caddy /var/log/caddy
 systemctl enable --now caddy
 systemctl reload caddy
 systemctl is-active caddy
