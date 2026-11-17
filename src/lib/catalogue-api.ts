@@ -10,7 +10,12 @@ import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import type { Category, Occasion, Product, Recipient } from "@/lib/products";
 import { registerProducts, variantComboKey } from "@/lib/products";
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://localhost:8020";
+const PUBLIC_API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://localhost:8020";
+
+// Inside a container the browser's API address may not be reachable (localhost is the
+// container itself), so server-side rendering can use a private address instead.
+const API_BASE_URL =
+  (typeof window === "undefined" ? process.env.API_INTERNAL_BASE_URL : undefined) ?? PUBLIC_API_BASE_URL;
 
 // A server-rendered page waits on this call, so it can't be left to the platform's connect
 // timeout: a slow API must become the error page quickly, not a blank wait.

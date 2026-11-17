@@ -49,6 +49,8 @@ _IMPORT_SOURCE_FILES = (
 )
 
 XML_ID_MODULE = "terrific_bites"
+# Added by the terrific_order_sync addon, with a UNIQUE index on each imported model.
+IMPORT_KEY_FIELD = "tb_import_key"
 
 CATEGORY_BLOCKING_DECISION_IDS = {"D03"}
 PRODUCT_BLOCKING_DECISION_IDS = {"D04", "D08", "D09", "D10", "D19"}
@@ -58,7 +60,7 @@ PRODUCT_BLOCKING_DECISION_IDS = {"D04", "D08", "D09", "D10", "D19"}
 # attribute/variant write path to its own approval, independent of category/template
 # creation, which can keep shipping on its own timeline without also having to bless the
 # newer write surface.
-VARIANT_BLOCKING_DECISION_IDS = {"D20"}
+VARIANT_BLOCKING_DECISION_IDS = {"D23"}
 
 # Variant-attribute modelling: attributes ("Box Size", "Flavor") are shared master data
 # across products, so they get their own matching pass (plan_attributes), separate from
@@ -204,6 +206,18 @@ def _find_external_key_match(
     return page.records[0] if page.records else None
 
 
+def _find_import_key_match(
+    client: OdooClient, model: str, import_key: str, correlation_id: str
+) -> int | None:
+    """Finds a record an earlier run created but never finished recording, typically a create
+    that timed out and committed anyway. Deliberately lets a failed lookup raise: without the
+    addon's key there is no way to rule out a duplicate, so nothing should be planned."""
+    page = client.search_read(
+        model, [[IMPORT_KEY_FIELD, "=", import_key]], ["id"], limit=1, correlation_id=correlation_id
+    )
+    return int(page.records[0]["id"]) if page.records else None
+
+
 def _approved_value(approvals: list[ApprovalDecision], decision_id: str) -> Any:
     for d in approvals:
         if d.decision_id == decision_id:
@@ -228,7 +242,7 @@ def plan_categories(
         # product.category has no `active` field on every Odoo instance (verified absent
         # on terrific_dev/Odoo 19 via fields_get — only `name`/`parent_id` exist here);
         # unlike product.template, category active/inactive is not a real write target.
-        proposed_values = {"name": cat["name_en"]}
+        proposed_values = {"name": cat["name_en"], IMPORT_KEY_FIELD: cat["external_key"]}
 
         base_kwargs = dict(
             entity_type="CATEGORY",
@@ -273,6 +287,20 @@ def plan_categories(
                     **base_kwargs,
                     match_strategy="EXTERNAL_KEY",
                     existing_odoo_id=external_match["res_id"],
+                    planned_action="MATCH",
+                )
+            )
+            continue
+
+        key_match = _find_import_key_match(
+            client, "product.category", cat["external_key"], correlation_id
+        )
+        if key_match:
+            items.append(
+                ImportPlanItem(
+                    **base_kwargs,
+                    match_strategy="IMPORT_KEY",
+                    existing_odoo_id=key_match,
                     planned_action="MATCH",
                 )
             )
@@ -345,6 +373,7 @@ def plan_products(
             "sale_ok": product.get("sellable", True),
             "active": product.get("active", True),
             "description_sale": product.get("description_en"),
+            IMPORT_KEY_FIELD: product["external_key"],
         }
         if uom_approval:
             proposed_values["uom_id"] = uom_approval.get("odoo_uom_id")
@@ -395,6 +424,20 @@ def plan_products(
                     **base_kwargs,
                     match_strategy="EXTERNAL_KEY",
                     existing_odoo_id=external_match["res_id"],
+                    planned_action="MATCH",
+                )
+            )
+            continue
+
+        key_match = _find_import_key_match(
+            client, "product.template", product["external_key"], correlation_id
+        )
+        if key_match:
+            items.append(
+                ImportPlanItem(
+                    **base_kwargs,
+                    match_strategy="IMPORT_KEY",
+                    existing_odoo_id=key_match,
                     planned_action="MATCH",
                 )
             )
@@ -571,7 +614,13 @@ def plan_attributes(
                 blocking_issues=attr_blocking,
                 warnings=attr_warnings,
                 proposed_values=(
-                    {"name": name, "create_variant": "always"} if attr_action == "CREATE" else {}
+                    {
+                        "name": name,
+                        "create_variant": "always",
+                        IMPORT_KEY_FIELD: f"attribute:{name}",
+                    }
+                    if attr_action == "CREATE"
+                    else {}
                 ),
             )
         )
@@ -678,7 +727,11 @@ def _plan_attribute_value(
         match_strategy=None,
         existing_odoo_id=None,
         planned_action="CREATE",
-        proposed_values={**identity_values, "name": value_label},
+        proposed_values={
+            **identity_values,
+            "name": value_label,
+            IMPORT_KEY_FIELD: f"attribute_value:{attribute_name}:{value_label}",
+        },
     )
 
 
@@ -717,6 +770,15 @@ def _iter_variant_combinations(
         pairs = [(axis["name_en"], v["label"]) for axis, v in zip(attributes, combo, strict=True)]
         results.append((external_key, sku, pairs))
     return results
+
+
+def _is_on_imported_template(
+    client: OdooClient, variant: dict[str, Any], template_key: str, correlation_id: str
+) -> bool:
+    template_id = _find_import_key_match(client, "product.template", template_key, correlation_id)
+    owner = variant.get("product_tmpl_id")
+    owner_id = owner[0] if isinstance(owner, list | tuple) and owner else owner
+    return template_id is not None and template_id == owner_id
 
 
 def plan_variants(
@@ -802,6 +864,19 @@ def plan_variants(
                 continue
 
             sku_matches = repo.find_variants_by_default_code(sku, correlation_id=correlation_id)
+            if sku_matches and _is_on_imported_template(
+                client, sku_matches[0], product["external_key"], correlation_id
+            ):
+                # An earlier run set this SKU but crashed before PostgreSQL recorded it.
+                items.append(
+                    ImportPlanItem(
+                        **base_kwargs,
+                        match_strategy="IMPORT_KEY",
+                        existing_odoo_id=int(sku_matches[0]["id"]),
+                        planned_action="MATCH",
+                    )
+                )
+                continue
             if sku_matches:
                 items.append(
                     ImportPlanItem(

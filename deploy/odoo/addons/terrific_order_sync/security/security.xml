@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- External IDs are how the catalogue import stays idempotent. Odoo only lets ERP
+         Managers create them, a role that can grant itself anything, so the import user
+         gets this narrow right instead. -->
+    <record id="group_catalogue_import" model="res.groups">
+        <field name="name">Terrific Bites: Catalogue Import</field>
+    </record>
+
+    <record id="rule_external_ids_catalogue_import" model="ir.rule">
+        <field name="name">Catalogue import writes only terrific_bites external IDs</field>
+        <field name="model_id" ref="base.model_ir_model_data"/>
+        <field name="groups" eval="[(4, ref('group_catalogue_import'))]"/>
+        <field name="domain_force">[('module', '=', 'terrific_bites')]</field>
+        <field name="perm_read" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="True"/>
+    </record>
+</odoo>

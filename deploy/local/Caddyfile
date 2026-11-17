@@ -1,0 +1,16 @@
+{
+	auto_https off
+	admin off
+}
+
+# One origin for the site and its API, so admin cookies stay simple on localhost.
+http://localhost:{$TB_HTTP_PORT} {
+	encode gzip
+	@backend path /api/* /media/*
+	reverse_proxy @backend terrific-api:8000
+	reverse_proxy terrific-frontend:3000
+}
+
+http://localhost:{$TB_ODOO_PORT} {
+	reverse_proxy terrific-odoo:8069
+}

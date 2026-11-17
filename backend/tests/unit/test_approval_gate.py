@@ -47,7 +47,7 @@ def _write_approvals(path: Path, decisions: list[dict[str, Any]]) -> None:
 def test_real_approval_file_parses_and_has_seven_decisions() -> None:
     decisions = load_business_approvals(REAL_APPROVALS_PATH)
     ids = {d.decision_id for d in decisions}
-    assert ids == {"D03", "D04", "D08", "D09", "D10", "D19", "D20"}
+    assert ids == {"D03", "D04", "D08", "D09", "D10", "D19", "D23"}
 
 
 def test_real_approval_file_d09_is_approved_and_non_blocking_for_import() -> None:
@@ -73,8 +73,8 @@ def test_real_approval_file_gate_is_satisfied() -> None:
     assert {d.decision_id for d in result.approved} == {"D03", "D04", "D08", "D10", "D19"}
 
 
-def test_real_approval_file_d20_is_non_blocking_whatever_its_approval_status() -> None:
-    """D20 (Odoo native product-attribute/variant modeling activation) gates only
+def test_real_approval_file_d23_is_non_blocking_whatever_its_approval_status() -> None:
+    """D23 (Odoo native product-attribute/variant modeling activation) gates only
     PRODUCT_ATTRIBUTE/PRODUCT_ATTRIBUTE_VALUE/PRODUCT_VARIANT plan items (via
     VARIANT_BLOCKING_DECISION_IDS in odoo_import_planning.py) and must never block the
     overall category/template --apply gate this test file otherwise asserts is satisfied.
@@ -83,9 +83,32 @@ def test_real_approval_file_d20_is_non_blocking_whatever_its_approval_status() -
     not pin it. test_odoo_import_planning.py covers how each status gates variant items.
     """
     decisions = load_business_approvals(REAL_APPROVALS_PATH)
-    d20 = next(d for d in decisions if d.decision_id == "D20")
-    assert d20.blocks_import is False
-    assert d20.is_resolved_approval is True  # non-blocking decisions are trivially resolved
+    d23 = next(d for d in decisions if d.decision_id == "D23")
+    assert d23.blocks_import is False
+    assert d23.is_resolved_approval is True  # non-blocking decisions are trivially resolved
+
+
+def test_d23_keeps_the_original_approval_record_from_d20() -> None:
+    raw = json.loads(REAL_APPROVALS_PATH.read_text(encoding="utf-8"))
+    d23 = next(d for d in raw["decisions"] if d["decision_id"] == "D23")
+    assert d23["previous_decision_id"] == "D20"
+    assert d23["status"] == "APPROVED"
+    assert d23["approved_at"] == "2026-08-02T06:34:36.566865+00:00"
+    assert d23["approved_by"].startswith("mnaushad.aws@gmail.com")
+    assert "terrific_dev" in d23["approval_notes"]
+    assert "terrific_dev" in d23["evidence"]["odoo_verification"]
+
+
+def test_variant_approval_id_does_not_collide_with_the_decision_register() -> None:
+    register_path = REAL_APPROVALS_PATH.with_name("catalogue-decisions.json")
+    register = json.loads(register_path.read_text(encoding="utf-8"))
+    titles = {d["decision_id"]: d["title"] for d in register["decisions"]}
+    assert "D23" not in titles
+    assert "external-id" in titles["D20"]
+    raw = json.loads(REAL_APPROVALS_PATH.read_text(encoding="utf-8"))
+    ids = [d["decision_id"] for d in raw["decisions"]]
+    assert len(ids) == len(set(ids))
+    assert "D20" not in ids
 
 
 # -- schema validation ------------------------------------------------------------------

@@ -11,7 +11,7 @@ import pytest
 from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.checkout import CheckoutItemIn
-from app.core.exceptions import NotFoundError, ValidationAppError
+from app.core.exceptions import MinimumOrderNotMetError, NotFoundError, ValidationAppError
 from app.services.checkout.pricing_service import CheckoutPricingService
 from tests.integration.catalogue_factories import make_product_with_default_variant
 
@@ -28,16 +28,18 @@ def test_prices_from_catalogue_not_from_the_request(db_session: Session) -> None
 
 
 def test_tax_is_vat_inclusive_not_added_on_top(db_session: Session) -> None:
-    # D08/D21: prices already include VAT. At the default 5% rate, 105 inclusive of
-    # VAT contains exactly 5 of VAT (105 / 1.05 = 100 net; 100 * 0.05 = 5).
-    product = make_product_with_default_variant(db_session, amount=Decimal("105.00"))
+    # D08/D21: prices and the delivery fee already include VAT, so the VAT is backed out
+    # of them: at the default 15% rate, 115 inclusive of VAT contains exactly 15 of VAT.
+    product = make_product_with_default_variant(db_session, amount=Decimal("115.00"))
 
     result = CheckoutPricingService(db_session).price_cart(
         [CheckoutItemIn(product_slug=product.slug, quantity=1)], promo_code=None
     )
 
-    assert result.subtotal_amount == 105.00
-    assert result.tax_amount == 5.00
+    assert result.subtotal_amount == 115.00
+    assert result.tax_amount == round(
+        (result.subtotal_amount + result.delivery_fee_amount) * 15 / 115, 2
+    )
     # total must equal subtotal + delivery, never subtotal + tax + delivery.
     assert result.total_amount == result.subtotal_amount + result.delivery_fee_amount
 
@@ -65,7 +67,7 @@ def test_unknown_promo_code_is_rejected_not_silently_ignored(db_session: Session
 def test_below_minimum_order_is_rejected(db_session: Session) -> None:
     product = make_product_with_default_variant(db_session, amount=Decimal("5.00"))
 
-    with pytest.raises(ValidationAppError):
+    with pytest.raises(MinimumOrderNotMetError):
         CheckoutPricingService(db_session).price_cart(
             [CheckoutItemIn(product_slug=product.slug, quantity=1)], promo_code=None
         )

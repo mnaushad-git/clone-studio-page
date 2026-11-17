@@ -111,12 +111,15 @@ def _variant_record(
     *,
     sku: str | None = None,
     ptav_ids: list[int] | None = None,
+    lst_price: float = 25.5,
 ) -> dict[str, Any]:
     return {
         "id": odoo_id,
         "name": name,
         "default_code": sku,
         "product_tmpl_id": [tmpl_id, name],
+        "lst_price": lst_price,
+        "currency_id": [1, "SAR"],
         "active": True,
         "write_date": "2026-07-30 10:00:00",
         "product_template_attribute_value_ids": ptav_ids or [],
@@ -303,7 +306,12 @@ def test_sync_resolves_attribute_combination_and_adds_price_extra(
         templates=[_template_record(310, "Layer Cake", categ_id=701, sku="LC-1")],
         variants=[
             _variant_record(
-                410, 310, "Layer Cake (9 Inch, Vanilla)", sku="LC-1-9V", ptav_ids=[1, 2]
+                410,
+                310,
+                "Layer Cake (9 Inch, Vanilla)",
+                sku="LC-1-9V",
+                ptav_ids=[1, 2],
+                lst_price=45.5,
             ),
         ],
         template_attribute_values=[
@@ -347,7 +355,164 @@ def test_sync_resolves_attribute_combination_and_adds_price_extra(
         text("SELECT amount FROM catalogue_product_prices WHERE product_variant_id = :vid"),
         {"vid": str(variant.id)},
     ).scalar_one()
-    assert float(price) == 25.5 + 20.0  # _template_record's list_price + this combo's price_extra
+    assert float(price) == 45.5  # Odoo's lst_price: list_price + this combination's price_extra
+
+
+BERRY_LARGE_SKU = "TB-CHO-009-LARGEBOX"
+
+
+def _sync_one_variant(
+    db_session: Session,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    lst_price: float,
+    sku: str = BERRY_LARGE_SKU,
+) -> Any:
+    _fake_connected_client(
+        monkeypatch,
+        categories=[_category_record(701, "Chocolates")],
+        templates=[_template_record(310, "Berry Truffle", categ_id=701)],
+        variants=[_variant_record(410, 310, "Berry Truffle", sku=sku, lst_price=lst_price)],
+    )
+    return OdooCatalogueSyncService(db_session).sync_all(
+        trigger="MANUAL", initiated_by="test", correlation_id="corr-price", full_resync=True
+    )
+
+
+def _published_price(db_session: Session) -> Any:
+    return db_session.execute(
+        text(
+            "SELECT p.amount FROM catalogue_product_prices p "
+            "JOIN catalogue_product_variants v ON v.id = p.product_variant_id "
+            "WHERE v.odoo_product_variant_id = 410"
+        )
+    ).scalar_one_or_none()
+
+
+def test_sync_publishes_the_approved_variant_price(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    run = _sync_one_variant(db_session, monkeypatch, lst_price=14.38)
+
+    assert run.status == "SUCCEEDED"
+    assert float(_published_price(db_session)) == 14.38
+
+
+def test_sync_refuses_to_publish_when_odoo_flattens_a_variant_price(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    run = _sync_one_variant(db_session, monkeypatch, lst_price=7.99)
+
+    assert run.status == "FAILED"
+    assert "Catalogue not published" in run.error_summary
+    assert "Berry Truffle / LARGE BOX" in run.error_summary
+    assert "expected SAR 14.38" in run.error_summary
+    assert "actual SAR 7.99" in run.error_summary
+    assert _table_count(db_session, "catalogue_product_variants") == 0
+    assert _published_price(db_session) is None
+
+
+def test_failed_reconciliation_leaves_the_last_good_price_in_place(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    assert _sync_one_variant(db_session, monkeypatch, lst_price=14.38).status == "SUCCEEDED"
+
+    run = _sync_one_variant(db_session, monkeypatch, lst_price=7.99)
+
+    assert run.status == "FAILED"
+    assert float(_published_price(db_session)) == 14.38
+    failures = db_session.execute(
+        text(
+            "SELECT error_message FROM odoo_catalogue_sync_items "
+            "WHERE sync_run_id = :run AND entity_type = 'PRODUCT_PRICE'"
+        ),
+        {"run": str(run.id)},
+    ).all()
+    assert len(failures) == 1
+    assert "actual SAR 7.99" in failures[0][0]
+
+
+def test_sync_fails_safely_when_prices_cannot_be_read(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    transport = _fake_connected_client(monkeypatch, categories=[_category_record(701, "Cakes")])
+    transport._responses[("execute_kw", "product.product", "search_read")] = [
+        OdooRemoteError("field lst_price is not readable")
+    ]
+
+    run = OdooCatalogueSyncService(db_session).sync_all(
+        trigger="MANUAL", initiated_by="test", correlation_id="corr-unreadable", full_resync=True
+    )
+
+    assert run.status == "FAILED"
+    assert "could not run" in run.error_summary
+    assert _table_count(db_session, "catalogue_categories") == 0
+
+
+def test_price_survives_a_failed_attribute_lookup(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Attribute labels are best-effort. Prices must not depend on that read succeeding."""
+    transport = _fake_connected_client(
+        monkeypatch,
+        categories=[_category_record(701, "Chocolates")],
+        templates=[_template_record(310, "Berry Truffle", categ_id=701)],
+        variants=[
+            _variant_record(
+                410, 310, "Berry", sku=BERRY_LARGE_SKU, ptav_ids=[1], lst_price=14.38
+            )
+        ],
+    )
+    transport.queue(
+        ("execute_kw", "product.template.attribute.value", "read"), OdooRemoteError("boom")
+    )
+
+    run = OdooCatalogueSyncService(db_session).sync_all(
+        trigger="MANUAL", initiated_by="test", correlation_id="corr-attr-fail", full_resync=True
+    )
+
+    assert run.status == "SUCCEEDED"
+    assert float(_published_price(db_session)) == 14.38
+
+
+def test_incremental_sync_still_picks_up_a_price_change(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Editing list_price or price_extra leaves product.product.write_date alone, so an
+    incremental read returns nothing for the variant. The price must update regardless."""
+    sku = "OPS-ADDED-1"
+    assert (
+        _sync_one_variant(db_session, monkeypatch, lst_price=10.0, sku=sku).status == "SUCCEEDED"
+    )
+
+    transport = _fake_connected_client(monkeypatch)
+    transport._responses[("execute_kw", "product.product", "search_read")] = [
+        [_variant_record(410, 310, "Berry Truffle", sku=sku, lst_price=12.0)],
+        [],
+        [],
+    ]
+    run = OdooCatalogueSyncService(db_session).sync_all(
+        trigger="MANUAL", initiated_by="test", correlation_id="corr-inc", full_resync=False
+    )
+
+    assert run.status == "SUCCEEDED"
+    assert float(_published_price(db_session)) == 12.0
+
+
+def test_repeat_sync_writes_nothing_for_an_unchanged_price(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _sync_one_variant(db_session, monkeypatch, lst_price=14.38)
+
+    run = _sync_one_variant(db_session, monkeypatch, lst_price=14.38)
+
+    assert run.counts_by_entity_json["PRODUCT_PRICE"] == {
+        "created": 0,
+        "updated": 0,
+        "skipped": 1,
+        "failed": 0,
+    }
+    assert float(_published_price(db_session)) == 14.38
 
 
 def test_sync_reuses_attribute_code_for_unrecognized_attribute_name_across_products(
@@ -506,6 +671,20 @@ def test_full_resync_ignores_checkpoint_domain(
         c for c in transport.calls if c.args[3:5] == ["product.category", "search_read"]
     )
     assert category_call.args[5][0] == []  # empty domain = sweep everything
+
+
+@pytest.mark.parametrize("model", ["product.template", "product.product"])
+def test_sync_pulls_only_physical_goods_from_odoo(
+    db_session: Session, monkeypatch: pytest.MonkeyPatch, model: str
+) -> None:
+    transport = _fake_connected_client(monkeypatch, categories=[_category_record(901, "Pastries")])
+
+    OdooCatalogueSyncService(db_session).sync_all(
+        trigger="MANUAL", initiated_by="test", correlation_id="corr-goods", full_resync=True
+    )
+
+    call = next(c for c in transport.calls if c.args[3:5] == [model, "search_read"])
+    assert ["type", "=", "consu"] in call.args[5][0]
 
 
 def test_incremental_sync_uses_checkpoint_watermark_on_second_run(

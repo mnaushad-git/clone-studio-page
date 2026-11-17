@@ -12,10 +12,18 @@ allowlist for an unrelated caller or faking an import context, both worse than t
 module owning its own small, self-contained write path (CLAUDE.md rule 6: Odoo-specific
 logic stays isolated per adapter, not shared beyond what actually applies).
 
-Idempotency (rule 7): before creating anything, push_order() searches for an existing
-sale.order by client_order_ref == order_number. A retry (crash between a successful
-create and the outbox event being marked completed, or an operator-triggered re-sync)
-finds and reuses that record instead of creating a duplicate sale order.
+Idempotency (rule 7) is enforced by Odoo, not by this client: the terrific_order_sync addon
+(deploy/odoo/addons) adds sale.order.tb_order_key with a UNIQUE index, and every create sets
+it to the order number. However many workers race, or however a timed-out create turns out,
+PostgreSQL commits at most one sale order per key. The lookup before creating and the one
+after a failed create only decide whether to reuse that order; neither is the safeguard.
+
+Financial agreement is enforced before confirming: every order goes in on the SAR pricelist
+with the VAT-inclusive tax set on each line, delivery and discount as their own lines, and
+is read back and compared with the storefront's figures (order_reconciliation.py). An order
+that doesn't match stays in draft and the push reports failure. VAT treatment and delivery
+tax are proposed rules awaiting client finance approval, see docs/integrations/
+odoo-order-financials.md.
 """
 
 from __future__ import annotations
@@ -28,9 +36,22 @@ from typing import Any, Protocol
 from app.integrations.odoo.client import OdooClient
 from app.integrations.odoo.config import OdooConfig
 from app.integrations.odoo.exceptions import OdooConfigurationError, OdooIntegrationError
+from app.integrations.odoo.order_reconciliation import (
+    ExpectedLine,
+    ExpectedOrder,
+    find_discrepancies,
+    storefront_arithmetic_problem,
+    to_cents,
+)
 from app.integrations.odoo.transport import OdooTransport
+from app.integrations.odoo.write_target_guard import assert_odoo_write_target_approved
 
 logger = logging.getLogger("app.integrations.odoo.order_push")
+
+ORDER_KEY_FIELD = "tb_order_key"
+# Service products created by deploy/odoo/bootstrap.py.
+DELIVERY_PRODUCT_CODE = "TB-DELIVERY-FEE"
+DISCOUNT_PRODUCT_CODE = "TB-PROMO-DISCOUNT"
 
 
 @dataclass(frozen=True)
@@ -40,6 +61,8 @@ class OdooOrderLine:
     quantity: int
     unit_price: float
     odoo_variant_id: int | None = None
+    # What the customer chose (variant axes, inscription). Becomes the sale line description.
+    description: str | None = None
 
 
 @dataclass(frozen=True)
@@ -59,6 +82,10 @@ class OdooOrderPusher(Protocol):
         *,
         order_number: str,
         total_amount: float,
+        tax_amount: float,
+        discount_amount: float,
+        delivery_fee_amount: float,
+        promo_code: str | None,
         currency: str,
         customer_name: str,
         customer_phone: str,
@@ -83,6 +110,10 @@ class StubOdooOrderPusher:
         *,
         order_number: str,
         total_amount: float,
+        tax_amount: float,
+        discount_amount: float,
+        delivery_fee_amount: float,
+        promo_code: str | None,
         currency: str,
         customer_name: str,
         customer_phone: str,
@@ -118,19 +149,30 @@ def _connect() -> OdooClient:
             "Odoo is not configured (ODOO_BASE_URL/DATABASE/USERNAME empty) — cannot "
             "push an order with ODOO_ORDER_PUSH_PROVIDER=live"
         )
+    assert_odoo_write_target_approved(settings)
     config = OdooConfig.from_settings(settings)
     transport = OdooTransport(config)
     client = OdooClient(config, transport)
     client.get_server_version()
     client.authenticate()
+    _refuse_administrator(client)
     return client
+
+
+def _refuse_administrator(client: OdooClient) -> None:
+    uid = client.session.uid
+    if _call_write(client, "res.users", "has_group", [[uid], "base.group_system"]):
+        raise OdooConfigurationError(
+            "The Odoo account used for order sync has administrator rights. Use the dedicated "
+            "order sync user created by deploy/odoo/bootstrap.py."
+        )
 
 
 def _call_write(client: OdooClient, model: str, method: str, args: list[Any]) -> Any:
     """The one write choke point for this module — mirrors OdooWriteClient's own
     _execute_write shape (same call_args layout, same retryable=False rationale: a
     failed create could have partially succeeded server-side, so this module decides
-    recovery itself via the client_order_ref idempotency check, never a blind retry).
+    recovery itself via the tb_order_key unique index, never a blind retry).
     Deliberately reaches past OdooClient's read-only gate via its transport, the same
     idiom app/services/catalogue/odoo_import_service.py uses to hand OdooClient's
     transport to a write-capable caller.
@@ -158,6 +200,71 @@ def _find_or_create_partner(client: OdooClient, *, name: str, phone: str) -> int
     return int(new_id)
 
 
+@dataclass(frozen=True)
+class OdooFiscalSetup:
+    pricelist_id: int
+    tax_id: int
+
+
+def _exactly_one(client: OdooClient, model: str, domain: list[Any], what: str) -> int:
+    records = client.search_read(model, domain, ["id"], limit=2).records
+    if len(records) != 1:
+        raise OdooConfigurationError(
+            f"Expected exactly one {what} in Odoo, found {len(records)}. "
+            "Run deploy/odoo/bootstrap.py against this database."
+        )
+    return int(records[0]["id"])
+
+
+def _resolve_fiscal_setup(client: OdooClient, currency: str) -> OdooFiscalSetup:
+    """Refuses to push rather than let Odoo fall back to its own default pricelist or tax."""
+    from app.core.config import get_settings
+
+    rate = get_settings().checkout_tax_rate_percent
+    return OdooFiscalSetup(
+        pricelist_id=_exactly_one(
+            client,
+            "product.pricelist",
+            [["currency_id.name", "=", currency], ["active", "=", True]],
+            f"active {currency} pricelist",
+        ),
+        tax_id=_exactly_one(
+            client,
+            "account.tax",
+            [
+                ["type_tax_use", "=", "sale"],
+                ["amount", "=", rate],
+                ["price_include_override", "=", "tax_included"],
+                ["active", "=", True],
+            ],
+            f"active price-included {rate:g}% sale tax",
+        ),
+    )
+
+
+def _one_product(client: OdooClient, code: str) -> int:
+    return _exactly_one(client, "product.product", [["default_code", "=", code]], f"{code} product")
+
+
+def _delivery_vat_applies() -> bool:
+    from app.core.config import get_settings
+
+    return get_settings().checkout_delivery_vat_applies
+
+
+def _line_values(line: ExpectedLine) -> dict[str, Any]:
+    values: dict[str, Any] = {
+        "product_id": line.product_id,
+        "product_uom_qty": line.quantity,
+        "price_unit": line.unit_price,
+        # Set on every line so a product's own tax setting can't change what was charged.
+        "tax_ids": [(6, 0, list(line.tax_ids))],
+    }
+    if line.name is not None:
+        values["name"] = line.name
+    return values
+
+
 class LiveOdooOrderPusher:
     """Creates (or, on retry, reuses) a real Odoo sale.order per paid order. Each cart
     line is resolved against product.product by SKU (product.template.default_code,
@@ -173,29 +280,113 @@ class LiveOdooOrderPusher:
         *,
         order_number: str,
         total_amount: float,
+        tax_amount: float,
+        discount_amount: float,
+        delivery_fee_amount: float,
+        promo_code: str | None,
         currency: str,
         customer_name: str,
         customer_phone: str,
         lines: list[OdooOrderLine],
     ) -> OdooPushResult:
+        problem = storefront_arithmetic_problem(
+            line_amounts=[(line.unit_price, line.quantity) for line in lines],
+            discount=discount_amount,
+            delivery_fee=delivery_fee_amount,
+            total=total_amount,
+        )
+        if problem:
+            logger.error(
+                "odoo_order_amounts_inconsistent",
+                extra={"order_number": order_number, "problem": problem},
+            )
+            return self._reconciliation_failed(None, [problem])
+
         client = _connect()
 
-        existing = client.search_read(
-            "sale.order", [["client_order_ref", "=", order_number]], ["id"], limit=1
+        # Raises, creating nothing, if the addon is missing: the field is then unknown.
+        existing = self._find_existing(client, order_number)
+
+        setup = _resolve_fiscal_setup(client, currency)
+        expected_lines, unresolved_skus = self._expected_lines(
+            client,
+            lines=lines,
+            setup=setup,
+            discount_amount=discount_amount,
+            delivery_fee_amount=delivery_fee_amount,
+            promo_code=promo_code,
         )
-        if existing.records:
-            sale_order_id = int(existing.records[0]["id"])
-            logger.info(
-                "odoo_order_push_reused_existing",
-                extra={"order_number": order_number, "sale_order_id": sale_order_id},
+        if unresolved_skus:
+            logger.warning(
+                "odoo_order_push_unresolved_skus",
+                extra={"order_number": order_number, "unresolved_skus": unresolved_skus},
             )
             return OdooPushResult(
-                success=True,
-                odoo_sale_order_id=sale_order_id,
-                raw={"provider": self.name, "reused_existing": True},
+                success=False,
+                odoo_sale_order_id=None,
+                raw={
+                    "provider": self.name,
+                    "error": "sku_not_found_in_odoo",
+                    "unresolved_skus": unresolved_skus,
+                },
             )
+        expected = ExpectedOrder(
+            currency=currency, total=total_amount, tax=tax_amount, lines=tuple(expected_lines)
+        )
 
-        order_lines: list[tuple[int, int, dict[str, Any]]] = []
+        if existing is not None:
+            return self._reuse(client, order_number, existing, expected)
+
+        try:
+            partner_id = _find_or_create_partner(client, name=customer_name, phone=customer_phone)
+            sale_order_id = int(
+                _call_write(
+                    client,
+                    "sale.order",
+                    "create",
+                    [
+                        {
+                            "partner_id": partner_id,
+                            "client_order_ref": order_number,
+                            ORDER_KEY_FIELD: order_number,
+                            "pricelist_id": setup.pricelist_id,
+                            "order_line": [(0, 0, _line_values(line)) for line in expected_lines],
+                        }
+                    ],
+                )
+            )
+        except OdooIntegrationError as exc:
+            # A unique-key rejection means another worker won, and a timeout may mean our
+            # own create committed. Either way the order may now exist.
+            return self._recover_failed_create(client, order_number, exc, expected)
+
+        result = self._reconcile_and_confirm(client, order_number, sale_order_id, "draft", expected)
+        if result.success:
+            result.raw["partner_id"] = partner_id
+            result.raw["line_count"] = len(expected_lines)
+            logger.info(
+                "odoo_order_push_succeeded",
+                extra={
+                    "order_number": order_number,
+                    "sale_order_id": sale_order_id,
+                    "partner_id": partner_id,
+                    "line_count": len(expected_lines),
+                },
+            )
+        return result
+
+    def _expected_lines(
+        self,
+        client: OdooClient,
+        *,
+        lines: list[OdooOrderLine],
+        setup: OdooFiscalSetup,
+        discount_amount: float,
+        delivery_fee_amount: float,
+        promo_code: str | None,
+    ) -> tuple[list[ExpectedLine], list[str]]:
+        vat = (setup.tax_id,)
+        expected: list[ExpectedLine] = []
         unresolved_skus: list[str] = []
         for line in lines:
             # Prefer the already-resolved Odoo variant id (set once the catalogue
@@ -214,80 +405,168 @@ class LiveOdooOrderPusher:
                     unresolved_skus.append(line.sku)
                     continue
                 product_id = int(variants.records[0]["id"])
-            order_lines.append(
-                (
-                    0,
-                    0,
-                    {
-                        "product_id": product_id,
-                        "product_uom_qty": line.quantity,
-                        "price_unit": line.unit_price,
-                    },
-                )
+            expected.append(
+                ExpectedLine(product_id, line.quantity, line.unit_price, vat, line.description)
             )
 
-        if unresolved_skus:
-            logger.warning(
-                "odoo_order_push_unresolved_skus",
-                extra={"order_number": order_number, "unresolved_skus": unresolved_skus},
+        # The storefront's discount is on the whole order. A negative line keeps every
+        # product at the price the customer saw and reproduces the VAT exactly.
+        if to_cents(discount_amount) > 0:
+            label = f"Discount ({promo_code})" if promo_code else "Discount"
+            discount_product = _one_product(client, DISCOUNT_PRODUCT_CODE)
+            expected.append(ExpectedLine(discount_product, 1, -discount_amount, vat, label))
+        if to_cents(delivery_fee_amount) > 0:
+            delivery_taxes = vat if _delivery_vat_applies() else ()
+            delivery_product = _one_product(client, DELIVERY_PRODUCT_CODE)
+            expected.append(
+                ExpectedLine(delivery_product, 1, delivery_fee_amount, delivery_taxes, "Delivery")
             )
-            return OdooPushResult(
-                success=False,
-                odoo_sale_order_id=None,
-                raw={
-                    "provider": self.name,
-                    "error": "sku_not_found_in_odoo",
-                    "unresolved_skus": unresolved_skus,
+        return expected, unresolved_skus
+
+    @staticmethod
+    def _find_existing(client: OdooClient, order_number: str) -> dict[str, Any] | None:
+        # The second branch finds orders pushed before the addon existed, which have no key.
+        domain = [
+            "|",
+            [ORDER_KEY_FIELD, "=", order_number],
+            "&",
+            [ORDER_KEY_FIELD, "=", False],
+            ["client_order_ref", "=", order_number],
+        ]
+        found = client.search_read("sale.order", domain, ["id", "state"], limit=1)
+        return found.records[0] if found.records else None
+
+    def _reuse(
+        self,
+        client: OdooClient,
+        order_number: str,
+        existing: dict[str, Any],
+        expected: ExpectedOrder,
+    ) -> OdooPushResult:
+        sale_order_id = int(existing["id"])
+        # The earlier attempt may have died between creating and confirming.
+        result = self._reconcile_and_confirm(
+            client, order_number, sale_order_id, existing.get("state", ""), expected
+        )
+        if result.success:
+            result.raw["reused_existing"] = True
+            logger.info(
+                "odoo_order_push_reused_existing",
+                extra={"order_number": order_number, "sale_order_id": sale_order_id},
+            )
+        return result
+
+    def _reconcile_and_confirm(
+        self,
+        client: OdooClient,
+        order_number: str,
+        sale_order_id: int,
+        state: str,
+        expected: ExpectedOrder,
+    ) -> OdooPushResult:
+        try:
+            order, problems = self._read_and_compare(client, sale_order_id, expected)
+        except OdooIntegrationError as exc:
+            order, problems = {}, [f"could not read the sale order back: {exc}"]
+        if problems:
+            logger.error(
+                "odoo_order_reconciliation_failed",
+                extra={
+                    "order_number": order_number,
+                    "sale_order_id": sale_order_id,
+                    "discrepancies": problems,
                 },
             )
+            return self._reconciliation_failed(sale_order_id, problems)
+        if state == "draft" and not self._confirm(client, order_number, sale_order_id):
+            return self._confirm_failed(sale_order_id)
+        return OdooPushResult(
+            success=True,
+            odoo_sale_order_id=sale_order_id,
+            raw={
+                "provider": self.name,
+                "amount_untaxed": order.get("amount_untaxed"),
+                "amount_tax": order.get("amount_tax"),
+                "amount_total": order.get("amount_total"),
+            },
+        )
 
+    @staticmethod
+    def _read_and_compare(
+        client: OdooClient, sale_order_id: int, expected: ExpectedOrder
+    ) -> tuple[dict[str, Any], list[str]]:
+        orders = client.read(
+            "sale.order",
+            [sale_order_id],
+            ["amount_untaxed", "amount_tax", "amount_total", "currency_id", "order_line"],
+        )
+        if not orders:
+            return {}, [f"sale order {sale_order_id} could not be read back"]
+        order = orders[0]
+        lines = client.read(
+            "sale.order.line",
+            order.get("order_line") or [],
+            ["product_id", "product_uom_qty", "price_unit", "tax_ids", "name"],
+        )
+        return order, find_discrepancies(expected, order, lines)
+
+    def _reconciliation_failed(
+        self, sale_order_id: int | None, problems: list[str]
+    ) -> OdooPushResult:
+        return OdooPushResult(
+            success=False,
+            odoo_sale_order_id=None,
+            raw={
+                "provider": self.name,
+                "error": "order_reconciliation_failed",
+                "sale_order_id": sale_order_id,
+                "discrepancies": problems,
+            },
+        )
+
+    def _recover_failed_create(
+        self,
+        client: OdooClient,
+        order_number: str,
+        error: OdooIntegrationError,
+        expected: ExpectedOrder,
+    ) -> OdooPushResult:
         try:
-            partner_id = _find_or_create_partner(client, name=customer_name, phone=customer_phone)
-            sale_order_id = int(
-                _call_write(
-                    client,
-                    "sale.order",
-                    "create",
-                    [
-                        {
-                            "partner_id": partner_id,
-                            "client_order_ref": order_number,
-                            "order_line": order_lines,
-                        }
-                    ],
-                )
-            )
-        except OdooIntegrationError as exc:
-            logger.exception("odoo_order_push_failed", extra={"order_number": order_number})
-            return OdooPushResult(
-                success=False,
-                odoo_sale_order_id=None,
-                raw={"provider": self.name, "error": str(exc)},
-            )
+            existing = self._find_existing(client, order_number)
+        except OdooIntegrationError:
+            existing = None
+        if existing is not None:
+            return self._reuse(client, order_number, existing, expected)
+        logger.warning(
+            "odoo_order_push_failed", extra={"order_number": order_number, "error": str(error)}
+        )
+        return OdooPushResult(
+            success=False,
+            odoo_sale_order_id=None,
+            raw={"provider": self.name, "error": str(error)},
+        )
 
+    def _confirm_failed(self, sale_order_id: int) -> OdooPushResult:
+        # Reported as a failure so that the outbox retries. The retry finds this order by
+        # its key and confirms it, so nothing is created twice and a draft isn't marked synced.
+        return OdooPushResult(
+            success=False,
+            odoo_sale_order_id=None,
+            raw={
+                "provider": self.name,
+                "error": "sale_order_confirm_failed",
+                "sale_order_id": sale_order_id,
+            },
+        )
+
+    @staticmethod
+    def _confirm(client: OdooClient, order_number: str, sale_order_id: int) -> bool:
         try:
             _call_write(client, "sale.order", "action_confirm", [[sale_order_id]])
         except OdooIntegrationError:
-            # The sale.order itself was created successfully — that's the part that
-            # must not be lost. Confirmation (draft quotation -> confirmed order) is a
-            # cosmetic nicety on top; log and move on rather than fail an otherwise-
-            # successful push over it.
             logger.warning(
                 "odoo_sale_order_confirm_failed",
                 extra={"order_number": order_number, "sale_order_id": sale_order_id},
             )
-
-        logger.info(
-            "odoo_order_push_succeeded",
-            extra={
-                "order_number": order_number,
-                "sale_order_id": sale_order_id,
-                "partner_id": partner_id,
-                "line_count": len(order_lines),
-            },
-        )
-        return OdooPushResult(
-            success=True,
-            odoo_sale_order_id=sale_order_id,
-            raw={"provider": self.name, "partner_id": partner_id, "line_count": len(order_lines)},
-        )
+            return False
+        return True

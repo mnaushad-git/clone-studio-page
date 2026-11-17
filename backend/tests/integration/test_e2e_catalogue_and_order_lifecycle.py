@@ -241,11 +241,17 @@ def test_odoo_import_links_seeded_product_and_admin_reflects_sync_state(
         monkeypatch, category_odoo_id=5001, product_odoo_id=5002
     )
 
+    target_checks: list[object] = []
+    monkeypatch.setattr(
+        odoo_import_service_module, "assert_odoo_write_target_approved", target_checks.append
+    )
+
     service = OdooCatalogueImportService(db_session)
     result = service.run_apply(
         confirmed=True, allow_partial=False, initiated_by="e2e-test", correlation_id="e2e-corr-1"
     )
 
+    assert len(target_checks) == 1
     assert result.run.status == "SUCCEEDED", [i.error_message for i in result.items]
     assert transport.write_call_count() == 4  # category, its xml-id, product, its xml-id
 

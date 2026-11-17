@@ -71,12 +71,9 @@ product.template ("Berry Truffle")
 
 4. **`price_extra` lives on `product.template.attribute.value`, not on
    `product.attribute.value`.** It's a per-template override (e.g. "Large Box costs
-   +8 SAR *on this template*"). This importer deliberately does **not** write it —
-   Postgres's `catalogue_product_prices` (absolute amount, deltas already composed) is
-   the source of truth for what the storefront charges, and `order_push.py` already
-   sends an explicit `price_unit` per sale-order line, so Odoo's own `price_extra`
-   computation is never consulted by the order path. Setting it would be write effort
-   with no functional consumer and a second number that can drift from the first.
+   +8 SAR *on this template*"). The importer establishes it from each value's approved
+   `delta` (`_apply_variant_prices`), because Odoo owns commercial price and the worker
+   publishes what Odoo sells at. See [Variant pricing](#variant-pricing).
 
 5. **`create_variant` mode matters, and must always be `"always"`.**
    - `"always"` (this app's only supported mode) — every combination gets a real,
@@ -123,7 +120,7 @@ One row per (variant, axis) — a variant with 2 axes (size, flavor) gets 2 rows
 ("product.attribute.value", "create"),
 ("product.template.attribute.line", "create"),
 ("product.template.attribute.line", "write"),   # ADD a value to an existing axis
-("product.template.attribute.value", "write"),  # price_extra (unused today, see #4)
+("product.template.attribute.value", "write"),  # price_extra, see #4
 ```
 
 Deliberately **not** allowlisted: `unlink`/`action_archive` on any of these models, or
@@ -147,8 +144,9 @@ canonical key.
 - `--reconcile` includes a duplicate-attribute-name detection check as a safety net
   catching this failure mode after the fact, even if a race somehow bypasses the
   plan-time gate.
-- Gated by its own approval decision (`D20` in
-  `data/catalogue/catalogue-business-approvals.json`), independent of the
+- Gated by its own approval decision (`D23` in
+  `data/catalogue/catalogue-business-approvals.json`, numbered `D20` before the two
+  decisions sharing that number were separated), independent of the
   `D03/D04/D08/D10/D19` gate that covers category/template creation — see
   [odoo-catalogue-import.md](odoo-catalogue-import.md)'s Status section.
 
@@ -223,13 +221,25 @@ box style, since it has no prior visual precedent. See
 N-Attribute Pipeline" rollout that retired the old two-slot-only limitation described
 in earlier drafts of this document.
 
-### Pricing
+## Variant pricing
 
-`sync_prices` now computes `amount = template.list_price + price_extra_by_variant[id]`
-— the summed `price_extra` from step 2 above. This is the mirror image of the push
-side's decision *not* to write `price_extra` (§4 above): here, Odoo genuinely is the
-authoritative source for ops-defined per-combination pricing (that's the whole point of
-this feature — ops prices variants directly in Odoo), so reading it is the correct
-direction for that same authority split, not a contradiction of the push side's
-decision, which was about *writing* it from Postgres, a different direction with
-Postgres as the authority.
+A variant's approved price is its product's `sales_price` plus each axis delta from
+`data/catalogue/products.json`. Odoo's selling price is `product.product.lst_price`, which it
+computes as `list_price` plus the `price_extra` of each attribute value. The two must agree to
+the cent, and `app/services/catalogue/variant_pricing.py` compares them.
+
+**Import.** Sets `price_extra` only where it's still zero. It reads first, so a retry after a
+timeout finds a value that committed and doesn't write again. A different non-zero value was set
+deliberately in Odoo: it's recorded as `PRICE_EXTRA_CONFLICT` and never overwritten. The run ends
+with a full reconciliation of every variant and is `FAILED` if any differs. `--reconcile` repeats
+that check and reports all 55.
+
+**Sync.** Before any phase runs, `sync_all` reads `lst_price` for every variant and compares
+each SKU in the approved catalogue. On any difference, or if the read fails, the run is `FAILED`
+and nothing is published, so the last good catalogue stays live. Each affected variant is
+recorded with its expected and actual price. SKUs added directly in Odoo have no approved price
+and aren't compared.
+
+`sync_prices` publishes `lst_price` from that same full sweep. It can't use the incremental
+variant read, because changing a template's `list_price` or an attribute's `price_extra` doesn't
+touch `product.product.write_date`. An unchanged price writes nothing and adds no audit row.

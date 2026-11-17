@@ -3,6 +3,7 @@ import {
   Outlet,
   Link,
   createRootRouteWithContext,
+  type ErrorComponentProps,
   useRouter,
   HeadContent,
   Scripts,
@@ -39,7 +40,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
   const t = useT();
@@ -85,7 +86,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "Handcrafted cupcakes, donuts and indulgent desserts. Order online for local pickup or event catering.",
       },
-      { name: "author", content: "Lovable" },
+      { name: "author", content: "Terrific Bites" },
       { property: "og:title", content: "Terrific Bites — Artisan Cupcakes, Donuts & Desserts" },
       {
         property: "og:description",
@@ -94,7 +95,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Terrific Bites — Artisan Cupcakes, Donuts & Desserts" },
       {
         name: "twitter:description",
@@ -103,13 +103,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         property: "og:image",
-        content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/ZMNitIXXmsMu7K501jJSV3AaVwj1/social-images/social-1784793135337-Logo_1.webp",
+        content: "https://terrific-bites.trunexus.ai/og-image.png",
       },
       {
         name: "twitter:image",
-        content:
-          "https://storage.googleapis.com/gpt-engineer-file-uploads/ZMNitIXXmsMu7K501jJSV3AaVwj1/social-images/social-1784793135337-Logo_1.webp",
+        content: "https://terrific-bites.trunexus.ai/og-image.png",
       },
     ],
     links: [
@@ -130,7 +128,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    // The language setup sets dir and lang on this element before React hydrates.
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

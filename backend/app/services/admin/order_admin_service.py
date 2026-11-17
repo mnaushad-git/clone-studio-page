@@ -172,13 +172,14 @@ class OrderAdminService:
     ) -> RetryResult:
         order = self.get_order_detail(order_id)
         events = self.outbox.list_by_order_and_type(order.id, event_type)
-        failed = next((e for e in events if e.status == "failed"), None)
+        failed = next((e for e in events if e.status in ("failed", "dead_letter")), None)
         if failed is None:
             raise ConflictError(
                 f"Order {order.order_number} has no failed {event_type!r} event to retry."
             )
 
         failed.status = "pending"
+        failed.next_attempt_at = None
         self.session.flush()
         self.audit.record(
             admin=admin,

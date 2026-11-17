@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { storeNow } from "@/lib/location";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { MinOrderNotice, useMinOrder } from "@/components/MinOrderNotice";
 import {
   useStore,
   addresses as addressStore,
@@ -92,6 +93,7 @@ export const Route = createFileRoute("/delivery")({
 function DeliveryPage() {
   const t = useT();
   const navigate = useNavigate();
+  const minOrder = useMinOrder();
   const cartItems = useStore((s) => s.cart);
   useCartProducts();
   const currentPromo = useStore((s) => s.promo);
@@ -164,6 +166,7 @@ function DeliveryPage() {
   };
 
   const submit = () => {
+    if (minOrder.message) return toast.error(minOrder.message);
     if (!name.trim()) return toast.error(t("cdRecipientNameRequired"));
     if (!phone.trim()) return toast.error(t("cdRecipientPhoneRequired"));
     if (!gift && (!area || !address.trim())) return toast.error(t("cdPleaseAddDeliveryAddress"));
@@ -452,9 +455,10 @@ function DeliveryPage() {
               </div>
             </div>
 
+            <MinOrderNotice message={minOrder.message} />
             <button
               onClick={submit}
-              disabled={cartItems.length === 0}
+              disabled={cartItems.length === 0 || minOrder.blocked}
               className="w-full bg-primary text-primary-foreground rounded-md py-4 font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t("cdContinueToPayment")}

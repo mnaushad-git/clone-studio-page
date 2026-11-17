@@ -61,6 +61,8 @@ systemctl reload caddy                         # graceful; other sites keep serv
 scripts/smoke.sh                               # from the deploy directory
 ```
 
+For the minimal path from today's live site, see [update-plan.md](update-plan.md).
+
 Publish the frontend only after the smoke test passes. Before that the live site would
 point at an API that doesn't exist yet.
 
@@ -158,8 +160,13 @@ PostgreSQL or Redis is unreachable, and Docker marks the API unhealthy after thr
 checks.
 
 `scripts/monitor.sh` runs every five minutes and alerts once when the state changes, and once
-on recovery. Set `ALERT_WEBHOOK_URL` in `.env.prod` (Slack, Discord, or any endpoint that
-accepts a JSON POST). It checks:
+on recovery. It sends to every channel set in `.env.prod`: email through an SMTP mailbox (see
+[vps-access-and-discovery.md](vps-access-and-discovery.md) for Hostinger's settings) and/or
+`ALERT_WEBHOOK_URL` (Slack, Discord, or any endpoint accepting a JSON POST). If a channel fails,
+the alert is retried on the next run. Check a new channel with `scripts/monitor.sh --test-alert`,
+then confirm the message actually arrived: the mail server accepting it isn't proof of delivery.
+
+It checks:
 - containers are running and healthy, and the public health URL responds;
 - the worker heartbeat, which goes stale if Beat or the worker stops;
 - paid orders waiting over 15 minutes, and failed order events;

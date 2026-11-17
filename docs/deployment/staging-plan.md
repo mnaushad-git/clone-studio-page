@@ -1,5 +1,9 @@
 # Staging deployment and test plan
 
+> **Optional.** The chosen approach updates the live site directly, without a separate staging
+> environment: see [update-plan.md](update-plan.md). This plan is kept for if a staging copy
+> is wanted later.
+
 For whoever carries out the staging deployment. **Not approved yet.** It starts only after
 [VPS discovery](vps-access-and-discovery.md) is complete and this plan has been approved.
 
@@ -69,6 +73,8 @@ docker compose --env-file .env.prod -f docker-compose.prod.yml config --quiet
 scripts/migrate.sh
 docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --no-build --wait
 ```
+Then make the scripts executable if the checkout lost the mode bits: `chmod +x scripts/*.sh`.
+
 **Pass:** all services are healthy, and only `127.0.0.1:18011` is published:
 `docker ps --filter name=terrific-bites-staging --format '{{.Names}} {{.Ports}}'`.
 
@@ -164,7 +170,9 @@ $COMPOSE exec -T api python -m app.scripts.ops_health_check
 - The requeue dry run reports no orders.
 - The health check is `ok`.
 
-**Then test the alerts** (with a real `ALERT_WEBHOOK_URL`), staging containers only:
+**Then test the alerts**, staging containers only. Set the email settings (or a webhook) in
+`.env.prod`, run `scripts/monitor.sh --test-alert`, and confirm the message arrived at the agreed
+address, checking spam. Then:
 ```bash
 $COMPOSE stop celery-worker        # within about 5 minutes the monitor must alert once
 scripts/monitor.sh; scripts/monitor.sh

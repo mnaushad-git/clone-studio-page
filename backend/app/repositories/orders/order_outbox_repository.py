@@ -4,7 +4,7 @@ import uuid
 from collections.abc import Sequence
 from datetime import datetime
 
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, or_, select
 
 from app.models.orders.order_outbox_event import OrderOutboxEvent
 from app.repositories.base import BaseRepository
@@ -21,6 +21,30 @@ class OrderOutboxRepository(BaseRepository[OrderOutboxEvent]):
             stmt = stmt.where(OrderOutboxEvent.event_type == event_type)
         stmt = stmt.order_by(OrderOutboxEvent.created_at).limit(limit)
         return self.session.execute(stmt).scalars().all()
+
+    def claim_next_due(self, event_type: str, now: datetime) -> OrderOutboxEvent | None:
+        """Locks the oldest due event until the caller commits or rolls back, skipping any
+        another worker holds. If a worker dies, its transaction ends, the lock goes with it
+        and the event stays due. One at a time, because each commit releases every lock the
+        transaction holds, which would expose the rest of a batch to a second worker."""
+        stmt = (
+            select(OrderOutboxEvent)
+            .where(
+                OrderOutboxEvent.event_type == event_type,
+                OrderOutboxEvent.status.in_(("pending", "failed")),
+                or_(
+                    OrderOutboxEvent.next_attempt_at <= now,
+                    and_(
+                        OrderOutboxEvent.status == "pending",
+                        OrderOutboxEvent.next_attempt_at.is_(None),
+                    ),
+                ),
+            )
+            .order_by(OrderOutboxEvent.created_at)
+            .limit(1)
+            .with_for_update(skip_locked=True)
+        )
+        return self.session.execute(stmt).scalars().first()
 
     def list_by_order_and_type(
         self, order_id: uuid.UUID, event_type: str

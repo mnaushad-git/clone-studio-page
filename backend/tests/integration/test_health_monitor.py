@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.dependencies import get_db
 from app.main import app
+from app.models.integration.odoo_catalogue_sync_run import OdooCatalogueSyncRun
 from app.models.orders.order_outbox_event import OrderOutboxEvent
 from app.services.ops.health_monitor import heartbeat_key, run_health_checks, summarize
 from tests.integration.test_orders_api import _checkout_payload, make_product_with_default_variant
@@ -59,6 +60,46 @@ def api_client(db_session: Session) -> Generator[TestClient, None, None]:
         yield TestClient(app, raise_server_exceptions=False)
     finally:
         app.dependency_overrides.pop(get_db, None)
+
+
+def _sync_run(session: Session, *, started: datetime, error: str | None) -> None:
+    session.add(
+        OdooCatalogueSyncRun(
+            trigger="MANUAL",
+            status="FAILED" if error else "SUCCEEDED",
+            started_at=started,
+            correlation_id="corr",
+            initiated_by="test",
+            error_summary=error,
+        )
+    )
+    session.flush()
+
+
+def test_refused_price_publication_fails_its_check(db_session: Session) -> None:
+    summary = "Catalogue not published. 1 of 55 differ"
+    _sync_run(db_session, started=datetime.now(UTC), error=summary)
+
+    checks = _by_name(run_health_checks(db_session, _fresh_redis(), get_settings(), now=NOW))
+
+    assert not checks["catalogue_prices"].ok
+    assert "55" not in checks["catalogue_prices"].detail
+
+
+def test_check_recovers_after_a_good_sync_and_ignores_odoo_being_unconfigured(
+    db_session: Session,
+) -> None:
+    now = datetime.now(UTC)
+    _sync_run(db_session, started=now - timedelta(minutes=10), error="Catalogue not published. x")
+    _sync_run(db_session, started=now - timedelta(minutes=5), error=None)
+    assert _by_name(run_health_checks(db_session, _fresh_redis(), get_settings(), now=NOW))[
+        "catalogue_prices"
+    ].ok
+
+    _sync_run(db_session, started=now, error="Odoo is not configured")
+    assert _by_name(run_health_checks(db_session, _fresh_redis(), get_settings(), now=NOW))[
+        "catalogue_prices"
+    ].ok
 
 
 def test_infrastructure_checks_pass_with_a_fresh_heartbeat(db_session: Session) -> None:

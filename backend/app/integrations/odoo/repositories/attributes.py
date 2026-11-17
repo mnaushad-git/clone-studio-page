@@ -6,6 +6,7 @@ created, never duplicated across products.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from typing import Any
 
 from app.integrations.odoo.client import OdooClient
@@ -65,6 +66,19 @@ class OdooAttributeRepository:
             correlation_id=correlation_id,
         )
         return page.records
+
+    def iter_template_values(
+        self, template_ids: list[int], *, max_records: int, correlation_id: str | None = None
+    ) -> Iterator[dict[str, Any]]:
+        """The rows that carry price_extra, for every value in use on these templates."""
+        yield from self._client.iter_search_read(
+            TEMPLATE_VALUE_MODEL,
+            [["product_tmpl_id", "in", template_ids], ["ptav_active", "=", True]],
+            [*TEMPLATE_VALUE_FIELDS, "product_tmpl_id"],
+            order="id",
+            max_records=max_records,
+            correlation_id=correlation_id,
+        )
 
     # -- bulk id-list reads (pull-sync sweep pattern, not a point lookup) -----------
 

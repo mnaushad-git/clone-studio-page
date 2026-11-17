@@ -15,6 +15,7 @@ import { featured, getProduct } from "@/lib/products";
 import { formatAttributes } from "@/lib/format-variant-attributes";
 import { useT, type TKey } from "@/lib/i18n";
 import { useCartProducts } from "@/lib/use-cart-products";
+import { MinOrderNotice, useMinOrder } from "@/components/MinOrderNotice";
 
 const GIFT_CARDS: { id: string; labelKey: TKey; image: string }[] = [
   { id: "classic", labelKey: "cdGiftCardClassic", image: giftCard },
@@ -48,6 +49,7 @@ export const Route = createFileRoute("/customize")({
 function CustomizePage() {
   const t = useT();
   const navigate = useNavigate();
+  const minOrder = useMinOrder();
   const cartItems = useStore((s) => s.cart);
   useCartProducts();
   const currentPromo = useStore((s) => s.promo);
@@ -82,6 +84,10 @@ function CustomizePage() {
   const continueToDelivery = () => {
     if (cartItems.length === 0) {
       toast.error(t("cdCartEmptyToast"));
+      return;
+    }
+    if (minOrder.message) {
+      toast.error(minOrder.message);
       return;
     }
     navigate({ to: "/delivery" });
@@ -233,9 +239,10 @@ function CustomizePage() {
               </div>
             </div>
 
+            <MinOrderNotice message={minOrder.message} />
             <button
               onClick={continueToDelivery}
-              disabled={cartItems.length === 0}
+              disabled={cartItems.length === 0 || minOrder.blocked}
               className="w-full bg-primary text-primary-foreground rounded-md py-4 font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t("cdContinueToDelivery")}

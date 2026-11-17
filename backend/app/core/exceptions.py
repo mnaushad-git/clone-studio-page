@@ -27,6 +27,11 @@ class ValidationAppError(AppError):
     message = "Request validation failed."
 
 
+class MinimumOrderNotMetError(ValidationAppError):
+    code = "MINIMUM_ORDER_NOT_MET"
+    message = "The order is below the minimum order amount."
+
+
 class NotFoundError(AppError):
     code = "NOT_FOUND"
     status_code = 404

@@ -1,0 +1,15 @@
+# Overlay for controlled local integration testing: real sale orders in the isolated
+# terrific-odoo container, with payments and notifications still stubbed. Applied only by
+# `Start-Stack.ps1 -Integration`. The application refuses this stage when APP_ENV is
+# production or the Odoo host isn't local (app/core/config.py).
+x-integration-env: &integration-env
+  DEPLOYMENT_STAGE: local_integration
+  ODOO_ORDER_PUSH_PROVIDER: live
+
+services:
+  terrific-api:
+    environment: *integration-env
+  terrific-worker:
+    environment: *integration-env
+  terrific-beat:
+    environment: *integration-env

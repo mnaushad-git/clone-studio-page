@@ -524,11 +524,11 @@ export function selectDeliveryFee(s: State): number {
 // Prices are VAT-inclusive (catalogue-decisions.json D08/D21, approved Phase 6): the
 // stored/displayed price already includes VAT, so checkout must never add a separate
 // VAT amount on top. selectTax() reports the VAT portion already folded into the
-// subtotal — informational only, never added by selectTotal().
+// subtotal and delivery fee — informational only, never added by selectTotal().
 export function selectTax(s: State): number {
-  const rate = (getAdminState().settings.taxRate ?? 5) / 100;
+  const rate = (getAdminState().settings.taxRate ?? 15) / 100;
   const net = Math.max(0, selectSubtotal(s) - selectDiscount(s));
-  return +((net * rate) / (1 + rate)).toFixed(2);
+  return +(((net + selectDeliveryFee(s)) * rate) / (1 + rate)).toFixed(2);
 }
 export function selectTotal(s: State): number {
   return +(Math.max(0, selectSubtotal(s) - selectDiscount(s)) + selectDeliveryFee(s)).toFixed(2);
@@ -559,6 +559,12 @@ export function selectMinOrder(): number {
   return deliveryOptionsCache
     ? Number(deliveryOptionsCache.minimum_order_amount)
     : MIN_ORDER_FALLBACK;
+}
+/** How much more the cart needs to reach the minimum, 0 when met or empty. */
+export function selectMinOrderShortfall(s: State): number {
+  if (s.cart.length === 0) return 0;
+  const net = Math.max(0, selectSubtotal(s) - selectPromoDiscount(s));
+  return +Math.max(0, selectMinOrder() - net).toFixed(2);
 }
 
 // ---------- Auth ----------

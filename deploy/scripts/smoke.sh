@@ -19,6 +19,7 @@ check "readiness (database + redis)" 200 /api/v1/readiness
 check "catalogue homepage" 200 /api/v1/catalogue/homepage
 check "catalogue categories" 200 /api/v1/catalogue/categories
 check "api docs hidden in production" 404 /docs
+check "api schema hidden in production" 404 /openapi.json
 check "admin requires login" 401 /api/v1/admin/auth/me
 
 if curl -s -m 15 "$BASE/api/v1/version" | grep -q "\"deployment_stage\":\"$EXPECTED_STAGE\""; then

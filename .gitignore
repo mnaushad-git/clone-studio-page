@@ -34,7 +34,10 @@ dist-ssr
 # Backend (Python/FastAPI) — see backend/.env.example for required variables
 backend/.env
 backend/.env.local
+backend/.env.odoo-admin.local
 .env.local
+# Native integration stack: data, logs and generated secrets
+.local-integration/
 __pycache__/
 *.pyc
 backend/.venv
@@ -50,4 +53,14 @@ backend/media
 # Production secrets and backups stay on the server only
 deploy/.env.prod
 deploy/backups/
+deploy/local/backups/
 deploy/.monitor-state
+
+# VPS discovery output lists server details
+vps-report*.txt
+
+# Generated Python packaging metadata
+*.egg-info/
+
+# Local review scratch output
+git-review.txt

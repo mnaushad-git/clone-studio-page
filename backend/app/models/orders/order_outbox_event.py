@@ -25,9 +25,12 @@ if TYPE_CHECKING:
 #     downstream once paid. Written as `completed` in the order's own transaction, so it
 #     can never sit pending or count as backlog.
 #   order.paid: consumed by OdooOrderSyncService. pending -> processing -> completed/failed.
-#   order.notify: consumed by the notification service. Same transitions.
+#     A failed event with next_attempt_at is retried automatically once that time passes.
+#     dead_letter means the retries ran out and an operator has to act.
+#   order.notify: consumed by the notification service. pending -> processing ->
+#     completed/failed.
 OUTBOX_EVENT_TYPES = ("order.created", "order.paid", "order.notify")
-OUTBOX_STATUSES = ("pending", "processing", "completed", "failed")
+OUTBOX_STATUSES = ("pending", "processing", "completed", "failed", "dead_letter")
 
 
 class OrderOutboxEvent(UUIDPrimaryKeyMixin, TimestampMixin, Base):
@@ -52,5 +55,6 @@ class OrderOutboxEvent(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     last_error: Mapped[str | None] = mapped_column(Text)
     processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    next_attempt_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     order: Mapped[Order] = relationship("Order", back_populates="outbox_events")

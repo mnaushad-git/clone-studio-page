@@ -38,7 +38,7 @@ database, though Stage B should still start on a fresh one.
 - [ ] Docker image and Compose stack tested on the VPS
 - [ ] Backup and restore tested on the VPS
 - [ ] HTTPS working through Caddy, with existing sites unaffected
-- [ ] Alert webhook set up and a real alert received
+- [ ] Alert channel set up, and a real alert received at the agreed destination
 - [ ] External uptime check on `/api/v1/health` (the VPS can't report its own outage)
 - [ ] Page timing measured on the VPS and on Lovable's hosting
 - [ ] Lovable builds the correct branch with the production API URL
@@ -72,6 +72,8 @@ database, though Stage B should still start on a fresh one.
 - [ ] Rate limits on order creation, tracking lookup and customer sign-in
 - [ ] Independent security review
 - [ ] Repository made private. It's currently publicly readable
+- [ ] Known dependency vulnerabilities resolved, with Python dependencies locked for repeatable builds
+- [ ] Approval gate made aware of the target Odoo instance
 - [ ] Secrets rotated, and a secret manager decided on
 - [ ] Removal of client-side admin stores where the backend now owns the data
 
@@ -91,10 +93,10 @@ database, though Stage B should still start on a fresh one.
 
 ## Decisions to reconcile
 
-- **D20 means two different things.** In `data/catalogue/catalogue-decisions.json` it's the
-  Odoo external-id strategy. In `data/catalogue/catalogue-business-approvals.json` it's the
-  attribute and variant write approval. The approval status has not been changed.
-- **The approval evidence covers `terrific_dev` only.** Run `--validate` and `--plan` against
-  production Odoo and review them again before any variant write there.
-- **`docs/integrations/odoo-catalogue-import.md` is out of date.** It still says D03, D04, D08,
-  D10, D19 and D20 are `PROPOSED`, but the approvals file records them as `APPROVED`.
+- **The variant-write approval is now `D23`.** It was `D20`, which also meant the Odoo
+  external-id strategy in `catalogue-decisions.json`. The original approval record is unchanged.
+- **`D23` has no entry in the decision register.** Its `source_decision_record` is `null`, and the
+  plan it cites wasn't saved. Its counts do match the catalogue.
+- **Production Odoo isn't covered by any approval.** See the table in
+  [odoo-catalogue-import.md](../integrations/odoo-catalogue-import.md). The approval gate doesn't
+  check which instance it targets.

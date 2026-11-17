@@ -31,7 +31,6 @@ import re
 import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from decimal import Decimal
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -75,8 +74,21 @@ from app.repositories.integration.odoo_catalogue_sync_run_repository import (
 )
 from app.repositories.integration.sync_checkpoint_repository import SyncCheckpointRepository
 from app.services.catalogue.media_storage_service import MediaStorageService
+from app.services.catalogue.variant_pricing import (
+    CATALOGUE_NOT_PUBLISHED,
+    OdooVariantPrice,
+    PriceReconciliation,
+    expected_variant_prices,
+    load_canonical_products,
+    reconcile_variant_prices,
+    to_money,
+)
 
 logger = logging.getLogger("app.services.catalogue.odoo_catalogue_sync_service")
+
+# Sellable goods only (decision D10). Odoo modules bring their own service products, such as
+# the delivery fee from website_sale, which must never become storefront products.
+GOODS_ONLY_DOMAIN: list[Any] = [["type", "=", "consu"]]
 
 INTEGRATION_NAME = "odoo_catalogue"
 
@@ -109,7 +121,10 @@ class ResolvedAttribute:
     attribute_name_en: str
     odoo_attribute_value_id: int
     value_label_en: str
-    price_extra: Decimal
+
+
+class VariantPriceMismatchError(Exception):
+    """Recorded against a sync item, never raised: names one variant Odoo would misprice."""
 
 
 def _connect_readonly(settings: Settings) -> tuple[OdooClient | None, str | None]:
@@ -216,6 +231,26 @@ class OdooCatalogueSyncService:
             self.session.commit()
             return run
 
+        # Runs before any phase, so a price problem leaves the last good catalogue in place.
+        try:
+            selling_prices = self._read_selling_prices(client)
+            reconciliation = self._reconcile_selling_prices(selling_prices)
+        except Exception as exc:  # noqa: BLE001 - a price we can't verify must not be published
+            logger.error("odoo_catalogue_price_reconciliation_unavailable", exc_info=exc)
+            self.sync_runs.mark_status(
+                run,
+                "FAILED",
+                completed_at=datetime.now(UTC),
+                error_summary=(
+                    f"{CATALOGUE_NOT_PUBLISHED} Variant price reconciliation could not run: {exc}"
+                ),
+            )
+            self.session.commit()
+            return run
+        if not reconciliation.ok:
+            self._refuse_publication(run, reconciliation)
+            return run
+
         counts_by_entity: dict[str, dict[str, int]] = {}
 
         category_counts, category_id_map = self.sync_categories(
@@ -228,19 +263,13 @@ class OdooCatalogueSyncService:
         )
         counts_by_entity["PRODUCT_TEMPLATE"] = product_counts.as_dict()
 
-        variant_counts, variant_id_map, variant_records, price_extra_by_variant = (
-            self.sync_variants(
-                client, run=run, full_resync=full_resync, product_id_map=product_id_map
-            )
+        variant_counts, variant_id_map = self.sync_variants(
+            client, run=run, full_resync=full_resync, product_id_map=product_id_map
         )
         counts_by_entity["PRODUCT_VARIANT"] = variant_counts.as_dict()
 
         price_counts = self.sync_prices(
-            run=run,
-            variant_id_map=variant_id_map,
-            variant_records=variant_records,
-            template_records=template_records,
-            price_extra_by_variant=price_extra_by_variant,
+            run=run, variant_id_map=variant_id_map, selling_prices=selling_prices
         )
         counts_by_entity["PRODUCT_PRICE"] = price_counts.as_dict()
 
@@ -314,6 +343,63 @@ class OdooCatalogueSyncService:
             status
         )
         return run
+
+    def _read_selling_prices(self, client: OdooClient) -> dict[int, dict[str, Any]]:
+        records = OdooProductRepository(client).iter_variant_prices(
+            domain=GOODS_ONLY_DOMAIN, max_records=self.settings.odoo_catalogue_sync_max_records
+        )
+        return {record["id"]: record for record in records}
+
+    @staticmethod
+    def _reconcile_selling_prices(
+        selling_prices: dict[int, dict[str, Any]],
+    ) -> PriceReconciliation:
+        """Variants staff add in Odoo have no approved price to compare, so they aren't checked."""
+        actual_by_sku = {
+            record["default_code"]: OdooVariantPrice(record["id"], to_money(record["lst_price"]))
+            for record in selling_prices.values()
+            if record.get("default_code")
+        }
+        return reconcile_variant_prices(
+            expected_variant_prices(load_canonical_products()), actual_by_sku, require_all=False
+        )
+
+    def _refuse_publication(
+        self, run: OdooCatalogueSyncRun, reconciliation: PriceReconciliation
+    ) -> None:
+        summary = reconciliation.summary()
+        logger.error(
+            "odoo_catalogue_price_reconciliation_failed",
+            extra={
+                "sync_run_id": str(run.id),
+                "mismatches": [row.to_dict() for row in reconciliation.mismatches],
+            },
+        )
+        for row in reconciliation.mismatches:
+            assert row.odoo_variant_id is not None  # require_all=False keeps found variants only
+            self._write_sync_item(
+                run=run,
+                entity_type="PRODUCT_PRICE",
+                odoo_model="product.product",
+                odoo_record_id=row.odoo_variant_id,
+                postgres_entity_id=None,
+                match_strategy=None,
+                action="FAILED",
+                result_status="FAILED",
+                error=VariantPriceMismatchError(row.describe()),
+            )
+        self.sync_runs.mark_status(
+            run,
+            "FAILED",
+            completed_at=datetime.now(UTC),
+            total_failed=len(reconciliation.mismatches),
+            error_summary=f"{CATALOGUE_NOT_PUBLISHED} {summary}",
+        )
+        self.checkpoints.mark_failed(
+            self.checkpoints.get_or_create(INTEGRATION_NAME, "PRODUCT_PRICE"),
+            metadata={"error": summary},
+        )
+        self.session.commit()
 
     def _incremental_domain(
         self, checkpoint: IntegrationSyncCheckpoint, full_resync: bool
@@ -507,7 +593,7 @@ class OdooCatalogueSyncService:
         }
         template_records: dict[int, dict[str, Any]] = {}
         window_start = datetime.now(UTC)
-        domain = self._incremental_domain(checkpoint, full_resync)
+        domain = [*GOODS_ONLY_DOMAIN, *self._incremental_domain(checkpoint, full_resync)]
         repo = OdooProductRepository(client)
 
         try:
@@ -642,7 +728,7 @@ class OdooCatalogueSyncService:
         run: OdooCatalogueSyncRun,
         full_resync: bool,
         product_id_map: dict[int, uuid.UUID],
-    ) -> tuple[EntityCounts, dict[int, uuid.UUID], dict[int, dict[str, Any]], dict[int, Decimal]]:
+    ) -> tuple[EntityCounts, dict[int, uuid.UUID]]:
         entity_type = "PRODUCT_VARIANT"
         checkpoint = self.checkpoints.get_or_create(INTEGRATION_NAME, entity_type)
         self.checkpoints.mark_running(checkpoint)
@@ -654,10 +740,8 @@ class OdooCatalogueSyncService:
             for v in self.variants.list_active()
             if v.odoo_product_variant_id
         }
-        variant_records: dict[int, dict[str, Any]] = {}
-        price_extra_by_variant: dict[int, Decimal] = {}
         window_start = datetime.now(UTC)
-        domain = self._incremental_domain(checkpoint, full_resync)
+        domain = [*GOODS_ONLY_DOMAIN, *self._incremental_domain(checkpoint, full_resync)]
         repo = OdooProductRepository(client)
 
         try:
@@ -670,7 +754,7 @@ class OdooCatalogueSyncService:
             logger.warning("odoo_catalogue_sync_variant_phase_failed", extra={"error": str(exc)})
             self.checkpoints.mark_failed(checkpoint, metadata={"error": str(exc)})
             self.session.commit()
-            return counts, id_map, variant_records, price_extra_by_variant
+            return counts, id_map
 
         # Batch-resolve every attribute combination referenced by this sweep's
         # variants up front — exactly 2 extra Odoo calls for the whole run, never one
@@ -703,19 +787,16 @@ class OdooCatalogueSyncService:
 
         try:
             for record in records:
-                variant_records[record["id"]] = record
                 try:
                     row, action, strategy = self._match_and_upsert_variant(record, product_id_map)
                     id_map[record["id"]] = row.id
                     counts.record(action)
 
-                    resolved_attrs, price_extra = self._resolve_variant_attributes(
+                    resolved_attrs = self._resolve_variant_attributes(
                         record, ptav_by_id, attribute_value_by_id
                     )
                     if resolved_attrs:
                         self._upsert_variant_attribute_values(row.id, resolved_attrs)
-                    if price_extra:
-                        price_extra_by_variant[record["id"]] = price_extra
 
                     self._write_sync_item(
                         run=run,
@@ -748,7 +829,7 @@ class OdooCatalogueSyncService:
             logger.warning("odoo_catalogue_sync_variant_phase_failed", extra={"error": str(exc)})
             self.checkpoints.mark_failed(checkpoint, metadata={"error": str(exc)})
             self.session.commit()
-            return counts, id_map, variant_records, price_extra_by_variant
+            return counts, id_map
 
         self.checkpoints.mark_success(
             checkpoint,
@@ -758,7 +839,7 @@ class OdooCatalogueSyncService:
             metadata=counts.as_dict(),
         )
         self.session.commit()
-        return counts, id_map, variant_records, price_extra_by_variant
+        return counts, id_map
 
     def _match_and_upsert_variant(
         self, record: dict[str, Any], product_id_map: dict[int, uuid.UUID]
@@ -820,18 +901,17 @@ class OdooCatalogueSyncService:
         record: dict[str, Any],
         ptav_by_id: dict[int, dict[str, Any]],
         attribute_value_by_id: dict[int, dict[str, Any]],
-    ) -> tuple[list[ResolvedAttribute], Decimal]:
+    ) -> list[ResolvedAttribute]:
         """Turns a product.product record's product_template_attribute_value_ids into
-        the full per-axis (attribute, value, price_extra) list plus the combination's
-        total price_extra — see docs/integrations/odoo-catalogue-variant-model.md's
-        Pull direction section for the underlying Odoo model this walks. Any id
-        missing from the batch-read lookup dicts (e.g. the batch read failed, or a
-        stale reference) is silently skipped for that one axis rather than failing
-        the whole variant — partial attribute data is better than none.
+        the full per-axis (attribute, value) list — see
+        docs/integrations/odoo-catalogue-variant-model.md's Pull direction section for
+        the underlying Odoo model this walks. Any id missing from the batch-read lookup
+        dicts (e.g. the batch read failed, or a stale reference) is silently skipped for
+        that one axis rather than failing the whole variant — partial attribute data is
+        better than none, and prices don't depend on it (see sync_prices).
         """
         ptav_ids = record.get("product_template_attribute_value_ids") or []
         resolved: list[ResolvedAttribute] = []
-        total_extra = Decimal(0)
         used_codes: set[str] = set()
 
         for ptav_id in ptav_ids:
@@ -849,8 +929,6 @@ class OdooCatalogueSyncService:
             if not attribute_ref:
                 continue
             odoo_attribute_id, attribute_name = attribute_ref[0], attribute_ref[1]
-            price_extra = Decimal(str(ptav.get("price_extra") or 0))
-            total_extra += price_extra
 
             code = self._attribute_code_for(odoo_attribute_id, attribute_name, used_codes)
             used_codes.add(code)
@@ -861,11 +939,10 @@ class OdooCatalogueSyncService:
                     attribute_name_en=attribute_name,
                     odoo_attribute_value_id=value_id,
                     value_label_en=attribute_value["name"],
-                    price_extra=price_extra,
                 )
             )
 
-        return resolved, total_extra
+        return resolved
 
     def _attribute_code_for(
         self, odoo_attribute_id: int, attribute_name: str, used_codes: set[str]
@@ -925,23 +1002,11 @@ class OdooCatalogueSyncService:
         *,
         run: OdooCatalogueSyncRun,
         variant_id_map: dict[int, uuid.UUID],
-        variant_records: dict[int, dict[str, Any]],
-        template_records: dict[int, dict[str, Any]],
-        price_extra_by_variant: dict[int, Decimal],
+        selling_prices: dict[int, dict[str, Any]],
     ) -> EntityCounts:
-        """No independent Odoo read: reuses the template/variant records already
-        fetched by sync_products/sync_variants this run (base price always comes from
-        product.template.list_price, plus this combination's summed attribute-value
-        price_extra from sync_variants — see _resolve_variant_attributes). Only
-        variants actually re-read this run have a price recomputed — a variant
-        unchanged since a prior run keeps its existing price row untouched.
-
-        Deliberately the mirror-image of the push side's decision NOT to write
-        price_extra (docs/integrations/odoo-catalogue-variant-model.md §4): here, Odoo
-        genuinely is the authoritative source for ops-defined per-combination pricing,
-        so reading it is the correct direction for that same authority split, not a
-        contradiction of the push side's decision (which was about writing, a
-        different direction with Postgres as the authority).
+        """Publishes Odoo's own lst_price for every variant, from the full sweep sync_all has
+        already reconciled. Only a real change writes, and only a change gets an audit row, so
+        a run every few minutes neither churns the table nor grows the audit log.
         """
         entity_type = "PRODUCT_PRICE"
         checkpoint = self.checkpoints.get_or_create(INTEGRATION_NAME, entity_type)
@@ -951,50 +1016,44 @@ class OdooCatalogueSyncService:
         counts = EntityCounts()
         try:
             for odoo_variant_id, variant_uuid in variant_id_map.items():
-                variant_record = variant_records.get(odoo_variant_id)
-                if variant_record is None:
-                    continue
-                tmpl_ref = variant_record.get("product_tmpl_id")
-                if not tmpl_ref:
-                    continue
-                tmpl_id: int = tmpl_ref[0]
-                template_record = template_records.get(tmpl_id)
-                if template_record is None:
+                record = selling_prices.get(odoo_variant_id)
+                if record is None:
                     continue
                 try:
-                    currency = (
-                        template_record["currency_id"][1]
-                        if template_record.get("currency_id")
-                        else "SAR"
-                    )
-                    amount = Decimal(
-                        str(template_record.get("list_price") or 0)
-                    ) + price_extra_by_variant.get(odoo_variant_id, Decimal(0))
-                    _, created, changed = self.prices.upsert_current(
+                    currency = record["currency_id"][1] if record.get("currency_id") else "SAR"
+                    amount = to_money(record["lst_price"])
+                    current = self.prices.get_current(variant_uuid, currency)
+                    if (
+                        current is not None
+                        and current.amount == amount
+                        and current.source_system == "odoo"
+                    ):
+                        current.last_synced_at = datetime.now(UTC)
+                        counts.record("SKIP_UNCHANGED")
+                        continue
+                    _, created, _ = self.prices.upsert_current(
                         variant_uuid,
                         currency,
                         {
                             "amount": amount,
                             "odoo_pricelist_id": None,
                             "source_system": "odoo",
-                            "source_updated_at": _parse_odoo_datetime(
-                                template_record.get("write_date")
-                            ),
+                            "source_updated_at": _parse_odoo_datetime(record.get("write_date")),
                             "last_synced_at": datetime.now(UTC),
                         },
                     )
-                    action = "CREATE" if created else ("UPDATE" if changed else "SKIP_UNCHANGED")
+                    action = "CREATE" if created else "UPDATE"
                     counts.record(action)
                     self._write_sync_item(
                         run=run,
                         entity_type=entity_type,
-                        odoo_model="product.template",
-                        odoo_record_id=tmpl_id,
+                        odoo_model="product.product",
+                        odoo_record_id=odoo_variant_id,
                         postgres_entity_id=variant_uuid,
                         match_strategy="ODOO_ID",
                         action=action,
                         result_status="SUCCEEDED",
-                        odoo_write_date=template_record.get("write_date"),
+                        odoo_write_date=record.get("write_date"),
                     )
                     self.session.commit()
                 except Exception as exc:  # noqa: BLE001
@@ -1003,8 +1062,8 @@ class OdooCatalogueSyncService:
                     self._write_sync_item(
                         run=run,
                         entity_type=entity_type,
-                        odoo_model="product.template",
-                        odoo_record_id=tmpl_id,
+                        odoo_model="product.product",
+                        odoo_record_id=odoo_variant_id,
                         postgres_entity_id=variant_uuid,
                         match_strategy=None,
                         action="FAILED",

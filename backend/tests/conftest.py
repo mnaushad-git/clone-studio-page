@@ -31,6 +31,9 @@ os.environ.setdefault("CELERY_BROKER_URL", "redis://localhost:6379/14")
 os.environ.setdefault("CELERY_RESULT_BACKEND", "redis://localhost:6379/13")
 os.environ.setdefault("CORS_ALLOWED_ORIGINS", "http://localhost:3000")
 os.environ.setdefault("TRUSTED_HOSTS", "localhost,127.0.0.1,testserver")
+# The suite creates many orders from one client; tests/integration/test_rate_limits.py
+# turns the limits on where they're under test.
+os.environ["RATE_LIMIT_ENABLED"] = "false"
 # Force Odoo "not configured" for the whole suite, regardless of what a developer's
 # .env has set for real local-Odoo development (Settings reads .env, and env vars take
 # priority over it — see app/core/config.py) — except when test_odoo_integration.py's

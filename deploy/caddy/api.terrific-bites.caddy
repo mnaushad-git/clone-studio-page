@@ -8,8 +8,14 @@
 api.terrific-bites.trunexus.ai {
 	encode gzip
 
-	# Matches the app's own expectation that it is only served over HTTPS.
-	header Strict-Transport-Security "max-age=31536000"
+	header {
+		# Matches the app's own expectation that it is only served over HTTPS.
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
 
 	reverse_proxy 127.0.0.1:18010 {
 		health_uri /api/v1/health

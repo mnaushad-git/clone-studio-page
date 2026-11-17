@@ -131,11 +131,22 @@ def test_live_stage_refuses_any_stub_provider() -> None:
     assert "PAYMENT_PROVIDER" not in str(excinfo.value)
 
 
+def test_live_stage_refuses_to_start_before_finance_approval() -> None:
+    with pytest.raises(ValidationError, match="FINANCE_RULES_APPROVED"):
+        Settings(
+            deployment_stage="live",
+            payment_provider="real_gateway",
+            notification_provider="real_sender",
+            odoo_order_push_provider="live",
+        )
+
+
 def test_live_stage_accepts_only_real_providers() -> None:
     settings = Settings(
         deployment_stage="live",
         payment_provider="real_gateway",
         notification_provider="real_sender",
         odoo_order_push_provider="live",
+        finance_rules_approved=True,
     )
     assert settings.is_demo_stage is False

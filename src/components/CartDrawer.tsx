@@ -13,8 +13,8 @@ import {
   selectTotal,
   selectDeliveryFee,
   selectCartCount,
-  selectMinOrder,
 } from "@/lib/store";
+import { MinOrderNotice, useMinOrder } from "@/components/MinOrderNotice";
 import { useAdmin } from "@/lib/admin-store";
 import { getProduct, products } from "@/lib/products";
 import { formatAttributes } from "@/lib/format-variant-attributes";
@@ -39,9 +39,8 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
   const isAuthed = !!user;
   const settings = useAdmin((s) => s.settings);
   const loyaltyCfg = useAdmin((s) => s.loyalty);
-  const taxRate = (settings.taxRate ?? 5) / 100;
-  const minOrder = selectMinOrder();
-  const belowMin = minOrder > 0 && subtotal < minOrder;
+  const taxRate = (settings.taxRate ?? 15) / 100;
+  const minOrder = useMinOrder();
   const [code, setCode] = useState("");
   const [ptsInput, setPtsInput] = useState("");
   const [err, setErr] = useState<string | null>(null);
@@ -333,29 +332,22 @@ export function CartDrawer({ open, onClose }: { open: boolean; onClose: () => vo
 
             {/* Actions */}
             <div className="space-y-2">
-              {belowMin && (
-                <p className="text-xs text-destructive text-center">
-                  {t("cartMinOrderPrefix")} SAR {minOrder.toFixed(2)}. {t("cartMinOrderAddPrefix")}{" "}
-                  SAR {(minOrder - subtotal).toFixed(2)} {t("cartMinOrderAddSuffix")}
-                </p>
-              )}
-              {isAuthed ? (
-                belowMin ? (
-                  <button
-                    disabled
-                    className="block w-full text-center bg-primary/50 text-primary-foreground rounded-md py-3 font-semibold cursor-not-allowed"
-                  >
-                    {t("cartCheckout")}
-                  </button>
-                ) : (
-                  <Link
-                    to="/customize"
-                    onClick={onClose}
-                    className="block text-center bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 transition"
-                  >
-                    {t("cartCheckout")}
-                  </Link>
-                )
+              <MinOrderNotice message={minOrder.message} />
+              {minOrder.blocked ? (
+                <button
+                  disabled
+                  className="block w-full text-center bg-primary/50 text-primary-foreground rounded-md py-3 font-semibold cursor-not-allowed"
+                >
+                  {isAuthed ? t("cartCheckout") : t("cartSignInToCheckout")}
+                </button>
+              ) : isAuthed ? (
+                <Link
+                  to="/customize"
+                  onClick={onClose}
+                  className="block text-center bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 transition"
+                >
+                  {t("cartCheckout")}
+                </Link>
               ) : (
                 <Link
                   to="/login"

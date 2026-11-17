@@ -9,14 +9,34 @@ step-by-step operational sequence.
 
 ## Status
 
-Import functionality is fully implemented and safe to run in `--validate`/`--plan`/
-`--dry-run` mode today. **`--apply` is blocked** — `D03`, `D04`, `D08`, `D10`, `D19` in
-[data/catalogue/catalogue-business-approvals.json](../../data/catalogue/catalogue-business-approvals.json)
-are still `PROPOSED`. See [odoo-import-approval-gate.md](odoo-import-approval-gate.md).
+Import functionality is fully implemented. `--validate`, `--plan` and `--dry-run` make no
+writes to Odoo. What `--apply` may do depends on which Odoo instance it targets.
 
-Variant/attribute writes (below) are gated **independently** by `D20`, also still
-`PROPOSED` — category/product-template creation can be approved and applied on its own
-timeline without also blessing the newer, higher-risk attribute write surface.
+| Activity | Development (`terrific_dev`) | Production Odoo |
+|---|---|---|
+| Read-only: `--validate`, `--plan`, `--dry-run` | Allowed | Allowed once the production instance and read-only credentials are provided |
+| Category and product-template `--apply` | Approved (`D03`, `D04`, `D08`, `D10`, `D19`). A run on 2026-07-29 reconciled cleanly | **Not authorized.** Needs separate written authorization |
+| Attribute and variant `--apply` | Approved (`D23`), based on a plan reviewed against `terrific_dev` | **Not authorized.** Needs a new `--validate` and `--plan` against production, a review, and separate written authorization |
+
+The decisions are recorded in
+[data/catalogue/catalogue-business-approvals.json](../../data/catalogue/catalogue-business-approvals.json).
+See [odoo-import-approval-gate.md](odoo-import-approval-gate.md).
+
+Before any production import, `D03`, `D04`, `D08`, `D10` and `D19` have to be confirmed for
+production. Their records don't name an environment, and the only applied run was on
+`terrific_dev`, so they shouldn't be read as production approval. No production Odoo instance
+has been chosen yet.
+
+**The approval gate doesn't enforce this table.** It checks the approvals file but not which
+Odoo instance `ODOO_BASE_URL` points to, so `--apply` against production would pass it. Until
+the gate is environment-aware, the production column is a rule for operators to follow. Never
+put production Odoo credentials on a machine or in a deployment where `--apply` could be run
+without that authorization.
+
+Variant and attribute writes are gated **independently** by `D23`, so category and
+product-template creation can be applied on its own timeline without also covering the newer,
+higher-risk attribute write surface. `D23` was numbered `D20` until 2026-11; `D20` now refers
+only to the external-id strategy in `catalogue-decisions.json`.
 
 ## Write-path architecture
 
@@ -58,7 +78,7 @@ Exactly the sequence below (`app/services/catalogue/odoo_import_service.py::run_
 16. Apply variant SKU where required (`product.product.write`, only if the
     auto-created variant's `default_code` doesn't already match)
 17. Import shared attributes (`product.attribute.create`, matched by name first — see
-    Variant strategy below; gated by `D20`, independent of `D03/D04/D08/D10/D19`)
+    Variant strategy below; gated by `D23`, independent of `D03/D04/D08/D10/D19`)
 18. Import attribute values, scoped to their attribute (`product.attribute.value.create`)
 19. Import per-product attribute lines and read back the resulting combination
     variants (`product.template.attribute.line.create`/`.write`, then
@@ -132,7 +152,7 @@ the `create_variant="always"` requirement) lives in
   always `BLOCKED` (a human acts in Odoo directly), since Odoo may delete a
   `product.product` that already has stock/sale history. No `unlink`/archive on any
   attribute-family model is ever on the write allowlist.
-- Gated by `D20` (independent of `D03/D04/D08/D10/D19`) — see Status above.
+- Gated by `D23` (independent of `D03/D04/D08/D10/D19`) — see Status above.
 
 ## CLI
 

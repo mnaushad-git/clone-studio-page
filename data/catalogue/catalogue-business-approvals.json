@@ -178,7 +178,9 @@
       "blocks_import": true
     },
     {
-      "decision_id": "D20",
+      "decision_id": "D23",
+      "previous_decision_id": "D20",
+      "renumbering_note": "Identifier changed from D20 to D23 because D20 in catalogue-decisions.json is a different decision (the Odoo external-id strategy). This is not a new approval: the status, approver, date, notes and evidence below are the original record, and the evidence text still reflects the plan reviewed under the old identifier.",
       "title": "Odoo native product-attribute/variant modeling activation",
       "proposed_value": {
         "write_surface": "product.attribute / product.attribute.value / product.template.attribute.line (create_variant='always')",

@@ -41,7 +41,9 @@ from app.integrations.odoo.client import OdooClient
 from app.integrations.odoo.config import OdooConfig
 from app.integrations.odoo.exceptions import OdooConfigurationError, OdooIntegrationError
 from app.integrations.odoo.repositories.attributes import OdooAttributeRepository
+from app.integrations.odoo.repositories.products import OdooProductRepository
 from app.integrations.odoo.write_client import ImportExecutionContext, OdooWriteClient, WriteAudit
+from app.integrations.odoo.write_target_guard import assert_odoo_write_target_approved
 from app.models.integration.odoo_import_item import OdooCatalogueImportItem
 from app.models.integration.odoo_import_run import OdooCatalogueImportRun
 from app.repositories.catalogue.category_repository import CategoryRepository
@@ -72,6 +74,15 @@ from app.services.catalogue.odoo_import_planning import (
     plan_variants,
     unresolved_attribute_values,
 )
+from app.services.catalogue.variant_pricing import (
+    OdooVariantPrice,
+    PriceExtraTarget,
+    PriceReconciliation,
+    expected_variant_prices,
+    price_extra_targets,
+    reconcile_variant_prices,
+    to_money,
+)
 
 logger = logging.getLogger("app.services.catalogue.odoo_import_service")
 
@@ -97,6 +108,7 @@ class ApplyResult:
     run: OdooCatalogueImportRun
     items: list[OdooCatalogueImportItem]
     blocked_reason: str | None = None
+    price_reconciliation: PriceReconciliation | None = None
 
 
 def _connect() -> tuple[OdooClient | None, str | None]:
@@ -432,6 +444,7 @@ class OdooCatalogueImportService:
         )
         self.import_runs.create(run)
 
+        assert_odoo_write_target_approved(get_settings())
         exec_context = ImportExecutionContext(
             run_id=run.id, correlation_id=correlation_id, initiated_by=initiated_by, mode="APPLY"
         )
@@ -543,12 +556,24 @@ class OdooCatalogueImportService:
 
         _, canonical_products = _load_canonical_catalogue()
         image_items, image_created, image_matched, image_failed = self._apply_images(
-            write_client, canonical_products, product_odoo_ids
+            write_client, canonical_products, product_odoo_ids, client
         )
         items.extend(image_items)
         created_count += image_created
         skipped_count += image_matched
         failed_count += image_failed
+
+        price_items, price_updated, price_matched, price_failed = self._apply_variant_prices(
+            write_client,
+            client,
+            canonical_products,
+            product_odoo_ids,
+            attribute_value_odoo_ids,
+        )
+        items.extend(price_items)
+        updated_count += price_updated
+        skipped_count += price_matched
+        failed_count += price_failed
 
         final_status = "SUCCEEDED"
         if failed_count and (created_count or updated_count):
@@ -558,6 +583,20 @@ class OdooCatalogueImportService:
         elif plan.blocked_items:
             final_status = "PARTIALLY_COMPLETED"
 
+        # The run only succeeds if Odoo now really sells every variant at its approved price.
+        error_summary: str | None = None
+        price_reconciliation: PriceReconciliation | None = None
+        try:
+            price_reconciliation = self._reconcile_variant_prices(
+                client, canonical_products, require_all=not allow_partial
+            )
+            if not price_reconciliation.ok:
+                final_status = "FAILED"
+                error_summary = price_reconciliation.summary()
+        except OdooIntegrationError as exc:
+            final_status = "FAILED"
+            error_summary = f"Variant price reconciliation could not run: {exc}"
+
         self.import_runs.mark_status(
             run,
             final_status,
@@ -566,9 +605,164 @@ class OdooCatalogueImportService:
             actual_update_count=updated_count,
             actual_skip_count=skipped_count,
             actual_failed_count=failed_count,
+            error_summary=error_summary,
         )
 
-        return ApplyResult(run=run, items=items)
+        return ApplyResult(run=run, items=items, price_reconciliation=price_reconciliation)
+
+    def _apply_variant_prices(
+        self,
+        write_client: OdooWriteClient,
+        read_client: OdooClient,
+        products: list[dict[str, Any]],
+        product_odoo_ids: dict[str, int],
+        attribute_value_odoo_ids: dict[tuple[str, str], int],
+    ) -> tuple[list[OdooCatalogueImportItem], int, int, int]:
+        """Establishes each approved size delta as Odoo's price_extra. Reads before writing, so
+        a run after a timeout finds an already-committed value and leaves it. A value only gets
+        written while it's still zero: anything else was set deliberately in Odoo, which owns
+        price, so it's reported as a conflict and left for a person to resolve.
+        """
+        targets = price_extra_targets(products)
+        if not product_odoo_ids or not targets:
+            return [], 0, 0, 0
+
+        current: dict[tuple[int, int], dict[str, Any]] = {}
+        for ptav in OdooAttributeRepository(read_client).iter_template_values(
+            list(product_odoo_ids.values()),
+            max_records=get_settings().odoo_catalogue_sync_max_records,
+            correlation_id=write_client.context.correlation_id,
+        ):
+            current[(ptav["product_tmpl_id"][0], ptav["product_attribute_value_id"][0])] = ptav
+
+        items: list[OdooCatalogueImportItem] = []
+        updated = matched = failed = 0
+        for target in targets:
+            template_id = product_odoo_ids.get(target.product_external_key)
+            value_id = attribute_value_odoo_ids.get((target.attribute_name, target.value_label))
+            if template_id is None or value_id is None:
+                continue  # Already recorded as blocked or failed by the variant pass.
+            item, outcome = self._apply_one_price_extra(
+                write_client, target, current.get((template_id, value_id))
+            )
+            if item is not None:
+                items.append(item)
+            updated += outcome == "UPDATE"
+            matched += outcome == "MATCH"
+            failed += outcome == "FAILED"
+        return items, updated, matched, failed
+
+    def _apply_one_price_extra(
+        self,
+        write_client: OdooWriteClient,
+        target: PriceExtraTarget,
+        ptav: dict[str, Any] | None,
+    ) -> tuple[OdooCatalogueImportItem | None, str]:
+        started_at = datetime.now(UTC)
+        proposed = {"price_extra": float(target.amount)}
+
+        def record(
+            planned: str,
+            actual: str,
+            status: str,
+            *,
+            before: dict[str, Any] | None = None,
+            written: dict[str, Any] | None = None,
+            error: tuple[str, str] | None = None,
+        ) -> OdooCatalogueImportItem:
+            item = OdooCatalogueImportItem(
+                import_run_id=write_client.context.run_id,
+                entity_type="PRODUCT_VARIANT",
+                canonical_external_key=target.external_key,
+                canonical_name=(
+                    f"{target.product_name}: {target.attribute_name} = {target.value_label}"
+                ),
+                odoo_model="product.template.attribute.value",
+                planned_action=planned,
+                actual_action=actual,
+                odoo_record_id=ptav["id"] if ptav else None,
+                before_state_json=before,
+                proposed_values_json=proposed,
+                written_values_json=written,
+                result_status=status,
+                error_code=error[0] if error else None,
+                error_message=error[1] if error else None,
+                started_at=started_at,
+                completed_at=datetime.now(UTC),
+            )
+            self.import_items.create(item)
+            return item
+
+        if ptav is None:
+            item = record(
+                "UPDATE",
+                "SKIP",
+                "FAILED",
+                error=(
+                    "PRICE_EXTRA_TARGET_NOT_FOUND",
+                    f"{target.value_label!r} is not an active value on this Odoo product.",
+                ),
+            )
+            return item, "FAILED"
+
+        actual = to_money(ptav.get("price_extra"))
+        before = {"price_extra": float(actual)}
+        if actual == target.amount:
+            if target.amount == 0:
+                return None, "UNCHANGED"
+            return record("MATCH", "MATCH", "SUCCEEDED", before=before), "MATCH"
+
+        if actual != 0:
+            item = record(
+                "UPDATE",
+                "SKIP",
+                "FAILED",
+                before=before,
+                error=(
+                    "PRICE_EXTRA_CONFLICT",
+                    f"Odoo has price_extra {actual}, approved value is {target.amount}. "
+                    "Not overwritten.",
+                ),
+            )
+            return item, "FAILED"
+
+        try:
+            write_client.write(
+                "product.template.attribute.value",
+                [ptav["id"]],
+                proposed,
+                audit=WriteAudit(
+                    entity_type="PRODUCT_VARIANT",
+                    canonical_external_key=target.external_key,
+                    planned_operation="UPDATE",
+                    before_state=before,
+                ),
+            )
+        except OdooIntegrationError as exc:
+            item = record(
+                "UPDATE",
+                "UPDATE",
+                "FAILED",
+                before=before,
+                error=(type(exc).__name__, str(exc)),
+            )
+            return item, "FAILED"
+        return record("UPDATE", "UPDATE", "SUCCEEDED", before=before, written=proposed), "UPDATE"
+
+    def _reconcile_variant_prices(
+        self, client: OdooClient, products: list[dict[str, Any]], *, require_all: bool
+    ) -> PriceReconciliation:
+        expected = expected_variant_prices(products)
+        if not expected:
+            return PriceReconciliation(rows=())
+        actual_by_sku = {
+            record["default_code"]: OdooVariantPrice(record["id"], to_money(record["lst_price"]))
+            for record in OdooProductRepository(client).iter_variant_prices(
+                domain=[], max_records=get_settings().odoo_catalogue_sync_max_records
+            )
+            if record.get("default_code")
+        }
+        return reconcile_variant_prices(expected, actual_by_sku, require_all=require_all)
 
     def _apply_category_item(
         self, write_client: OdooWriteClient, plan_item: ImportPlanItem
@@ -610,6 +804,7 @@ class OdooCatalogueImportService:
                 completed_at=datetime.now(UTC),
             )
             self.import_items.create(item)
+            self._finish_recovered_create(write_client, plan_item, "product.category")
             self._adopt_category_odoo_id(plan_item.canonical_external_key, odoo_id)
             return item, odoo_id
 
@@ -704,6 +899,7 @@ class OdooCatalogueImportService:
                 completed_at=datetime.now(UTC),
             )
             self.import_items.create(item)
+            self._finish_recovered_create(write_client, plan_item, "product.template")
             self._adopt_product_odoo_id(plan_item.canonical_external_key, odoo_id)
             return item, odoo_id
 
@@ -1270,6 +1466,7 @@ class OdooCatalogueImportService:
         write_client: OdooWriteClient,
         products: list[dict[str, Any]],
         product_odoo_ids: dict[str, int],
+        read_client: OdooClient,
     ) -> tuple[list[OdooCatalogueImportItem], int, int, int]:
         """Uploads the primary image (product.template.image_1920) and gallery images
         (product.image) for every product whose template was created/matched this run.
@@ -1289,7 +1486,13 @@ class OdooCatalogueImportService:
             primary = product.get("primary_image")
             if primary and primary.get("original_path"):
                 item, outcome = self._apply_one_image(
-                    write_client, product, template_id, primary, role="PRIMARY", display_order=0
+                    write_client,
+                    read_client,
+                    product,
+                    template_id,
+                    primary,
+                    role="PRIMARY",
+                    display_order=0,
                 )
                 items.append(item)
                 created += outcome == "CREATE"
@@ -1300,7 +1503,13 @@ class OdooCatalogueImportService:
                 if not img.get("original_path"):
                     continue
                 item, outcome = self._apply_one_image(
-                    write_client, product, template_id, img, role="GALLERY", display_order=idx + 1
+                    write_client,
+                    read_client,
+                    product,
+                    template_id,
+                    img,
+                    role="GALLERY",
+                    display_order=idx + 1,
                 )
                 items.append(item)
                 created += outcome == "CREATE"
@@ -1312,6 +1521,7 @@ class OdooCatalogueImportService:
     def _apply_one_image(
         self,
         write_client: OdooWriteClient,
+        read_client: OdooClient,
         product: dict[str, Any],
         template_id: int,
         img: dict[str, Any],
@@ -1373,20 +1583,31 @@ class OdooCatalogueImportService:
                 odoo_id = template_id
                 model = "product.template"
             else:
-                audit = WriteAudit(
-                    entity_type="PRODUCT_IMAGE",
-                    canonical_external_key=image_external_key,
-                    planned_operation="CREATE",
-                )
-                odoo_id = write_client.create(
+                image_name = f"{product['slug']}-{display_order}"
+                # A create that timed out may have committed, with no audit row to show for it.
+                committed = read_client.search_read(
                     "product.image",
-                    {
-                        "product_tmpl_id": template_id,
-                        "name": f"{product['slug']}-{display_order}",
-                        "image_1920": encoded,
-                    },
-                    audit=audit,
-                )
+                    [["product_tmpl_id", "=", template_id], ["name", "=", image_name]],
+                    ["id"],
+                    limit=1,
+                ).records
+                if committed:
+                    odoo_id = int(committed[0]["id"])
+                else:
+                    audit = WriteAudit(
+                        entity_type="PRODUCT_IMAGE",
+                        canonical_external_key=image_external_key,
+                        planned_operation="CREATE",
+                    )
+                    odoo_id = write_client.create(
+                        "product.image",
+                        {
+                            "product_tmpl_id": template_id,
+                            "name": image_name,
+                            "image_1920": encoded,
+                        },
+                        audit=audit,
+                    )
                 model = "product.image"
 
             item = OdooCatalogueImportItem(
@@ -1428,6 +1649,13 @@ class OdooCatalogueImportService:
             )
             self.import_items.create(item)
             return item, "FAILED"
+
+    def _finish_recovered_create(
+        self, write_client: OdooWriteClient, plan_item: ImportPlanItem, model: str
+    ) -> None:
+        """A record found only by its import key never got its external ID."""
+        if plan_item.match_strategy == "IMPORT_KEY" and plan_item.existing_odoo_id:
+            self._pin_xml_id(write_client, model, plan_item.xml_id_name, plan_item.existing_odoo_id)
 
     def _pin_xml_id(
         self, write_client: OdooWriteClient, model: str, xml_id_name: str, res_id: int
@@ -1554,6 +1782,14 @@ class OdooCatalogueImportService:
                     proposed = item.proposed_values_json or item.written_values_json or {}
                     for field_name, expected in proposed.items():
                         actual = record.get(field_name)
+                        # Odoo blanks a template's SKU once it has several variants. The
+                        # SKUs themselves are checked on the variant items.
+                        if (
+                            model == "product.template"
+                            and field_name == "default_code"
+                            and actual is False
+                        ):
+                            continue
                         # Any many2one field (categ_id, uom_id, ...) reads back as Odoo's
                         # [id, display_name] pair, never a bare id — unwrap it before
                         # comparing against the scalar id we originally wrote.
@@ -1601,6 +1837,16 @@ class OdooCatalogueImportService:
             self._check_duplicate_attribute_names(client) if client is not None else []
         )
 
+        variant_prices: PriceReconciliation | None = None
+        if client is not None:
+            _, canonical_products = _load_canonical_catalogue()
+            try:
+                variant_prices = self._reconcile_variant_prices(
+                    client, canonical_products, require_all=True
+                )
+            except OdooIntegrationError as exc:
+                errors.append(f"Could not reconcile variant prices: {exc}")
+
         return {
             "generated_at": datetime.now(UTC).isoformat(),
             "run_id": str(run.id),
@@ -1610,12 +1856,15 @@ class OdooCatalogueImportService:
             "items_checked": checked,
             "field_mismatches": mismatches,
             "postgresql_mapping_mismatches": postgres_mismatches,
+            "variant_prices": variant_prices.to_dict() if variant_prices else None,
             "errors": errors,
             "clean": (
                 not mismatches
                 and not postgres_mismatches
                 and not errors
                 and not duplicate_attribute_warnings
+                and variant_prices is not None
+                and variant_prices.ok
             ),
         }
 

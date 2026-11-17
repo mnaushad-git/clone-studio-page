@@ -3,6 +3,14 @@
 Describes why re-running `import_odoo_catalogue --apply` against unchanged canonical
 data is safe and produces zero duplicate writes.
 
+## After a timeout
+
+Each category, product and attribute is created with `tb_import_key`, its canonical external key,
+under a `UNIQUE` index added by the `terrific_order_sync` addon. A create that timed out but
+committed has no external ID yet, so the next run finds it by that key, adopts it and pins the
+external ID. A create still committing can't produce a second copy, because the index rejects it.
+Planning raises if the field is missing, since a duplicate couldn't then be ruled out.
+
 ## Matching priority (category and product alike)
 
 Implemented once, in `app/services/catalogue/odoo_import_planning.py`

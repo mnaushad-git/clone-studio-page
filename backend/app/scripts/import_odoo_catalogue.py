@@ -191,6 +191,10 @@ def _run_apply(args: argparse.Namespace) -> int:
         f"skipped={result.run.actual_skip_count} "
         f"failed={result.run.actual_failed_count}"
     )
+    if result.price_reconciliation is not None:
+        print(f"  {result.price_reconciliation.summary()}")
+        if args.output:
+            _write_report(args.output, result.price_reconciliation.to_dict())
     return 0 if result.run.status == "SUCCEEDED" else 1
 
 
@@ -220,6 +224,16 @@ def _run_reconcile(args: argparse.Namespace) -> int:
         print(
             f"PostgreSQL mapping mismatches: {len(report.get('postgresql_mapping_mismatches', []))}"
         )
+        prices = report.get("variant_prices") or {}
+        print(
+            f"Variant prices: {prices.get('variants_matching')} of "
+            f"{prices.get('variants_checked')} match Odoo"
+        )
+        for row in prices.get("mismatches", []):
+            print(
+                f"  - {row['product']} / {row['variant']} [{row['sku']}]: "
+                f"expected {row['expected_price']}, actual {row['actual_price']}"
+            )
         print(f"\nFull report written to {output}")
     return 0 if report.get("clean") else 1
 

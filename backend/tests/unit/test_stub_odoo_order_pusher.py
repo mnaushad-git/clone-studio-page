@@ -9,6 +9,10 @@ def test_stub_pusher_always_succeeds_and_never_calls_a_real_odoo_instance() -> N
     result = pusher.push_order(
         order_number="TB-ABC123",
         total_amount=58.15,
+        tax_amount=7.58,
+        discount_amount=0.0,
+        delivery_fee_amount=10.21,
+        promo_code=None,
         currency="SAR",
         customer_name="Sara M.",
         customer_phone="+966500000000",

@@ -9,6 +9,10 @@ first mark it completed and hide it from the other.
 
 Never charges an order that isn't pending_payment (ConflictError) — this is what makes
 double-submitting the payment button, or retrying after a network blip, safe.
+
+Also refuses a provider that doesn't match the order. A stub marks an order paid without
+taking money, so outside local development it may only touch demo orders. A real provider
+takes real money, so it may never touch a demo order.
 """
 
 from __future__ import annotations
@@ -37,6 +41,20 @@ class PaymentService:
         self.outbox = OrderOutboxRepository(session)
         self.settings = get_settings()
 
+    def _refuse_provider_mismatch(self, order: Order, provider_name: str) -> None:
+        is_stub = provider_name == "stub"
+        stub_allowed_for_real_orders = self.settings.deployment_stage in (
+            "development",
+            "local_integration",
+        )
+        if is_stub and not order.is_demo and not stub_allowed_for_real_orders:
+            raise ConflictError(
+                f"Order {order.order_number} is not a demo order and can't be paid on a demo "
+                "deployment."
+            )
+        if not is_stub and order.is_demo:
+            raise ConflictError(f"Order {order.order_number} is a demo order and can't be charged.")
+
     def pay_order(self, order_id: uuid.UUID, method_label: str) -> Order:
         order = self.orders.get_by_id_with_items(order_id)
         if order is None:
@@ -47,6 +65,7 @@ class PaymentService:
             )
 
         provider = get_payment_provider(self.settings)
+        self._refuse_provider_mismatch(order, provider.name)
         result = provider.charge(
             amount=float(order.total_amount),
             currency=order.currency,

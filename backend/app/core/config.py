@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 from typing import Annotated
+from urllib.parse import urlsplit
 
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
@@ -19,7 +20,10 @@ from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 INSECURE_ADMIN_JWT_SECRET = "dev-insecure-admin-jwt-secret-change-me"
 MIN_PRODUCTION_JWT_SECRET_LENGTH = 32
 _LOCAL_HOST_MARKERS = ("localhost", "127.0.0.1", "0.0.0.0", "[::1]")
-DEPLOYMENT_STAGES = ("development", "demo", "live")
+DEPLOYMENT_STAGES = ("development", "demo", "local_integration", "live")
+# The hosts a local_integration deployment may push real sale orders to.
+LOCAL_ODOO_HOSTS = ("localhost", "127.0.0.1", "terrific-odoo")
+ODOO_CREDENTIAL_FREE_ROLES = ("api", "beat", "migrate")
 
 SECRET_FIELD_NAMES: frozenset[str] = frozenset(
     {
@@ -48,9 +52,13 @@ class Settings(BaseSettings):
     app_env: str = "development"
     debug: bool = False
     # development: local work. demo: Stage A, every external provider must be a stub and
-    # every order is permanently marked is_demo. live: Stage B, every provider must be
-    # real. See docs/deployment/production-runbook.md.
+    # every order is permanently marked is_demo. local_integration: real sale orders into
+    # an isolated local Odoo, payments and notifications stubbed, never on production. live:
+    # Stage B, every provider must be real. See docs/deployment/production-runbook.md.
     deployment_stage: str = "development"
+    # Which process this is, so that _refuse_odoo_credentials_outside_workers can hold each
+    # one to the credentials its job needs. Blank is local development and tests.
+    service_role: str = ""
 
     # API
     api_v1_prefix: str = "/api/v1"
@@ -120,7 +128,10 @@ class Settings(BaseSettings):
     # (src/lib/admin-store.ts SiteSettings) since admin settings aren't backend-owned
     # yet (Launch Sprint scope). Server-authoritative regardless: checkout always
     # recomputes from these, never from a client-submitted tax/delivery/total value.
-    checkout_tax_rate_percent: float = 5.0
+    # 15% Saudi VAT, with every price (and, below, the delivery fee) VAT-inclusive. Proposed
+    # rules awaiting client finance approval, see docs/integrations/odoo-order-financials.md.
+    checkout_tax_rate_percent: float = 15.0
+    checkout_delivery_vat_applies: bool = True
     checkout_default_delivery_fee: float = 15.0
     checkout_free_delivery_threshold: float = 0.0
     checkout_min_order_amount: float = 30.0
@@ -133,6 +144,19 @@ class Settings(BaseSettings):
     # creates a real sale.order (see LiveOdooOrderPusher). See
     # app/integrations/odoo/order_push_factory.py for the swap point.
     odoo_order_push_provider: str = "stub"
+    # Every Odoo write is refused unless this is exactly <ODOO_BASE_URL>#<ODOO_DATABASE>.
+    # See app/integrations/odoo/write_target_guard.py.
+    odoo_write_approved_target: str = ""
+
+    # Set only once the client's finance team has approved the VAT and delivery treatment.
+    # DEPLOYMENT_STAGE=live refuses to start without it.
+    finance_rules_approved: bool = False
+
+    # Automatic retries of a failed order push: the delay doubles from the base up to the
+    # maximum, and the event is dead-lettered for an operator after max_attempts.
+    order_sync_max_attempts: int = 8
+    order_sync_retry_base_seconds: int = 120
+    order_sync_retry_max_seconds: int = 3600
 
     # "stub" (Launch Sprint default, explicit decision) never sends a real email/SMS.
     # See app/integrations/notifications/factory.py for the swap point.
@@ -164,6 +188,13 @@ class Settings(BaseSettings):
     # Dashboard "stuck order" threshold (task brief §4) — an order paid/processing for
     # longer than this with no forward progress surfaces as an operational alert.
     ops_stuck_order_minutes: int = 30
+    # app/core/rate_limit.py: per-IP limits on the public order endpoints. A shopper places a
+    # handful of orders at most, so these only stop automated abuse.
+    rate_limit_enabled: bool = True
+    rate_limit_order_create_per_10_min: int = 20
+    rate_limit_order_pay_per_10_min: int = 20
+    rate_limit_order_lookup_per_minute: int = 60
+
     # app/services/ops/health_monitor.py: alert thresholds for the operational check.
     ops_heartbeat_max_age_seconds: int = 300
     ops_outbox_max_age_minutes: int = 15
@@ -252,7 +283,35 @@ class Settings(BaseSettings):
             wrong = sorted(name for name, value in providers.items() if value == "stub")
             if wrong:
                 raise ValueError(f"DEPLOYMENT_STAGE=live refuses stub for: {', '.join(wrong)}")
+            if not self.finance_rules_approved:
+                raise ValueError(
+                    "DEPLOYMENT_STAGE=live requires FINANCE_RULES_APPROVED=true, set once the "
+                    "client's finance team has approved the VAT and delivery treatment"
+                )
+        if self.deployment_stage == "local_integration":
+            self._check_local_integration()
         return self
+
+    @model_validator(mode="after")
+    def _refuse_odoo_credentials_outside_workers(self) -> Settings:
+        """The API and scheduler never talk to Odoo, so a credential there is only exposure."""
+        if self.service_role in ODOO_CREDENTIAL_FREE_ROLES and (
+            self.odoo_password or self.odoo_api_key
+        ):
+            raise ValueError(f"SERVICE_ROLE={self.service_role} must not hold Odoo credentials")
+        return self
+
+    def _check_local_integration(self) -> None:
+        if self.app_env == "production":
+            raise ValueError("DEPLOYMENT_STAGE=local_integration is refused in production")
+        if self.payment_provider != "stub" or self.notification_provider != "stub":
+            raise ValueError(
+                "DEPLOYMENT_STAGE=local_integration requires stub payments and notifications"
+            )
+        if self.odoo_order_push_provider != "live":
+            raise ValueError("DEPLOYMENT_STAGE=local_integration requires the live Odoo pusher")
+        if urlsplit(self.odoo_base_url).hostname not in LOCAL_ODOO_HOSTS:
+            raise ValueError("DEPLOYMENT_STAGE=local_integration requires a local Odoo host")
 
     @model_validator(mode="after")
     def _refuse_unsafe_production_config(self) -> Settings:

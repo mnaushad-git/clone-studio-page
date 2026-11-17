@@ -7,7 +7,7 @@ totals a customer is actually charged always come from this module.
 
 Prices are VAT-inclusive (matches the Storefront's D08/D21 convention, see
 src/lib/store.ts): tax reported here is the VAT portion already folded into the
-subtotal, never added on top of it.
+subtotal and delivery fee, never added on top of them.
 
 Promo codes and delivery pricing are Admin-Portal-managed (promo_codes,
 delivery_settings/delivery_slots — task brief §11/§12), not env config or a hardcoded
@@ -24,7 +24,7 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.schemas.checkout import CheckoutItemIn
 from app.core.config import get_settings
-from app.core.exceptions import NotFoundError, ValidationAppError
+from app.core.exceptions import MinimumOrderNotMetError, NotFoundError, ValidationAppError
 from app.models.admin.promo_code import PromoCode
 from app.models.catalogue.product import CatalogueProduct
 from app.models.catalogue.product_variant import CatalogueProductVariant
@@ -203,16 +203,17 @@ class CheckoutPricingService:
         net = max(0.0, subtotal - discount)
         min_order = float(delivery.minimum_order_amount)
         if net < min_order:
-            raise ValidationAppError(f"Minimum order is {min_order:.2f} {currency}.")
-
-        rate = self.settings.checkout_tax_rate_percent / 100
-        tax = _round((net * rate) / (1 + rate))
+            raise MinimumOrderNotMetError(f"Minimum order is {min_order:.2f} {currency}.")
 
         threshold = float(delivery.free_delivery_threshold)
         delivery_fee = (
             0.0 if threshold > 0 and net >= threshold else float(delivery.flat_delivery_fee)
         )
         delivery_fee = _round(delivery_fee)
+
+        rate = self.settings.checkout_tax_rate_percent / 100
+        vat_inclusive = net + delivery_fee if self.settings.checkout_delivery_vat_applies else net
+        tax = _round((vat_inclusive * rate) / (1 + rate))
 
         total = _round(net + delivery_fee)
 

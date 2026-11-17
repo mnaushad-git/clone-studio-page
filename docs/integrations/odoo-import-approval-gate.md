@@ -76,13 +76,15 @@ in-process (not by shelling out to the CLI) — the two can never disagree.
 
 ## Current status
 
-As of this phase's implementation, running the checker against the real file reports:
+Running the checker against the real file reports:
 
 ```
-Blocking decisions approved: 0
-Unresolved decisions: 5   (D03, D04, D08, D10, D19 — all PROPOSED)
+Blocking decisions approved: 5   (D03, D04, D08, D10, D19)
+Unresolved decisions: 0
 Rejected decisions: 0
-Non-blocking decisions (informational): 1   (D09 — APPROVED)
+Non-blocking decisions (informational): 2   (D09, D23 — both APPROVED)
 ```
 
-`--apply` is refused until this changes.
+So the gate is satisfied. It doesn't look at which Odoo instance is targeted, and these
+approvals don't authorize production writes: see the table in
+[odoo-catalogue-import.md](odoo-catalogue-import.md).

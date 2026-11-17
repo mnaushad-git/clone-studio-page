@@ -84,7 +84,7 @@ function TrackPage() {
 
   const share = async () => {
     if (navigator.share) {
-      try { await navigator.share({ title: `Terrific Bites order ${order.id}`, url: shareUrl }); } catch {}
+      try { await navigator.share({ title: `Terrific Bites order ${order.id}`, url: shareUrl }); } catch { /* The shopper closed the share sheet. */ }
     } else {
       copyLink();
     }

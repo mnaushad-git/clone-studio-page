@@ -1,0 +1,14 @@
+# Allow-list: only what the frontend build needs reaches the build context.
+*
+!package.json
+!package-lock.json
+!vite.config.ts
+!tsconfig.json
+!components.json
+!public
+!src
+# Tracked and holds only the publishable Supabase values the bundle still references.
+# .env.production is left out so that build args alone decide the API address.
+!.env
+**/*.test.ts
+**/*.test.tsx

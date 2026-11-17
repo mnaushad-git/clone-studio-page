@@ -60,7 +60,7 @@ function ContentPage() {
             <div className="grid grid-cols-2 gap-3">
               <Field label="CTA label"><Input value={form.ctaLabel} onChange={(e) => setForm({ ...form, ctaLabel: e.target.value })} /></Field>
               <Field label="CTA link"><Input value={form.ctaLink} onChange={(e) => setForm({ ...form, ctaLink: e.target.value })} placeholder="/cupcakes" /></Field>
-              <Field label="Position"><Select value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value as any })}><option value="hero">Hero</option><option value="midpage">Mid-page</option><option value="footer">Footer</option></Select></Field>
+              <Field label="Position"><Select value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value as typeof form.position })}><option value="hero">Hero</option><option value="midpage">Mid-page</option><option value="footer">Footer</option></Select></Field>
               <Field label="Order"><Input type="number" value={form.order} onChange={(e) => setForm({ ...form, order: Number(e.target.value) })} /></Field>
             </div>
             <Field label="Image URL" hint="Paste a public URL or asset path"><Input value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} /></Field>

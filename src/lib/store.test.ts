@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
-import { cart, selectCartCount, selectDeliveryFee, selectSubtotal, selectTax, selectTotal, useStore } from "@/lib/store";
+import { cart, selectCartCount, selectDeliveryFee, selectMinOrderShortfall, selectSubtotal, selectTax, selectTotal, useStore } from "@/lib/store";
 import { registerProducts, type Product } from "@/lib/products";
 
 // These exercise the pure selectors directly against a hand-built State object rather
@@ -46,13 +46,14 @@ describe("VAT-inclusive checkout math (D08/D21)", () => {
     expect(total).not.toBe(+(subtotal + selectTax(state) + selectDeliveryFee(state)).toFixed(2));
   });
 
-  it("selectTax reports the VAT portion already included in the subtotal, not an add-on", () => {
-    const state = makeState([{ unitPrice: 105, qty: 1 }]);
+  it("selectTax reports the VAT portion already included in the order, not an add-on", () => {
+    const state = makeState([{ unitPrice: 115, qty: 1 }]);
 
-    // At a 5% rate, SAR 105 inclusive of VAT contains exactly SAR 5 of VAT
-    // (105 / 1.05 = 100 net, 100 * 0.05 = 5) — not 105 * 0.05 = 5.25, which is what
-    // the old (buggy) "VAT added on top" formula would have produced.
-    expect(selectTax(state)).toBe(5);
+    // At 15%, SAR 115 inclusive of VAT contains exactly SAR 15 of VAT — not
+    // 115 * 0.15 = 17.25, which is what the old "VAT added on top" formula would produce.
+    // The delivery fee is VAT-inclusive too (proposed rule, pending finance approval).
+    const fee = selectDeliveryFee(state);
+    expect(selectTax(state)).toBe(+(((115 + fee) * 15) / 115).toFixed(2));
   });
 
   it("an empty cart has zero subtotal, tax, and total", () => {
@@ -61,6 +62,20 @@ describe("VAT-inclusive checkout math (D08/D21)", () => {
     expect(selectSubtotal(state)).toBe(0);
     expect(selectTax(state)).toBe(0);
     expect(selectTotal(state)).toBe(0);
+  });
+});
+
+describe("minimum order", () => {
+  it("reports how much more an order below the minimum needs", () => {
+    expect(selectMinOrderShortfall(makeState([{ unitPrice: 12.5, qty: 2 }]))).toBe(5);
+  });
+
+  it("is met exactly at the minimum", () => {
+    expect(selectMinOrderShortfall(makeState([{ unitPrice: 15, qty: 2 }]))).toBe(0);
+  });
+
+  it("does not apply to an empty cart", () => {
+    expect(selectMinOrderShortfall(makeState([]))).toBe(0);
   });
 });
 

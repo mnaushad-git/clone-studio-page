@@ -1,0 +1,18 @@
+; Rendered to /tmp/odoo.conf by start-odoo.sh when the container starts, so that the master
+; password never lives in a tracked file or in the image.
+[options]
+addons_path = /usr/lib/python3/dist-packages/odoo/addons,/mnt/terrific-addons
+data_dir = /var/lib/odoo
+db_host = __DB_HOST__
+db_port = 5432
+db_user = terrific_odoo
+db_password = __DB_PASSWORD__
+db_name = terrific_odoo
+dbfilter = ^terrific_odoo$
+list_db = False
+admin_passwd = __ADMIN_PASSWD__
+proxy_mode = True
+; Threaded mode serves HTTP and the websocket on one port, which suits this traffic level.
+workers = 0
+limit_time_real = 300
+log_level = info

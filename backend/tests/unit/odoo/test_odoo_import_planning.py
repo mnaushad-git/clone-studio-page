@@ -2,8 +2,11 @@ from __future__ import annotations
 
 from typing import Any
 
+import pytest
+
 from app.integrations.odoo.client import OdooClient
 from app.integrations.odoo.config import OdooConfig
+from app.integrations.odoo.exceptions import OdooValidationError
 from app.services.catalogue.approval_gate import ApprovalDecision
 from app.services.catalogue.odoo_import_planning import (
     EnvironmentSnapshot,
@@ -90,7 +93,7 @@ def test_plan_categories_creates_when_no_match_and_decisions_approved(config: Od
     assert len(items) == 1
     assert items[0].planned_action == "CREATE"
     assert items[0].xml_id_name == "category_cupcakes"
-    assert items[0].proposed_values == {"name": "Cupcakes"}
+    assert items[0].proposed_values == {"name": "Cupcakes", "tb_import_key": "category.cupcakes"}
 
 
 def test_plan_categories_blocked_when_decision_not_approved(config: OdooConfig) -> None:
@@ -150,6 +153,7 @@ def test_plan_categories_name_match_requires_adoption_and_blocks(config: OdooCon
     transport = FakeTransport()
     transport.queue(("common", "authenticate"), 7)
     transport.queue(("execute_kw", "ir.model.data", "search_read"), [])
+    transport.queue(("execute_kw", "product.category", "search_read"), [])  # import key
     transport.queue(
         ("execute_kw", "product.category", "search_read"),
         [{"id": 12, "name": "Cupcakes"}, {"id": 13, "name": "Cupcakes"}],
@@ -223,6 +227,7 @@ def test_plan_products_sku_match_requires_adoption_and_blocks(config: OdooConfig
     transport = FakeTransport()
     transport.queue(("common", "authenticate"), 7)
     transport.queue(("execute_kw", "ir.model.data", "search_read"), [])
+    transport.queue(("execute_kw", "product.template", "search_read"), [])  # import key
     transport.queue(
         ("execute_kw", "product.template", "search_read"),
         [{"id": 900, "default_code": "TB-CUP-001"}],
@@ -298,7 +303,11 @@ def test_plan_attributes_creates_attribute_and_values_when_no_match(config: Odoo
         i for i in items if i.entity_type == "PRODUCT_ATTRIBUTE" and i.canonical_name == "Size"
     )
     assert size_attr.planned_action == "CREATE"
-    assert size_attr.proposed_values == {"name": "Size", "create_variant": "always"}
+    assert size_attr.proposed_values == {
+        "name": "Size",
+        "create_variant": "always",
+        "tb_import_key": "attribute:Size",
+    }
 
     size_values = [
         i
@@ -458,14 +467,14 @@ def test_plan_attributes_create_blocked_when_d20_not_approved(config: OdooConfig
     client = _authenticated_client(config, transport)
 
     items = plan_attributes(
-        [_buttercream()], [_approval("D20", status="PROPOSED")], client, None, {}, {}, "corr-1"
+        [_buttercream()], [_approval("D23", status="PROPOSED")], client, None, {}, {}, "corr-1"
     )
 
     size_attr = next(
         i for i in items if i.entity_type == "PRODUCT_ATTRIBUTE" and i.canonical_name == "Size"
     )
     assert size_attr.planned_action == "BLOCKED"
-    assert any("D20" in issue for issue in size_attr.blocking_issues)
+    assert any("D23" in issue for issue in size_attr.blocking_issues)
 
 
 def test_plan_attributes_create_allowed_when_d20_approved(config: OdooConfig) -> None:
@@ -477,7 +486,7 @@ def test_plan_attributes_create_allowed_when_d20_approved(config: OdooConfig) ->
 
     items = plan_attributes(
         [_buttercream()],
-        [_approval("D20", status="APPROVED", approved_value=True)],
+        [_approval("D23", status="APPROVED", approved_value=True)],
         client,
         None,
         {},
@@ -574,3 +583,83 @@ def test_environment_fingerprint_changes_when_company_changes() -> None:
     )
 
     assert snap_a.fingerprint != snap_b.fingerprint
+
+
+def test_plan_categories_adopts_a_record_an_earlier_run_left_with_only_its_key(
+    config: OdooConfig,
+) -> None:
+    """A create that timed out but committed: no external ID yet, only the import key."""
+    transport = FakeTransport()
+    transport.queue(("common", "authenticate"), 7)
+    transport.queue(("execute_kw", "ir.model.data", "search_read"), [])
+    transport.queue(("execute_kw", "product.category", "search_read"), [{"id": 31}])
+    client = _authenticated_client(config, transport)
+
+    [item] = plan_categories([_category()], [_approval("D03")], client, None, {}, "corr-1")
+
+    assert item.planned_action == "MATCH"
+    assert item.match_strategy == "IMPORT_KEY"
+    assert item.existing_odoo_id == 31
+
+
+def test_plan_products_adopts_a_record_an_earlier_run_left_with_only_its_key(
+    config: OdooConfig,
+) -> None:
+    transport = FakeTransport()
+    transport.queue(("common", "authenticate"), 7)
+    transport.queue(("execute_kw", "ir.model.data", "search_read"), [])
+    transport.queue(("execute_kw", "product.template", "search_read"), [{"id": 62}])
+    client = _authenticated_client(config, transport)
+
+    [item] = plan_products([_product()], [], client, None, {}, "corr-1")
+
+    assert item.planned_action == "MATCH"
+    assert item.match_strategy == "IMPORT_KEY"
+    assert item.existing_odoo_id == 62
+
+
+def test_plan_refuses_to_guess_when_the_import_key_cannot_be_checked(config: OdooConfig) -> None:
+    """Without the addon, a record from a timed-out create would be invisible."""
+    transport = FakeTransport()
+    transport.queue(("common", "authenticate"), 7)
+    transport.queue(("execute_kw", "ir.model.data", "search_read"), [])
+    transport.queue(
+        ("execute_kw", "product.template", "search_read"),
+        OdooValidationError("Invalid field tb_import_key"),
+    )
+    client = _authenticated_client(config, transport)
+
+    with pytest.raises(OdooValidationError):
+        plan_products([_product()], [], client, None, {}, "corr-1")
+
+
+def test_plan_variants_adopts_a_sku_already_on_the_imported_template(config: OdooConfig) -> None:
+    """An earlier run set the SKU, then crashed before PostgreSQL recorded the variant."""
+    transport = FakeTransport()
+    transport.queue(("common", "authenticate"), 7)
+    transport.queue(
+        ("execute_kw", "product.product", "search_read"),
+        [{"id": 700, "product_tmpl_id": [62, "Buttercream"]}],
+    )
+    transport.queue(("execute_kw", "product.template", "search_read"), [{"id": 62}])
+    client = _authenticated_client(config, transport)
+
+    items = plan_variants([_buttercream()], [], client, None, {}, set(), "corr-1")
+
+    assert {i.planned_action for i in items} == {"MATCH"}
+    assert all(i.match_strategy == "IMPORT_KEY" for i in items)
+
+
+def test_plan_variants_still_blocks_a_sku_on_someone_elses_template(config: OdooConfig) -> None:
+    transport = FakeTransport()
+    transport.queue(("common", "authenticate"), 7)
+    transport.queue(
+        ("execute_kw", "product.product", "search_read"),
+        [{"id": 700, "product_tmpl_id": [99, "Unrelated"]}],
+    )
+    transport.queue(("execute_kw", "product.template", "search_read"), [{"id": 62}])
+    client = _authenticated_client(config, transport)
+
+    items = plan_variants([_buttercream()], [], client, None, {}, set(), "corr-1")
+
+    assert {i.planned_action for i in items} == {"BLOCKED"}

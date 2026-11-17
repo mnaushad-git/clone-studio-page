@@ -7,8 +7,9 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import {
   useStore, orders, selectSubtotal, selectDiscount, selectTax,
-  selectDeliveryFee, selectTotal,
+  selectDeliveryFee, selectTotal, selectMinOrder,
 } from "@/lib/store";
+import { MinOrderNotice, useMinOrder } from "@/components/MinOrderNotice";
 import { useAdmin } from "@/lib/admin-store";
 import { getProduct } from "@/lib/products";
 import { useT } from "@/lib/i18n";
@@ -64,6 +65,7 @@ function makeCardSchema(t: ReturnType<typeof useT>) {
 function PaymentPage() {
   const t = useT();
   const navigate = useNavigate();
+  const minOrder = useMinOrder();
   const cartItems = useStore((s) => s.cart);
   useCartProducts();
   const currentPromo = useStore((s) => s.promo);
@@ -92,6 +94,7 @@ function PaymentPage() {
   const handleConfirm = async () => {
     setErrors({});
     if (cartItems.length === 0) { toast.error(t("checkoutToastCartEmpty")); return; }
+    if (minOrder.message) { toast.error(minOrder.message); return; }
     if (!selected) { toast.error(t("checkoutToastChooseMethod")); return; }
     let methodLabel = methods.find((m) => m.id === selected)?.label ?? t("checkoutStepPayment");
     if (DEMO_MODE) methodLabel = `Demo payment (${methodLabel})`;
@@ -132,7 +135,10 @@ function PaymentPage() {
       toast.success(paid.is_demo ? t("demoOrderRecorded") : t("checkoutToastPaymentConfirmed"));
       setTimeout(() => navigate({ to: "/success" }), 400);
     } catch (err) {
-      if (err instanceof CheckoutApiError && err.status === 422) {
+      if (err instanceof CheckoutApiError && err.code === "MINIMUM_ORDER_NOT_MET") {
+        // A promo discount is only known to the server, so this can still happen here.
+        toast.error(`${t("cartMinOrderPrefix")} SAR ${selectMinOrder().toFixed(2)}.`);
+      } else if (err instanceof CheckoutApiError && err.status === 422) {
         toast.error(t("checkoutToastPricesChanged"));
       } else if (err instanceof CheckoutApiError && err.status === 402) {
         toast.error(t("checkoutToastPaymentDeclined"));
@@ -261,7 +267,8 @@ function PaymentPage() {
               </div>
             </div>
 
-            <button type="button" onClick={handleConfirm} disabled={loading || cartItems.length === 0}
+            <MinOrderNotice message={minOrder.message} />
+            <button type="button" onClick={handleConfirm} disabled={loading || cartItems.length === 0 || minOrder.blocked}
               className="w-full bg-primary text-primary-foreground rounded-md py-4 font-semibold hover:opacity-90 transition inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
               {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> {t("checkoutProcessing")}</>
                 : <><Lock className="h-4 w-4" /> {DEMO_MODE ? t("demoConfirmButton") : t("checkoutConfirmPayment")} · SAR {total.toFixed(2)}</>}

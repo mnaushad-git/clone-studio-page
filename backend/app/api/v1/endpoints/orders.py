@@ -25,6 +25,7 @@ from app.api.v1.schemas.checkout import (
     PayOrderRequest,
 )
 from app.core.exceptions import NotFoundError
+from app.core.rate_limit import rate_limit
 from app.dependencies import get_db
 from app.models.orders.order import Order
 from app.models.orders.order_item import OrderItem
@@ -35,6 +36,16 @@ from app.workers.tasks.order_notifications import send_order_confirmations
 from app.workers.tasks.order_sync import push_paid_orders_to_odoo
 
 router = APIRouter(prefix="/orders", tags=["orders"])
+
+_limit_create = rate_limit(
+    "order_create", limit_setting="rate_limit_order_create_per_10_min", window_seconds=600
+)
+_limit_pay = rate_limit(
+    "order_pay", limit_setting="rate_limit_order_pay_per_10_min", window_seconds=600
+)
+_limit_lookup = rate_limit(
+    "order_lookup", limit_setting="rate_limit_order_lookup_per_minute", window_seconds=60
+)
 logger = logging.getLogger("app.api.v1.endpoints.orders")
 
 
@@ -97,7 +108,11 @@ def _order_out(order: Order) -> OrderOut:
     )
 
 
-@router.post("", summary="Price a cart and create an order (status: pending_payment)")
+@router.post(
+    "",
+    summary="Price a cart and create an order (status: pending_payment)",
+    dependencies=[Depends(_limit_create)],
+)
 def create_order(request: CheckoutRequest, session: Session = Depends(get_db)) -> OrderOut:
     order = OrderService(session).create_order(request)
     session.commit()
@@ -105,7 +120,11 @@ def create_order(request: CheckoutRequest, session: Session = Depends(get_db)) -
     return _order_out(order)
 
 
-@router.post("/{order_id}/pay", summary="Charge a pending_payment order (stub provider)")
+@router.post(
+    "/{order_id}/pay",
+    summary="Charge a pending_payment order (stub provider)",
+    dependencies=[Depends(_limit_pay)],
+)
 def pay_order(
     order_id: uuid.UUID, request: PayOrderRequest, session: Session = Depends(get_db)
 ) -> OrderOut:
@@ -128,7 +147,7 @@ def pay_order(
     return _order_out(order)
 
 
-@router.get("/{order_id}", summary="Fetch an order by id")
+@router.get("/{order_id}", summary="Fetch an order by id", dependencies=[Depends(_limit_lookup)])
 def get_order(order_id: uuid.UUID, session: Session = Depends(get_db)) -> OrderOut:
     order = OrderRepository(session).get_by_id_with_items(order_id)
     if order is None:
@@ -136,7 +155,11 @@ def get_order(order_id: uuid.UUID, session: Session = Depends(get_db)) -> OrderO
     return _order_out(order)
 
 
-@router.get("/by-tracking-token/{tracking_token}", summary="Fetch an order by its tracking token")
+@router.get(
+    "/by-tracking-token/{tracking_token}",
+    summary="Fetch an order by its tracking token",
+    dependencies=[Depends(_limit_lookup)],
+)
 def get_order_by_tracking_token(
     tracking_token: str, session: Session = Depends(get_db)
 ) -> OrderOut:

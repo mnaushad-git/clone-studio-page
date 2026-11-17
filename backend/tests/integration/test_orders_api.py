@@ -104,7 +104,7 @@ def test_create_order_rejects_below_minimum_order_with_422(
     response = api_client.post("/api/v1/orders", json=_checkout_payload((product.slug, 1)))
 
     assert response.status_code == 422
-    assert response.json()["error"]["code"] == "VALIDATION_ERROR"
+    assert response.json()["error"]["code"] == "MINIMUM_ORDER_NOT_MET"
 
 
 def test_create_order_rejects_empty_cart_with_422(api_client: TestClient) -> None:

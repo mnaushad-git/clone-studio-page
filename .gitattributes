@@ -1,0 +1,15 @@
+# Text files are stored and checked out with LF, so a clone or a copy taken from Windows
+# runs unchanged on the Linux VPS.
+* text=auto eol=lf
+
+# Binary assets: never touch line endings or attempt text diffs.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.pdf binary

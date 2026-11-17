@@ -1,5 +1,5 @@
 import { Facebook, Instagram, Twitter, Music2, Mail, Phone } from "lucide-react";
-import logoFooter from "@/assets/logo-footer.png.asset.json";
+import logoFooter from "@/assets/logo-footer.png";
 import { useAdmin } from "@/lib/admin-store";
 import { useT } from "@/lib/i18n";
 
@@ -23,7 +23,7 @@ export function SiteFooter() {
       <footer className="bg-primary text-primary-foreground">
         <div className="max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-4 gap-10">
           <div>
-            <img src={logoFooter.url} alt={settings.brandName} className="h-16 w-auto object-contain" />
+            <img src={logoFooter} alt={settings.brandName} className="h-16 w-auto object-contain" />
             <p className="mt-4 text-xs opacity-80 max-w-xs">{t("footerTagline")}</p>
             <div className="mt-4 space-y-1 text-xs opacity-80">
               {settings.supportEmail && <p className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" /> {settings.supportEmail}</p>}

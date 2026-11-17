@@ -3,7 +3,7 @@ import { ShopGrid } from "@/components/ShopGrid";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/shop")({
-  component: () => {
+  component: function ShopPage() {
     const t = useT();
     return (
       <ShopGrid

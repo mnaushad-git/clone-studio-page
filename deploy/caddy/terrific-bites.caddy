@@ -1,0 +1,28 @@
+# Proposed site block for the storefront on the VPS's existing Caddy, next to
+# api.terrific-bites.caddy. Add it, validate, then reload; all of this needs approval. The
+# certificate is only issued once DNS for this hostname points at the VPS, and that DNS
+# change is what moves the site off Lovable. Same upstream caveat as the API block if
+# Caddy runs in a container.
+terrific-bites.trunexus.ai {
+	encode gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	reverse_proxy 127.0.0.1:18011 {
+		health_uri /
+		health_interval 30s
+	}
+
+	log {
+		output file /var/log/caddy/terrific-bites.log {
+			roll_size 10mb
+			roll_keep 5
+		}
+	}
+}

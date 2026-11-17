@@ -13,11 +13,13 @@ from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any, Protocol
 
-from sqlalchemy import text
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
+from app.models.integration.odoo_catalogue_sync_run import OdooCatalogueSyncRun
 from app.repositories.orders.order_outbox_repository import OrderOutboxRepository
+from app.services.catalogue.variant_pricing import CATALOGUE_NOT_PUBLISHED
 
 # order.created is excluded: it is an audit record with no consumer.
 _CONSUMED_EVENT_TYPES = ("order.paid", "order.notify")
@@ -77,8 +79,9 @@ def _check_outbox(session: Session, settings: Settings) -> list[HealthCheck]:
     try:
         stale = outbox.count_pending_older_than(_CONSUMED_EVENT_TYPES, cutoff)
         failed = sum(
-            outbox.count_by_type_and_status(event_type, "failed")
+            outbox.count_by_type_and_status(event_type, status)
             for event_type in _CONSUMED_EVENT_TYPES
+            for status in ("failed", "dead_letter")
         )
     except Exception as exc:  # noqa: BLE001 - any failure is the result being reported
         return [HealthCheck("order_queue", False, f"unreadable ({type(exc).__name__})")]
@@ -86,6 +89,24 @@ def _check_outbox(session: Session, settings: Settings) -> list[HealthCheck]:
         HealthCheck("order_queue", stale == 0, f"{stale} pending over {minutes} min"),
         HealthCheck("order_failures", failed == 0, f"{failed} failed events"),
     ]
+
+
+def _check_catalogue_prices(session: Session) -> HealthCheck:
+    latest = (
+        select(OdooCatalogueSyncRun.error_summary)
+        .where(OdooCatalogueSyncRun.status != "RUNNING")
+        .order_by(OdooCatalogueSyncRun.started_at.desc())
+        .limit(1)
+    )
+    try:
+        summary = session.execute(latest).scalar_one_or_none()
+    except Exception as exc:  # noqa: BLE001 - any failure is the result being reported
+        return HealthCheck("catalogue_prices", False, f"unreadable ({type(exc).__name__})")
+    if summary and summary.startswith(CATALOGUE_NOT_PUBLISHED):
+        return HealthCheck(
+            "catalogue_prices", False, "latest sync refused: see Admin, catalogue sync runs"
+        )
+    return HealthCheck("catalogue_prices", True, "latest sync not refused")
 
 
 def run_health_checks(
@@ -101,6 +122,7 @@ def run_health_checks(
         _check_redis(redis_client),
         _check_heartbeat(redis_client, settings, current),
         *_check_outbox(session, settings),
+        _check_catalogue_prices(session),
     ]
 
 

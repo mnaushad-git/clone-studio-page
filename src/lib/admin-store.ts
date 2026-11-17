@@ -258,7 +258,7 @@ const initial: AdminState = {
     supportEmail: "hello@terrificbites.sa",
     supportPhone: "+966 11 000 0000",
     currency: "SAR",
-    taxRate: 5,
+    taxRate: 15,
     languages: [
       { code: "en", label: "English", enabled: true },
       { code: "ar", label: "العربية", enabled: true },

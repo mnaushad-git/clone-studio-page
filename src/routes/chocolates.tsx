@@ -3,7 +3,7 @@ import { ShopGrid } from "@/components/ShopGrid";
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/chocolates")({
-  component: () => {
+  component: function ChocolatesPage() {
     const t = useT();
     return (
       <ShopGrid title={t("shopCategoryChocolates")} breadcrumb={[{ label: t("shopCategoryChocolates") }]} initialCategory="chocolates" lockCategory />

@@ -1,0 +1,273 @@
+# Complete local Terrific Bites stack. Start it with deploy/local/Start-Stack.ps1, see
+# docs/deployment/local-stack.md. Only Caddy publishes ports, and only on loopback.
+# Default mode is the Stage A demo; docker-compose.integration.yml adds real Odoo order push.
+
+name: terrific-bites-local
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-backend: &backend
+  image: terrific-bites-api:local
+  build:
+    context: ../..
+    dockerfile: deploy/backend.Dockerfile
+  restart: unless-stopped
+  logging: *logging
+  environment: &backend-env
+    APP_ENV: development
+    DEBUG: "false"
+    LOG_LEVEL: INFO
+    DEPLOYMENT_STAGE: demo
+    PAYMENT_PROVIDER: stub
+    NOTIFICATION_PROVIDER: stub
+    ODOO_ORDER_PUSH_PROVIDER: stub
+    DATABASE_URL: postgresql+psycopg://terrific_bites:${APP_DB_PASSWORD:?}@terrific-postgres:5432/terrific_bites
+    REDIS_URL: redis://:${REDIS_PASSWORD:?}@terrific-redis:6379/0
+    CELERY_BROKER_URL: redis://:${REDIS_PASSWORD:?}@terrific-redis:6379/1
+    CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD:?}@terrific-redis:6379/2
+    ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:?}
+    CORS_ALLOWED_ORIGINS: http://localhost:${TB_HTTP_PORT:-18080}
+    TRUSTED_HOSTS: localhost,127.0.0.1,terrific-api
+    MEDIA_ROOT: /app/media
+    MEDIA_BASE_URL: http://localhost:${TB_HTTP_PORT:-18080}/media
+    ODOO_BASE_URL: http://terrific-odoo:8069
+    ODOO_DATABASE: terrific_odoo
+    ODOO_VERIFY_SSL: "false"
+
+# Odoo credentials go only to the two services that talk to Odoo, never to the API or Beat.
+x-odoo-write: &odoo-write
+  # Names the one Odoo instance this stack may write to. See write_target_guard.py.
+  ODOO_WRITE_APPROVED_TARGET: http://terrific-odoo:8069#terrific_odoo
+
+x-worker-env: &worker-env
+  <<: [*backend-env, *odoo-write]
+  SERVICE_ROLE: worker
+  ODOO_USERNAME: ${ODOO_ORDER_SYNC_LOGIN:-terrific-order-sync}
+  ODOO_PASSWORD: ${ODOO_ORDER_SYNC_PASSWORD:?}
+
+x-odoo: &odoo
+  image: odoo:19.0
+  logging: *logging
+  entrypoint: ["bash", "/etc/terrific/start-odoo.sh"]
+  environment: &odoo-env
+    ODOO_DB_HOST: terrific-postgres
+    ODOO_DB_PASSWORD: ${ODOO_DB_PASSWORD:?}
+    ODOO_ADMIN_PASSWD: ${ODOO_ADMIN_PASSWD:?}
+  volumes:
+    - odoo_data:/var/lib/odoo
+    - ../odoo/addons:/mnt/terrific-addons:ro
+    - ../odoo/odoo.conf.template:/etc/terrific/odoo.conf.template:ro
+    - ../odoo/start-odoo.sh:/etc/terrific/start-odoo.sh:ro
+    - ../odoo/bootstrap.py:/etc/terrific/bootstrap.py:ro
+  networks: [internal]
+
+services:
+  terrific-postgres:
+    image: postgres:16
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      POSTGRES_USER: terrific_pgadmin
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:?}
+      POSTGRES_DB: postgres
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?}
+      ODOO_DB_PASSWORD: ${ODOO_DB_PASSWORD:?}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../postgres-init:/docker-entrypoint-initdb.d:ro
+    networks: [internal]
+    mem_limit: 1g
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U terrific_bites -d terrific_bites && pg_isready -h 127.0.0.1 -U terrific_odoo -d terrific_odoo"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  terrific-redis:
+    image: redis:7
+    restart: unless-stopped
+    logging: *logging
+    # AOF so that queued work and rate-limit counters survive a restart.
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\" --appendonly yes --maxmemory 128mb --maxmemory-policy noeviction"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?}
+    volumes:
+      - redis_data:/data
+    networks: [internal]
+    mem_limit: 192m
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # One-shots, run in order by Start-Stack.ps1.
+  terrific-migrate:
+    <<: *backend
+    restart: "no"
+    profiles: [ops]
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      <<: *backend-env
+      SERVICE_ROLE: migrate
+    networks: [internal]
+    depends_on:
+      terrific-postgres:
+        condition: service_healthy
+
+  # The only holder of the product-creating Odoo user. See docs/deployment/local-stack.md.
+  terrific-catalogue-import:
+    <<: *backend
+    restart: "no"
+    profiles: [ops]
+    command: ["python", "-m", "app.scripts.import_odoo_catalogue", "--validate"]
+    environment:
+      <<: [*backend-env, *odoo-write]
+      SERVICE_ROLE: catalogue_import
+      ODOO_USERNAME: ${ODOO_CATALOGUE_IMPORT_LOGIN:-terrific-catalogue-import}
+      ODOO_PASSWORD: ${ODOO_CATALOGUE_IMPORT_PASSWORD:?}
+    networks: [internal]
+    depends_on:
+      terrific-postgres:
+        condition: service_healthy
+
+  terrific-odoo-init:
+    <<: *odoo
+    restart: "no"
+    profiles: [ops]
+    # Only this one-shot sees the integration passwords, to create the users in bootstrap.py.
+    environment:
+      <<: *odoo-env
+      ODOO_ORDER_SYNC_LOGIN: ${ODOO_ORDER_SYNC_LOGIN:-terrific-order-sync}
+      ODOO_ORDER_SYNC_PASSWORD: ${ODOO_ORDER_SYNC_PASSWORD:?}
+      ODOO_CATALOGUE_IMPORT_LOGIN: ${ODOO_CATALOGUE_IMPORT_LOGIN:-terrific-catalogue-import}
+      ODOO_CATALOGUE_IMPORT_PASSWORD: ${ODOO_CATALOGUE_IMPORT_PASSWORD:?}
+    command: ["-i", "sale_management,stock,account,website_sale,terrific_order_sync", "--stop-after-init"]
+    depends_on:
+      terrific-postgres:
+        condition: service_healthy
+
+  terrific-odoo:
+    <<: *odoo
+    restart: unless-stopped
+    mem_limit: 1536m
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8069/web/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    depends_on:
+      terrific-postgres:
+        condition: service_healthy
+
+  terrific-api:
+    <<: *backend
+    environment:
+      <<: *backend-env
+      SERVICE_ROLE: api
+    volumes:
+      - media:/app/media
+    networks: [internal]
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8000/api/v1/readiness', timeout=4)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    depends_on:
+      terrific-postgres:
+        condition: service_healthy
+      terrific-redis:
+        condition: service_healthy
+
+  terrific-worker:
+    <<: *backend
+    environment: *worker-env
+    command: ["celery", "-A", "app.workers.celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
+    volumes:
+      - media:/app/media
+    networks: [internal]
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A app.workers.celery_app inspect ping --timeout 10 | grep -q pong"]
+      interval: 60s
+      timeout: 20s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      terrific-postgres:
+        condition: service_healthy
+      terrific-redis:
+        condition: service_healthy
+
+  # Exactly one instance: a second would fire every scheduled task twice. The worker's
+  # outbox poll depends on this service.
+  terrific-beat:
+    <<: *backend
+    environment:
+      <<: *backend-env
+      SERVICE_ROLE: beat
+    command: ["celery", "-A", "app.workers.celery_app", "beat", "--loglevel=INFO", "--schedule=/tmp/celerybeat-schedule"]
+    networks: [internal]
+    mem_limit: 192m
+    depends_on:
+      terrific-redis:
+        condition: service_healthy
+
+  terrific-frontend:
+    image: terrific-bites-frontend:local
+    build:
+      context: ../..
+      dockerfile: deploy/frontend.Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:${TB_HTTP_PORT:-18080}
+        VITE_DEMO_MODE: "true"
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      # Server-side rendering reaches the API over the private network.
+      API_INTERNAL_BASE_URL: http://terrific-api:8000
+    networks: [internal]
+    mem_limit: 384m
+    depends_on:
+      terrific-api:
+        condition: service_healthy
+
+  terrific-caddy:
+    image: caddy:2
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      TB_HTTP_PORT: ${TB_HTTP_PORT:-18080}
+      TB_ODOO_PORT: ${TB_ODOO_PORT:-18069}
+    ports:
+      - "127.0.0.1:${TB_HTTP_PORT:-18080}:${TB_HTTP_PORT:-18080}"
+      - "127.0.0.1:${TB_ODOO_PORT:-18069}:${TB_ODOO_PORT:-18069}"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    networks: [internal, edge]
+    mem_limit: 128m
+    depends_on:
+      - terrific-frontend
+      - terrific-api
+      - terrific-odoo
+
+networks:
+  # No route out, and nothing on it is reachable from the host except through Caddy.
+  internal:
+    internal: true
+  edge:
+
+volumes:
+  postgres_data:
+  redis_data:
+  odoo_data:
+  media:
+  caddy_data:

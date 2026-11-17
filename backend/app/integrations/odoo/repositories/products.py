@@ -38,6 +38,15 @@ VARIANT_FIELDS = ["id", "name", "default_code", "product_tmpl_id", "active"]
 # only to the _SYNC_FIELDS superset, not the conflict-check VARIANT_FIELDS.
 TEMPLATE_SYNC_FIELDS = [*TEMPLATE_FIELDS, "write_date"]
 VARIANT_SYNC_FIELDS = [*VARIANT_FIELDS, "write_date", "product_template_attribute_value_ids"]
+# lst_price is what Odoo itself sells the variant at: list_price plus its price_extras.
+VARIANT_PRICE_FIELDS = [
+    "id",
+    "default_code",
+    "product_tmpl_id",
+    "lst_price",
+    "currency_id",
+    "write_date",
+]
 
 # A conflict/name lookup never needs more than a handful of matches to prove a
 # collision exists; this bounds every method here without requiring callers to
@@ -122,6 +131,24 @@ class OdooProductRepository:
             domain or [],
             VARIANT_SYNC_FIELDS,
             order="product_tmpl_id",
+            max_records=max_records,
+            correlation_id=correlation_id,
+        )
+
+    def iter_variant_prices(
+        self,
+        *,
+        domain: list[Any],
+        max_records: int,
+        correlation_id: str | None = None,
+    ) -> Iterator[dict[str, Any]]:
+        """Always a full sweep. Changing a template's list_price or an attribute's price_extra
+        doesn't touch product.product.write_date, so a write_date filter would miss both."""
+        yield from self._client.iter_search_read(
+            VARIANT_MODEL,
+            domain,
+            VARIANT_PRICE_FIELDS,
+            order="id",
             max_records=max_records,
             correlation_id=correlation_id,
         )
