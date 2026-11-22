@@ -300,6 +300,9 @@ export function mapDetailToProduct(detail: ProductDetailOut): Product {
     recipients: detail.recipients.map((r) => r.name_en as Recipient),
   };
 
+  const defaultVariant = detail.variants.find((v) => v.is_default) ?? detail.variants[0];
+  base.sku = defaultVariant?.sku ?? detail.sku;
+
   const gallery = detail.gallery_images.map((img) => resolveImageUrl(img.url));
   if (gallery.length > 0) {
     base.thumbs = [base.image, ...gallery];
@@ -311,6 +314,7 @@ export function mapDetailToProduct(detail: ProductDetailOut): Product {
     // loops into one, for any number of ops-defined axes.
     const axesByCode = new Map<string, { code: string; name: string; values: string[] }>();
     const priceByKey: Record<string, number> = {};
+    const skuByKey: Record<string, string> = {};
 
     for (const v of detail.variants) {
       const selected: Record<string, string> = {};
@@ -325,12 +329,14 @@ export function mapDetailToProduct(detail: ProductDetailOut): Product {
       }
       if (Object.keys(selected).length > 0 && v.price != null) {
         priceByKey[variantComboKey(selected)] = Number(v.price);
+        skuByKey[variantComboKey(selected)] = v.sku;
       }
     }
 
     if (axesByCode.size > 0) {
       base.variantAxes = [...axesByCode.values()];
       base.variantPriceByKey = priceByKey;
+      base.variantSkuByKey = skuByKey;
     }
   }
 

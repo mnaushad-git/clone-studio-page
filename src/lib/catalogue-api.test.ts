@@ -103,6 +103,7 @@ describe("mapDetailToProduct", () => {
     const single = mapDetailToProduct(makeDetail());
     expect(single.variantAxes).toBeUndefined();
     expect(single.variantPriceByKey).toBeUndefined();
+    expect(single.sku).toBe("TB-CUP-001");
 
     const multi = mapDetailToProduct(
       makeDetail({
@@ -177,6 +178,13 @@ describe("mapDetailToProduct", () => {
       "flavor=Chocolate|size=6 INCH": 300,
       "flavor=Vanilla|size=9 INCH": 380,
       "flavor=Chocolate|size=9 INCH": 380,
+    });
+    expect(multi.sku).toBe("TB-CAK-001-6IN-VAN");
+    expect(multi.variantSkuByKey).toEqual({
+      "flavor=Vanilla|size=6 INCH": "TB-CAK-001-6IN-VAN",
+      "flavor=Chocolate|size=6 INCH": "TB-CAK-001-6IN-CHO",
+      "flavor=Vanilla|size=9 INCH": "TB-CAK-001-9IN-VAN",
+      "flavor=Chocolate|size=9 INCH": "TB-CAK-001-9IN-CHO",
     });
   });
 

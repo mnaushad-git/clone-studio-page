@@ -42,6 +42,10 @@ export type Product = {
   // stops being a safe assumption once a product can have more than one
   // price-bearing axis.
   variantPriceByKey?: Record<string, number>;
+  // SKU of the variant bought when no options are chosen (the default variant), and
+  // the SKU of each real option combination, keyed like variantPriceByKey.
+  sku?: string;
+  variantSkuByKey?: Record<string, string>;
   description?: string;
   isNew?: boolean;
   occasions?: Occasion[];

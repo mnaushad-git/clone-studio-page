@@ -6,7 +6,8 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductReviews } from "@/components/ProductReviews";
-import { getProduct, variantComboKey } from "@/lib/products";
+import { getProduct } from "@/lib/products";
+import { productGallery, resolveSelection, selectorAxes } from "@/lib/product-options";
 import { fetchProductDetail, mapDetailToProduct, mapSummaryToProduct, useCatalogueProducts, CatalogueApiError } from "@/lib/catalogue-api";
 import { useAdmin } from "@/lib/admin-store";
 import { useT } from "@/lib/i18n";
@@ -60,11 +61,8 @@ function ProductPage() {
   };
   const { data: categoryPage } = useCatalogueProducts({ category: baseProduct.category, limit: 8 });
   const categoryProducts = categoryPage ? categoryPage.items.map(mapSummaryToProduct) : [];
-  const fallbackThumbs = [
-    product.image,
-    ...categoryProducts.filter((p) => p.id !== product.id).map((p) => p.image),
-  ].slice(0, 4);
-  const thumbs = baseProduct.thumbs ?? (fallbackThumbs.length > 1 ? fallbackThumbs : [product.image]);
+  // Only this product's own images: its primary image plus its catalogue gallery.
+  const thumbs = productGallery({ image: product.image, thumbs: baseProduct.thumbs });
   const [active, setActive] = useState(0);
   const [selectedIndices, setSelectedIndices] = useState<Record<string, number>>({});
   const [qty, setQty] = useState(1);
@@ -85,88 +83,28 @@ function ProductPage() {
 
   const tabs = [t("productTabDescription"), t("productTabStorage"), t("productTabIngredients"), t("productTabAllergens")];
 
-  const defaultSizesByCategory: Record<string, { label: string; sub?: string; delta?: number }[]> = {
-    cupcakes: [
-      { label: t("productSizeLabelPack6"), sub: t("productSizeSubAssorted"), delta: 0 },
-      { label: t("productSizeLabelPack12"), sub: t("productSizeSubAssorted"), delta: product.price * 0.9 },
-    ],
-    chocolates: [
-      { label: t("productSizeLabelSmallBox"), sub: t("productSizeSub8Pieces"), delta: 0 },
-      { label: t("productSizeLabelLargeBox"), sub: t("productSizeSub16Pieces"), delta: product.price * 0.8 },
-    ],
-    donuts: [
-      { label: t("productSizeLabelSingle"), sub: t("productSizeSub1Piece"), delta: 0 },
-      { label: t("productSizeLabelPack6"), sub: t("productSizeSubAssorted"), delta: product.price * 4 },
-    ],
-    gifts: [
-      { label: t("productSizeLabelStandard"), sub: t("productSizeSubGiftBox"), delta: 0 },
-      { label: t("productSizeLabelDeluxe"), sub: t("productSizeSubPremiumBox"), delta: 15 },
-    ],
-    extras: [
-      { label: t("productSizeLabelSingle"), sub: t("productSizeSub1Piece"), delta: 0 },
-      { label: t("productSizeLabelPack"), sub: t("productSizeSub4Pieces"), delta: product.price * 3 },
-    ],
-    cakes: [
-      { label: t("productSizeLabel6Inch"), sub: t("productSizeSub3Layers"), delta: 0 },
-      { label: t("productSizeLabel9Inch"), sub: t("productSizeSub3Layers"), delta: 80 },
-    ],
-  };
-  const sizeOverridesById: Record<string, { label: string; sub?: string; delta?: number }[]> = {
-    "extra-icecream": [
-      { label: t("productSizeLabelSmall3oz"), delta: 0 },
-      { label: t("productSizeLabelMedium11oz"), delta: 3 },
-      { label: t("productSizeLabelLarge16oz"), delta: 6 },
-    ],
-  };
-  const defaultFlavorsByCategory: Record<string, string[]> = {
-    cupcakes: [t("productFlavorVanilla"), t("productFlavorChocolate")],
-    chocolates: [t("productFlavorMilk"), t("productFlavorDark")],
-    donuts: [t("productFlavorGlazed"), t("productFlavorChocolate")],
-    cakes: [t("productFlavorVanilla"), t("productFlavorChocolate")],
-    gifts: [],
-    extras: [],
-  };
-  // One selector axis per real catalogue variant attribute (any number, any name —
-  // ops/Odoo-defined). When a product has no real variants at all, fall back to a
-  // locally-synthesized "size"/"flavor" axis pair from category defaults — those have
-  // no backend variant behind them, so their delta stays zero (the value is still
-  // sent through as a label on the order for prep purposes) rather than promising a
-  // price the server would silently not honor (it falls back to the single
-  // default-variant price).
-  const realAxes = product.variantAxes;
-  const fallbackSizeOptions = sizeOverridesById[baseProduct.id] ?? defaultSizesByCategory[baseProduct.category];
-  const fallbackFlavorOptions = defaultFlavorsByCategory[baseProduct.category];
-  const fallbackAxes: { code: string; name: string; values: { label: string; sub?: string }[] }[] = [
-    ...(fallbackSizeOptions ? [{ code: "size", name: "Size", values: fallbackSizeOptions.map((s) => ({ label: s.label, sub: s.sub })) }] : []),
-    ...(fallbackFlavorOptions?.length ? [{ code: "flavor", name: "Flavor", values: fallbackFlavorOptions.map((f) => ({ label: f })) }] : []),
-  ];
-  const hasRealAxes = !!realAxes && realAxes.length > 0;
-  const axes: { code: string; name: string; values: { label: string; sub?: string }[] }[] = hasRealAxes
-    ? realAxes.map((a) => ({ ...a, values: a.values.map((v) => ({ label: v })) }))
-    : fallbackAxes;
-
-  const selectedAttributes: Record<string, string> = {};
-  for (const axis of axes) {
-    const value = axis.values[selectedIndices[axis.code] ?? 0];
-    if (value) selectedAttributes[axis.code] = value.label;
-  }
-  const unitPrice = hasRealAxes
-    ? (product.variantPriceByKey?.[variantComboKey(selectedAttributes)] ?? product.price)
-    : product.price;
+  // Selectors come only from the product's real catalogue variants. A product with a
+  // single variant shows none, and a combination without a real variant can't be
+  // bought, so the cart always holds exactly the variant the customer chose.
+  const axes = selectorAxes(product);
+  const selection = resolveSelection(product, selectedIndices);
+  const unitPrice = selection.unitPrice;
 
   const addToCart = () => {
+    if (!selection.available) return false;
     cart.add({
       productId: product.id,
       qty,
-      attributes: Object.keys(selectedAttributes).length > 0 ? selectedAttributes : undefined,
+      attributes: selection.attributes,
       inscription: inscription || undefined,
       unitPrice,
     });
     toast.success([t("productAddedToCartPrefix"), product.name, t("productAddedToCartSuffix")].filter(Boolean).join(" "));
+    return true;
   };
 
   const buyNow = () => {
-    addToCart();
+    if (!addToCart()) return;
     setTimeout(() => navigate({ to: "/customize" }), 200);
   };
 
@@ -224,6 +162,11 @@ function ProductPage() {
             <div>
               <div className="text-3xl font-bold text-foreground">SAR {unitPrice.toFixed(2)}</div>
               <div className="text-xs text-muted-foreground mt-1">{t("productAllPricesVat")}</div>
+              {selection.sku && (
+                <div className="text-xs text-muted-foreground mt-1" data-testid="product-sku">
+                  {t("productSkuLabel")}: <span dir="ltr">{selection.sku}</span>
+                </div>
+              )}
             </div>
             <div className="text-right">
               <div className="flex items-center gap-2 justify-end text-sm">
@@ -267,19 +210,18 @@ function ProductPage() {
                         <span className={`h-4 w-4 rounded-full border ${isSelected ? "border-primary" : "border-muted-foreground/50"} flex items-center justify-center`}>
                           {isSelected && <span className="h-2 w-2 rounded-full bg-primary" />}
                         </span>
-                        <span className="block text-sm font-semibold tracking-wide">{v.label}</span>
-                        {v.sub && <span className="block text-[11px] text-muted-foreground uppercase tracking-wider">{v.sub}</span>}
+                        <span className="block text-sm font-semibold tracking-wide">{v}</span>
                       </button>
                     ) : (
                       <button
-                        key={v.label}
+                        key={v}
                         onClick={() => setSelectedIndices((s) => ({ ...s, [axis.code]: i }))}
                         className={`flex items-center gap-3 border rounded-md p-3 uppercase text-sm ${isSelected ? "border-primary" : "border-border"}`}
                       >
                         <span className={`h-4 w-4 rounded-full border ${isSelected ? "border-primary" : "border-muted-foreground/50"} flex items-center justify-center`}>
                           {isSelected && <span className="h-2 w-2 rounded-full bg-primary" />}
                         </span>
-                        {v.label}
+                        {v}
                       </button>
                     );
                   })}
@@ -288,13 +230,17 @@ function ProductPage() {
             );
           })}
 
+          {!selection.available && (
+            <p className="mt-4 text-sm text-destructive" role="status" data-testid="option-unavailable">{t("productOptionUnavailable")}</p>
+          )}
+
           <div className="mt-6 grid grid-cols-[auto_1fr_auto] gap-3">
             <div className="flex items-center border border-border rounded-md">
               <button onClick={() => setQty(Math.max(1, qty - 1))} className="p-3"><Minus className="h-4 w-4" /></button>
               <span className="w-10 text-center">{qty}</span>
               <button onClick={() => setQty(qty + 1)} className="p-3"><Plus className="h-4 w-4" /></button>
             </div>
-            <button onClick={addToCart} className="bg-foreground text-background rounded-md font-semibold hover:opacity-90">{t("productAddToCartBtn")}</button>
+            <button onClick={addToCart} disabled={!selection.available} className="bg-foreground text-background rounded-md font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed">{t("productAddToCartBtn")}</button>
             <button
               onClick={toggleWish}
               aria-label={t("productSaveAria")}
@@ -303,7 +249,7 @@ function ProductPage() {
               <Heart className={`h-4 w-4 ${wished ? "text-red-500 fill-red-500" : "text-foreground"}`} />
             </button>
           </div>
-          <button onClick={buyNow} className="mt-3 w-full bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90">{t("productBuyNowBtn")}</button>
+          <button onClick={buyNow} disabled={!selection.available} className="mt-3 w-full bg-primary text-primary-foreground rounded-md py-3 font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed">{t("productBuyNowBtn")}</button>
 
           {(override?.allowInscription ?? baseProduct.category === "cakes") && (
             <div className="mt-6">
