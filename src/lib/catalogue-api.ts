@@ -337,6 +337,9 @@ export function mapDetailToProduct(detail: ProductDetailOut): Product {
       base.variantAxes = [...axesByCode.values()];
       base.variantPriceByKey = priceByKey;
       base.variantSkuByKey = skuByKey;
+      if (defaultVariant && defaultVariant.attributes.length > 0) {
+        base.defaultAttributes = Object.fromEntries(defaultVariant.attributes.map((a) => [a.code, a.value_label_en]));
+      }
     }
   }
 

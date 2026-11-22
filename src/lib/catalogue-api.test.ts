@@ -180,6 +180,8 @@ describe("mapDetailToProduct", () => {
       "flavor=Chocolate|size=9 INCH": 380,
     });
     expect(multi.sku).toBe("TB-CAK-001-6IN-VAN");
+    expect(multi.defaultAttributes).toEqual({ size: "6 INCH", flavor: "Vanilla" });
+    expect(single.defaultAttributes).toBeUndefined();
     expect(multi.variantSkuByKey).toEqual({
       "flavor=Vanilla|size=6 INCH": "TB-CAK-001-6IN-VAN",
       "flavor=Chocolate|size=6 INCH": "TB-CAK-001-6IN-CHO",

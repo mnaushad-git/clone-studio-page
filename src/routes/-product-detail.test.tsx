@@ -22,7 +22,7 @@ vi.mock("@/components/ProductCard", () => ({
 
 import { Route } from "./product.$id";
 import { mapDetailToProduct, type ProductDetailOut, type VariantOut } from "@/lib/catalogue-api";
-import { products, registerProducts, type Product } from "@/lib/products";
+import { products, type Product } from "@/lib/products";
 import { cart } from "@/lib/store";
 import { setLang } from "@/lib/i18n";
 
@@ -83,11 +83,12 @@ function variant(sku: string, price: string, isDefault: boolean, size?: string):
 const ROYAL = mapDetailToProduct(
   detail("royal-chocolate-cupcake", "Royal Chocolate Cupcake", "19.00", [variant("TB-DEMO-001", "19.00", true)]),
 );
-// An existing product with two real size variants.
+// An existing product with two real size variants. As on staging, the API lists the
+// default variant (the one cards are priced at) second.
 const SWISS = mapDetailToProduct(
   detail("swiss-frosting", "Swiss Frosting", "40.00", [
-    variant("TB-CUP-SWISS-6", "40.00", true, "Pack of 6"),
     variant("TB-CUP-SWISS-12", "75.00", false, "Pack of 12"),
+    variant("TB-CUP-SWISS-6", "40.00", true, "Pack of 6"),
   ]),
 );
 // Another cupcake returned for "related products"; its image must never show in the gallery.
@@ -100,7 +101,9 @@ function summaryPage() {
     merchandising: { featured: false, is_new: false, is_bestseller: null, badge_en: null, badge_ar: null },
     moments: [], recipients: [], availability_status: "UNKNOWN",
   });
-  const items = [s(ROYAL), s(SWISS), s(OTHER)];
+  // The category list (limit 8) doesn't include the opened product, as for a cupcake
+  // past the 8th on staging.
+  const items = [s(OTHER)];
   return new Response(JSON.stringify({ items, total: items.length, limit: 8, offset: 0 }), {
     status: 200,
     headers: { "Content-Type": "application/json" },
@@ -140,7 +143,8 @@ describe("product detail page options and images", () => {
 
   beforeEach(() => {
     recoverableErrors = [];
-    registerProducts([ROYAL, SWISS, OTHER]);
+    // A direct page load: the browser's product cache starts empty.
+    products.length = 0;
     cart.clear();
     vi.stubGlobal("fetch", vi.fn(async () => summaryPage()));
     container = document.createElement("div");
@@ -180,6 +184,7 @@ describe("product detail page options and images", () => {
     await openProduct(SWISS);
     expect(recoverableErrors).toEqual([]);
 
+    // Opens on the default variant, matching the card price.
     expect(screen.getByText("SAR 40.00")).toBeInTheDocument();
     expect(screen.getByTestId("product-sku")).toHaveTextContent("TB-CUP-SWISS-6");
     expect(galleryImages()).toEqual(["https://api.example/media/swiss-frosting.jpg"]);

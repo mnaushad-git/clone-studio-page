@@ -46,6 +46,9 @@ export type Product = {
   // the SKU of each real option combination, keyed like variantPriceByKey.
   sku?: string;
   variantSkuByKey?: Record<string, string>;
+  // The default variant's option values: what the page selects when it opens, so it
+  // matches the price shown on product cards.
+  defaultAttributes?: Record<string, string>;
   description?: string;
   isNew?: boolean;
   occasions?: Occasion[];

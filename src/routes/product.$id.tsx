@@ -6,7 +6,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductReviews } from "@/components/ProductReviews";
-import { getProduct } from "@/lib/products";
+import { getProduct, registerProducts } from "@/lib/products";
 import { productGallery, resolveSelection, selectorAxes } from "@/lib/product-options";
 import { fetchProductDetail, mapDetailToProduct, mapSummaryToProduct, useCatalogueProducts, CatalogueApiError } from "@/lib/catalogue-api";
 import { useAdmin } from "@/lib/admin-store";
@@ -72,6 +72,13 @@ function ProductPage() {
   const wished = useStore(selectIsWishlisted(product.id));
   const avg = useStore(selectAverageRating(product.id));
   const recentIds = useStore((s) => s.recentlyViewed);
+
+  // The loader ran on the server for a direct page load, so the browser's product cache
+  // may not hold this product (the category list below only returns 8). cart.add looks
+  // the product up there and would otherwise silently do nothing.
+  useEffect(() => {
+    registerProducts([baseProduct]);
+  }, [baseProduct]);
 
   useEffect(() => {
     recentlyViewed.track(product.id);
@@ -191,7 +198,7 @@ function ProductPage() {
           {product.description && <p className="mt-2 text-sm text-muted-foreground">{product.description}</p>}
 
           {axes.map((axis, axisIdx) => {
-            const selectedIdx = selectedIndices[axis.code] ?? 0;
+            const selectedValue = selection.attributes?.[axis.code];
             const isSizeStyle = axis.code === "size";
             return (
               <div key={axis.code} className={axisIdx === 0 ? "mt-6" : "mt-3"}>
@@ -200,7 +207,7 @@ function ProductPage() {
                 )}
                 <div className={`grid gap-3 ${isSizeStyle ? (axis.values.length >= 3 ? "grid-cols-3" : "grid-cols-2") : "grid-cols-2"}`}>
                   {axis.values.map((v, i) => {
-                    const isSelected = selectedIdx === i;
+                    const isSelected = selectedValue === v;
                     return isSizeStyle ? (
                       <button
                         key={i}

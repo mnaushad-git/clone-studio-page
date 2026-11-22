@@ -20,7 +20,7 @@ export type Selection = {
 };
 
 export function resolveSelection(
-  product: Pick<Product, "price" | "sku" | "variantAxes" | "variantPriceByKey" | "variantSkuByKey">,
+  product: Pick<Product, "price" | "sku" | "variantAxes" | "variantPriceByKey" | "variantSkuByKey" | "defaultAttributes">,
   selectedIndices: Record<string, number>,
 ): Selection {
   const axes = selectorAxes(product);
@@ -29,7 +29,11 @@ export function resolveSelection(
   }
   const attributes: Record<string, string> = {};
   for (const axis of axes) {
-    attributes[axis.code] = axis.values[selectedIndices[axis.code] ?? 0] ?? axis.values[0];
+    // Until the customer picks a value, use the default variant's (the one product
+    // cards are priced at), falling back to the first value.
+    const defaultIdx = axis.values.indexOf(product.defaultAttributes?.[axis.code] ?? "");
+    const idx = selectedIndices[axis.code] ?? (defaultIdx >= 0 ? defaultIdx : 0);
+    attributes[axis.code] = axis.values[idx] ?? axis.values[0];
   }
   const key = variantComboKey(attributes);
   const price = product.variantPriceByKey?.[key];

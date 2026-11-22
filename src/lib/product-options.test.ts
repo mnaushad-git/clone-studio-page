@@ -53,6 +53,18 @@ describe("resolveSelection", () => {
     expect(resolveSelection(cake, { size: 1 })).toMatchObject({ unitPrice: 380, sku: "CAKE-9-VAN", available: true });
   });
 
+  it("opens on the default variant even when it isn't listed first", () => {
+    const sized = {
+      price: 4.5,
+      variantAxes: [{ code: "size", name: "Size", values: ["PACK OF 12", "PACK OF 6"] }],
+      variantPriceByKey: { "size=PACK OF 12": 8.55, "size=PACK OF 6": 4.5 },
+      variantSkuByKey: { "size=PACK OF 12": "SP-12", "size=PACK OF 6": "SP-6" },
+      defaultAttributes: { size: "PACK OF 6" },
+    };
+    expect(resolveSelection(sized, {})).toMatchObject({ attributes: { size: "PACK OF 6" }, unitPrice: 4.5, sku: "SP-6" });
+    expect(resolveSelection(sized, { size: 0 })).toMatchObject({ unitPrice: 8.55, sku: "SP-12" });
+  });
+
   it("marks a combination with no real variant as unavailable", () => {
     expect(resolveSelection(cake, { size: 1, flavor: 1 })).toMatchObject({ available: false, sku: undefined });
   });
